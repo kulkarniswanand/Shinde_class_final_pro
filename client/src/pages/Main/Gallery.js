@@ -1,6 +1,7 @@
 // src/Gallery.js
 import React from 'react';
 
+
 const Gallery = () => {
   return (
     <>
@@ -11,6 +12,8 @@ const Gallery = () => {
       <p className="text-lg">
         This is the Gallery page. Here you can provide information Gallery your class.
       </p>
+
+      
     </div>
     </>
 
