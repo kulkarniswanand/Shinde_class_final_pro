@@ -1,8 +1,8 @@
-const express = require("express");
+const express = require('express');
+const { createBranch } = require('../BRANCH_MANAGEMENT/controllers/authController');
 const router = express.Router();
-const { loginUser } = require("../controllers/authControllers");
 
-// Login route
-router.post("/login", loginUser);
+// Route to create a new branch
+router.post('/branch', createBranch);
 
 module.exports = router;

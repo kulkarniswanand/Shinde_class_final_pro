@@ -1,4 +1,5 @@
 import React from 'react';
+import Footer from "../../components/Home/Footer";
 
 const achievementsData = [
   {
@@ -64,7 +65,12 @@ const OurAchievements = () => {
           ))}
         </div>
       </div>
+        {/* Footer Section */}
+        <section className="mt-16">
+        <Footer />
+      </section>
     </div>
+    
   );
 };
 

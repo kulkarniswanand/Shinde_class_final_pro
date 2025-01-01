@@ -1,7 +1,13 @@
-import React from "react";
-import Footer from "../../components/Home/Footer";
+import React, { useState } from "react";
+// import Footer from "../../components/Home/Footer";
 
 const About = () => {
+  const [showMoreContent, setShowMoreContent] = useState(false);
+
+  const handleLearnMoreClick = () => {
+    setShowMoreContent(!showMoreContent);
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 relative">
       {/* Diagonal Divider */}
@@ -26,9 +32,27 @@ const About = () => {
               environment where learning thrives. Join us to experience education
               that transforms and inspires.
             </p>
-            <button className="mt-6 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all">
-              Learn More
+            <button
+              className="mt-6 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all"
+              onClick={handleLearnMoreClick}
+            >
+              {showMoreContent ? "Show Less" : "Learn More"}
             </button>
+            {showMoreContent && (
+              <div className="mt-6 text-lg text-gray-700 leading-relaxed">
+                <p>
+                  At Shinde Classes, we believe in nurturing talent and unlocking
+                  potential. Our dedicated team of educators ensures that each
+                  student receives personalized attention and guidance.
+                </p>
+                <p className="mt-4">
+                  Discover a variety of courses tailored to meet diverse learning
+                  needs and equip yourself with the skills for a brighter future.
+                  Our focus is on holistic development and fostering a love for
+                  lifelong learning.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -37,7 +61,7 @@ const About = () => {
           <img
             src="./images/About/students.jpg"
             alt="About Us"
-            className="w-full h-full object-cover rounded-tl-3xl transform hover:scale-105 transition-all duration-500"
+            className="w-full h-full object-cover rounded-tl-3xl transition-all duration-500"
           />
         </div>
       </div>

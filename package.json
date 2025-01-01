@@ -1,5 +1,6 @@
 {
-  "devDependencies": {
-    "gh-pages": "^6.2.0"
+  "dependencies": {
+    "react-icons": "^5.4.0",
+    "react-router-dom": "^7.0.2"
   }
 }

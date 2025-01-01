@@ -28,9 +28,9 @@ const HomePage = () => {
       </section>
 
       {/* Image Slider */}
-      <section>
+      {/* <section>
         <ImageSlider />
-      </section>
+      </section> */}
 
       {/* VisionMission Section */}
       <section>

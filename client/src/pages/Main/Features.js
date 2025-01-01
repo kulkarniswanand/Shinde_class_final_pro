@@ -47,34 +47,35 @@ const classFeatures = [
 
 const Features = () => {
   return (
-   <>
-            {/* <Navbar /> */}
-
-    <section className="py-10 bg-gray-50">
-      <div className="container mx-auto px-6 md:px-12">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
-          Why Choose Shinde Classes?
-        </h2>
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {classFeatures.map((feature) => (
-            <div
-              key={feature.id}
-              className="p-6 bg-white rounded-lg shadow hover:shadow-lg transition-shadow"
-            >
-              <div className="text-4xl mb-4 text-primary">{feature.icon}</div>
-              <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-              <p className="text-gray-600">{feature.description}</p>
-            </div>
-          ))}
+    <>
+      {/* Main Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-6 md:px-12">
+          <h2 className="text-4xl font-bold text-center text-gray-800 mb-12">
+            Why Choose <span className="text-blue-500">Shinde Classes?</span>
+          </h2>
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {classFeatures.map((feature) => (
+              <div
+                key={feature.id}
+                className="p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow transform hover:-translate-y-1"
+              >
+                <div className="text-5xl mb-4 text-blue-500">{feature.icon}</div>
+                <h3 className="text-xl font-bold mb-2 text-gray-800">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600">{feature.description}</p>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
-      <section>
-        {/* Footer Section */}
+      </section>
+
+      {/* Footer Section */}
+      <section className="mt-16">
         <Footer />
       </section>
-    </section>
-   </> 
-
+    </>
   );
 };
 
