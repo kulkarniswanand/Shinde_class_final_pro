@@ -1,27 +1,48 @@
-import React from "react";
+import React, { useState } from "react";
 import { FaFacebook, FaTwitter, FaInstagram } from "react-icons/fa";
 
 const Footer = () => {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+  };
+
   return (
-    <footer className="bg-gradient-to-br from-gray-900 to-black text-white">
+    <footer
+      className={`${
+        isDarkMode ? "bg-gray-900" : "bg-gradient-to-br from-gray-900 to-black"
+      } text-white transition-all duration-500`}
+    >
+      {/* Theme Toggle Button */}
+      <div className="absolute top-4 right-4 z-50">
+        <button
+          onClick={toggleDarkMode}
+          className="bg-gray-800 p-2 rounded-full text-white hover:bg-gray-600 transition"
+        >
+          {isDarkMode ? "🌞" : "🌙"}
+        </button>
+      </div>
+
       {/* Call-to-Action Section */}
-      <div className="py-8 bg-gray-800">
+      <div className="py-8 bg-gradient-to-br from-purple-700 to-blue-600">
         <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <h3 className="text-xl font-semibold">
+          <h3 className="text-xl font-semibold text-white">
             Join Shinde Classes and Shape Your Future!
           </h3>
           <a
             href="/admissions"
-            className="px-6 py-3 bg-primary text-black rounded-full font-medium hover:bg-white hover:text-black transition-all duration-300"
+            className="px-6 py-3 bg-yellow-500 text-black rounded-full font-medium hover:bg-yellow-400 hover:text-black transition-all duration-300"
           >
             Enroll Now
           </a>
         </div>
       </div>
 
+      {/* Footer Sections */}
       <div className="container mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
-          {/* Map Section */}
+          {/* Map Section (Unchanged) */}
           <div>
             <h3 className="text-xl font-semibold mb-4 border-b-2 border-primary inline-block">
               Location
@@ -45,11 +66,10 @@ const Footer = () => {
             <img
               src="/images/footer/logo.png"
               alt="Shinde Classes Logo"
-              className="mb-4 w-32"
+              className="mb-4 w-32 transform hover:scale-105 transition-all duration-300"
             />
             <p className="text-gray-400 leading-relaxed">
-              Shinde Classes provides quality education, empowering students to
-              achieve excellence in their academic and personal growth.
+              Shinde Classes provides quality education, empowering students to achieve excellence in their academic and personal growth.
             </p>
           </div>
 
@@ -62,7 +82,7 @@ const Footer = () => {
               <li>
                 <a
                   href="/privacy-policy"
-                  className="text-gray-400 hover:text-primary transition"
+                  className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
                 >
                   Privacy Policy
                 </a>
@@ -70,7 +90,7 @@ const Footer = () => {
               <li>
                 <a
                   href="/terms-of-service"
-                  className="text-gray-400 hover:text-primary transition"
+                  className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
                 >
                   Terms of Service
                 </a>
@@ -78,7 +98,7 @@ const Footer = () => {
               <li>
                 <a
                   href="/admissions"
-                  className="text-gray-400 hover:text-primary transition"
+                  className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
                 >
                   Admissions
                 </a>
@@ -86,7 +106,7 @@ const Footer = () => {
               <li>
                 <a
                   href="/careers"
-                  className="text-gray-400 hover:text-primary transition"
+                  className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
                 >
                   Careers
                 </a>
@@ -101,14 +121,17 @@ const Footer = () => {
             </h3>
             <ul className="space-y-3">
               <li>
-                <a href="/" className="text-gray-400 hover:text-primary transition">
+                <a
+                  href="/"
+                  className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
+                >
                   Home
                 </a>
               </li>
               <li>
                 <a
                   href="/about"
-                  className="text-gray-400 hover:text-primary transition"
+                  className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
                 >
                   About Us
                 </a>
@@ -116,7 +139,7 @@ const Footer = () => {
               <li>
                 <a
                   href="/features"
-                  className="text-gray-400 hover:text-primary transition"
+                  className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
                 >
                   Our Facilities
                 </a>
@@ -124,7 +147,7 @@ const Footer = () => {
               <li>
                 <a
                   href="/achievements"
-                  className="text-gray-400 hover:text-primary transition"
+                  className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
                 >
                   Achievements
                 </a>
@@ -132,7 +155,7 @@ const Footer = () => {
               <li>
                 <a
                   href="/gallery"
-                  className="text-gray-400 hover:text-primary transition"
+                  className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
                 >
                   Gallery
                 </a>
@@ -140,7 +163,7 @@ const Footer = () => {
               <li>
                 <a
                   href="/contact"
-                  className="text-gray-400 hover:text-primary transition"
+                  className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
                 >
                   Contact Us
                 </a>
@@ -172,8 +195,7 @@ const Footer = () => {
             </a>
           </div>
           <p className="text-gray-500 text-sm">
-            &copy; {new Date().getFullYear()} Shinde Classes. All rights
-            reserved.
+            &copy; {new Date().getFullYear()} Shinde Classes. All rights reserved.
           </p>
         </div>
       </div>

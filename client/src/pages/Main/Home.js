@@ -27,15 +27,16 @@ const HomePage = () => {
         <DirectorsMessage />
       </section>
 
-      {/* Image Slider */}
-      {/* <section>
-        <ImageSlider />
-      </section> */}
-
       {/* VisionMission Section */}
       <section>
         <VisionMission />
       </section>
+
+
+      {/* Image Slider */}
+      { <section>
+        <ImageSlider />
+      </section> }
 
       {/* Footer Section */}
       <section>
