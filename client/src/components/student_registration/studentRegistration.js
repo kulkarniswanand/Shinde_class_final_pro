@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { motion } from "framer-motion";
 
 const StudentRegistrationForm = () => {
   const [formData, setFormData] = useState({
@@ -14,34 +15,21 @@ const StudentRegistrationForm = () => {
     branch: "",
   });
 
-  const [age, setAge] = useState("");
   const [errors, setErrors] = useState({});
-  const [admissionDate] = useState(new Date().toISOString().split("T")[0]); // Today's date
+  const [admissionDate] = useState(new Date().toISOString().split("T")[0]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverMessage, setServerMessage] = useState({ type: "", text: "" });
 
+  // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-
-    if (name === "dob") {
-      calculateAge(value);
-    }
-
     setFormData({
       ...formData,
       [name]: value,
     });
   };
 
-  const calculateAge = (dob) => {
-    const birthDate = new Date(dob);
-    const today = new Date();
-    let calculatedAge = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      calculatedAge--;
-    }
-    setAge(calculatedAge || "");
-  };
-
+  // Form validation
   const validateForm = () => {
     const newErrors = {};
     if (!formData.name.trim()) newErrors.name = "Name is required.";
@@ -59,214 +47,149 @@ const StudentRegistrationForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) return;
-
+  
+    if (!window.confirm("Are you sure you want to submit this form?")) return;
+  
+    setIsSubmitting(true);
+    setServerMessage({ type: "", text: "" });
+  
     try {
-      const response = await axios.post("/api/students/register", {
-        ...formData,
-        admissionDate,
-      });
-      alert("Student registered successfully!");
-      console.log(response.data);
+      const response = await axios.post(
+        `${process.env.REACT_APP_BACKEND_URL}/api/students/register`,
+        { ...formData, admissionDate }
+      );
+  
+      if (response.status === 201) {
+        setServerMessage({ type: "success", text: "Student registered successfully!" });
+  
+        // Reset form fields
+        setFormData({
+          name: "",
+          address: "",
+          gender: "",
+          dob: "",
+          parentMobile: "",
+          studentMobile: "",
+          email: "",
+          class: "",
+          branch: "",
+        });
+  
+        setErrors({});
+        setIsSubmitting(false); // ✅ Reset after success
+      }
     } catch (error) {
       console.error("Error registering student:", error);
-      alert("Failed to register student.");
+      setServerMessage({ type: "error", text: "Failed to register student. Please try again." });
+    } finally {
+      setTimeout(() => setIsSubmitting(false), 500); // Small delay for better UX
     }
   };
+  
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-purple-900 to-indigo-600 text-white">
-      <div className="bg-gray-800 p-10 rounded-lg shadow-2xl w-full max-w-2xl">
-        <h1 className="text-3xl font-bold mb-8 text-center">Student Registration</h1>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Name */}
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium">
-              Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              className={`w-full px-4 py-2 bg-gray-700 border ${
-                errors.name ? "border-red-500" : "border-gray-600"
-              } rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500`}
-              required
-            />
-            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-          </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 text-white px-6 py-10">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="bg-gray-700 p-10 rounded-2xl shadow-xl w-full max-w-5xl"
+      >
+        <h1 className="text-3xl font-extrabold text-center mb-6 text-yellow-400">
+          Student Admission Form
+        </h1>
 
-          {/* Address */}
-          <div>
-            <label htmlFor="address" className="block text-sm font-medium">
-              Address
-            </label>
-            <textarea
-              id="address"
-              name="address"
-              value={formData.address}
-              onChange={handleInputChange}
-              className={`w-full px-4 py-2 bg-gray-700 border ${
-                errors.address ? "border-red-500" : "border-gray-600"
-              } rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500`}
-              required
-            ></textarea>
-            {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
-          </div>
+        {/* Success/Error Messages */}
+        {serverMessage.text && (
+          <p className={`text-center mb-4 ${serverMessage.type === "success" ? "text-green-400" : "text-red-400"}`}>
+            {serverMessage.text}
+          </p>
+        )}
 
-          {/* Gender */}
-          <div>
-            <label htmlFor="gender" className="block text-sm font-medium">
-              Gender
-            </label>
+        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-x-8 gap-y-6">
+          {[
+            { name: "name", type: "text" },
+            { name: "address", type: "text" },
+            { name: "dob", type: "date" },
+            { name: "parentMobile", type: "text" },
+            { name: "studentMobile", type: "text" },
+            { name: "email", type: "email" },
+            { name: "branch", type: "text" },
+          ].map((field, index) => (
+            <motion.div
+              key={field.name}
+              initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 * index }}
+              className="flex flex-col"
+            >
+              <label className="block text-sm font-medium capitalize text-yellow-300 mb-2">
+                {field.name.replace(/([A-Z])/g, " $1")}
+              </label>
+              <input
+                type={field.type}
+                name={field.name}
+                value={formData[field.name]}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 bg-gray-600 border border-gray-500 rounded-lg focus:ring-2 focus:ring-yellow-400"
+                required
+              />
+              {errors[field.name] && <p className="text-red-400 text-sm mt-1">{errors[field.name]}</p>}
+            </motion.div>
+          ))}
+
+          {/* Gender Selection */}
+          <div className="flex flex-col">
+            <label className="block text-sm font-medium text-yellow-300 mb-2">Gender</label>
             <select
-              id="gender"
               name="gender"
               value={formData.gender}
               onChange={handleInputChange}
-              className={`w-full px-4 py-2 bg-gray-700 border ${
-                errors.gender ? "border-red-500" : "border-gray-600"
-              } rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500`}
+              className="w-full px-4 py-3 bg-gray-600 border border-gray-500 rounded-lg focus:ring-2 focus:ring-yellow-400"
               required
             >
               <option value="">Select Gender</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
+              <option value="Other">Other</option>
             </select>
-            {errors.gender && <p className="text-red-500 text-sm mt-1">{errors.gender}</p>}
+            {errors.gender && <p className="text-red-400 text-sm mt-1">{errors.gender}</p>}
           </div>
 
-          {/* Date of Birth */}
-          <div>
-            <label htmlFor="dob" className="block text-sm font-medium">
-              Date of Birth
-            </label>
-            <input
-              type="date"
-              id="dob"
-              name="dob"
-              value={formData.dob}
-              onChange={handleInputChange}
-              className={`w-full px-4 py-2 bg-gray-700 border ${
-                errors.dob ? "border-red-500" : "border-gray-600"
-              } rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500`}
-              required
-            />
-            {errors.dob && <p className="text-red-500 text-sm mt-1">{errors.dob}</p>}
-          </div>
-
-          {/* Parent's Mobile */}
-          <div>
-            <label htmlFor="parentMobile" className="block text-sm font-medium">
-              Parent's Mobile
-            </label>
-            <input
-              type="text"
-              id="parentMobile"
-              name="parentMobile"
-              value={formData.parentMobile}
-              onChange={handleInputChange}
-              className={`w-full px-4 py-2 bg-gray-700 border ${
-                errors.parentMobile ? "border-red-500" : "border-gray-600"
-              } rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500`}
-              required
-            />
-            {errors.parentMobile && <p className="text-red-500 text-sm mt-1">{errors.parentMobile}</p>}
-          </div>
-
-          {/* Student's Mobile */}
-          <div>
-            <label htmlFor="studentMobile" className="block text-sm font-medium">
-              Student's Mobile (Optional)
-            </label>
-            <input
-              type="text"
-              id="studentMobile"
-              name="studentMobile"
-              value={formData.studentMobile}
-              onChange={handleInputChange}
-              className={`w-full px-4 py-2 bg-gray-700 border ${
-                errors.studentMobile ? "border-red-500" : "border-gray-600"
-              } rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500`}
-            />
-            {errors.studentMobile && <p className="text-red-500 text-sm mt-1">{errors.studentMobile}</p>}
-          </div>
-
-          {/* Email */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium">
-              Email (Optional)
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className={`w-full px-4 py-2 bg-gray-700 border ${
-                errors.email ? "border-red-500" : "border-gray-600"
-              } rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500`}
-            />
-            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
-          </div>
-
-          {/* Class */}
-          <div>
-            <label htmlFor="class" className="block text-sm font-medium">
-              Class
-            </label>
+          {/* Class Selection */}
+          <div className="flex flex-col">
+            <label className="block text-sm font-medium text-yellow-300 mb-2">Class</label>
             <select
-              id="class"
               name="class"
               value={formData.class}
               onChange={handleInputChange}
-              className={`w-full px-4 py-2 bg-gray-700 border ${
-                errors.class ? "border-red-500" : "border-gray-600"
-              } rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500`}
+              className="w-full px-4 py-3 bg-gray-600 border border-gray-500 rounded-lg focus:ring-2 focus:ring-yellow-400"
               required
             >
               <option value="">Select Class</option>
+              <option value="8th">8th</option>
+              <option value="9th">9th</option>
               <option value="10th">10th</option>
-              <option value="12th">12th</option>
             </select>
-            {errors.class && <p className="text-red-500 text-sm mt-1">{errors.class}</p>}
+            {errors.class && <p className="text-red-400 text-sm mt-1">{errors.class}</p>}
           </div>
 
-          {/* Branch */}
-          <div>
-            <label htmlFor="branch" className="block text-sm font-medium">
-              Branch
-            </label>
-            <input
-              type="text"
-              id="branch"
-              name="branch"
-              value={formData.branch}
-              onChange={handleInputChange}
-              className={`w-full px-4 py-2 bg-gray-700 border ${
-                errors.branch ? "border-red-500" : "border-gray-600"
-              } rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500`}
-              required
-            />
-            {errors.branch && <p className="text-red-500 text-sm mt-1">{errors.branch}</p>}
-          </div>
-
-          {/* Submit */}
-          <div>
-            <button
-              type="submit"
-              className="w-full bg-violet-700 hover:bg-violet-900 text-white py-2 px-4 rounded-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-            >
-              Register Student
-            </button>
-          </div>
+          {/* Submit Button */}
+          <motion.button
+            type="submit"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="col-span-2 w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-3 px-4 rounded-lg font-semibold transition-all duration-300"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Submitting..." : "Submit Admission"}
+          </motion.button>
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 };

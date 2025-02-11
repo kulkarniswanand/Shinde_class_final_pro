@@ -5,12 +5,20 @@ export default function UpdateBranch() {
   const [selectedBranch, setSelectedBranch] = useState(null);
   const [errors, setErrors] = useState({});
 
+  // Fetch branches from the backend
   useEffect(() => {
-    // Simulated fetch branches from API
-    setBranches([
-      { id: 1, name: "Branch 1", location: "Location 1", username: "branch1", password: "password1" },
-      { id: 2, name: "Branch 2", location: "Location 2", username: "branch2", password: "password2" },
-    ]);
+    const fetchBranches = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/update-branch/");
+        if (!response.ok) throw new Error("Failed to fetch branches.");
+        const data = await response.json();
+        setBranches(data);
+      } catch (error) {
+        console.error(error.message);
+      }
+    };
+
+    fetchBranches();
   }, []);
 
   const validate = () => {
@@ -28,14 +36,33 @@ export default function UpdateBranch() {
     setErrors({});
   };
 
-  const handleUpdate = (e) => {
+  const handleUpdate = async (e) => {
     e.preventDefault();
     if (!validate()) return;
-    // Simulate API call to update branch
-    console.log("Updated Branch", selectedBranch);
-    alert("Branch Updated Successfully!");
-    setSelectedBranch(null);
-    setErrors({});
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/update-branch/${selectedBranch.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(selectedBranch),
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to update branch.");
+
+      alert("Branch Updated Successfully!");
+      setSelectedBranch(null);
+      setErrors({});
+
+      // Refresh branches after update
+      const updatedBranches = await fetch("http://localhost:5000/api/updatebranch/");
+      setBranches(await updatedBranches.json());
+    } catch (error) {
+      console.error(error.message);
+      alert("An error occurred while updating the branch.");
+    }
   };
 
   return (
