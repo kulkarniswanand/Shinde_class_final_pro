@@ -1,28 +1,31 @@
-const Branch = require("../models/branchModel");
+const { getAllBranches, updateBranchById } = require("../models/branchModel");
 
-// Get all branches
-exports.getAllBranches = async (_req, res) => {
+// Fetch all branches
+exports.getBranches = async (req, res) => {
   try {
-    const branches = await Branch.getAllBranches();
-    res.status(200).json(branches);
+    const branches = await getAllBranches();
+    res.json(branches);
   } catch (error) {
+    console.error("Error fetching branches:", error);
     res.status(500).json({ message: "Error fetching branches", error });
   }
 };
 
-// Update a branch
+// Update a branch by ID
 exports.updateBranch = async (req, res) => {
-  const branchId = req.params.id;
-  const updatedData = req.body;
-
-  if (!branchId || !updatedData) {
-    return res.status(400).json({ message: "Invalid request data" });
-  }
+  const { id } = req.params;
+  const { name, location, username, password } = req.body;
 
   try {
-    await Branch.updateBranch(branchId, updatedData);
-    res.status(200).json({ message: "Branch updated successfully" });
+    const result = await updateBranchById(id, name, location, username, password);
+
+    if (result.affectedRows > 0) {
+      res.json({ message: "Branch updated successfully!" });
+    } else {
+      res.status(404).json({ message: "Branch not found" });
+    }
   } catch (error) {
+    console.error("Error updating branch:", error);
     res.status(500).json({ message: "Error updating branch", error });
   }
 };

@@ -1,38 +1,48 @@
 import React, { useState, useEffect } from "react";
+import { EyeIcon, EyeOffIcon } from "lucide-react"; // Import icons for show/hide password
+
+// const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 export default function UpdateBranch() {
   const [branches, setBranches] = useState([]);
   const [selectedBranch, setSelectedBranch] = useState(null);
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false); // <-- Add this state
+
+  // Function to toggle password visibility
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   // Fetch branches from the backend
   useEffect(() => {
-    const fetchBranches = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/api/update-branch/");
-        if (!response.ok) throw new Error("Failed to fetch branches.");
-        const data = await response.json();
-        setBranches(data);
-      } catch (error) {
-        console.error(error.message);
-      }
-    };
-
     fetchBranches();
   }, []);
 
+  const fetchBranches = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/updatebranch/`);
+      if (!response.ok) throw new Error("Failed to fetch branches.");
+      const data = await response.json();
+      setBranches(data);
+    } catch (error) {
+      console.error("Error fetching branches:", error);
+    }
+  };
+
   const validate = () => {
+    if (!selectedBranch) return false;
     const newErrors = {};
-    if (!selectedBranch.name.trim()) newErrors.name = "Branch name is required.";
-    if (!selectedBranch.location.trim()) newErrors.location = "Location is required.";
-    if (!selectedBranch.username.trim()) newErrors.username = "Username is required.";
-    if (!selectedBranch.password.trim()) newErrors.password = "Password is required.";
+    if (!selectedBranch.name?.trim()) newErrors.name = "Branch name is required.";
+    if (!selectedBranch.location?.trim()) newErrors.location = "Location is required.";
+    if (!selectedBranch.username?.trim()) newErrors.username = "Username is required.";
+    if (!selectedBranch.password?.trim()) newErrors.password = "Password is required.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleEdit = (branch) => {
-    setSelectedBranch(branch);
+    setSelectedBranch({ ...branch });
     setErrors({});
   };
 
@@ -41,26 +51,20 @@ export default function UpdateBranch() {
     if (!validate()) return;
 
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/update-branch/${selectedBranch.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(selectedBranch),
-        }
-      );
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/updatebranch/${selectedBranch.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(selectedBranch),
+      });
 
       if (!response.ok) throw new Error("Failed to update branch.");
 
       alert("Branch Updated Successfully!");
       setSelectedBranch(null);
       setErrors({});
-
-      // Refresh branches after update
-      const updatedBranches = await fetch("http://localhost:5000/api/updatebranch/");
-      setBranches(await updatedBranches.json());
+      fetchBranches();
     } catch (error) {
-      console.error(error.message);
+      console.error("Update error:", error);
       alert("An error occurred while updating the branch.");
     }
   };
@@ -155,21 +159,30 @@ export default function UpdateBranch() {
             {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username}</p>}
           </div>
 
-          <div>
+          <div className="relative">
             <label htmlFor="password" className="block text-sm font-medium text-gray-300">
               Password
             </label>
-            <input
-              type="password"
-              name="password"
-              id="password"
-              value={selectedBranch.password}
-              onChange={(e) => setSelectedBranch({ ...selectedBranch, password: e.target.value })}
-              className={`w-full p-3 rounded-lg bg-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring ${
-                errors.password ? "border-red-500" : "border-gray-600"
-              }`}
-              placeholder="Enter password"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                id="password"
+                value={selectedBranch.password}
+                onChange={(e) => setSelectedBranch({ ...selectedBranch, password: e.target.value })}
+                className={`w-full p-3 rounded-lg bg-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring ${
+                  errors.password ? "border-red-500" : "border-gray-600"
+                }`}
+                placeholder="Enter password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3 text-gray-400 hover:text-white"
+              >
+                {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
+              </button>
+            </div>
             {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
           </div>
 

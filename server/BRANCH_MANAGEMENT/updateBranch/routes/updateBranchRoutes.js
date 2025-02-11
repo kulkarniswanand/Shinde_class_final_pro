@@ -1,11 +1,12 @@
 const express = require("express");
+const { getBranches, updateBranch } = require("../controllers/updateBranchController");
+
 const router = express.Router();
-const updateBranchController = require("../controllers/updateBranchController");
 
 // Route to get all branches
-router.get("/", updateBranchController.getAllBranches);
+router.get("/", getBranches);
 
-// Route to update a branch
-router.put("/:id", updateBranchController.updateBranch);
+// Route to update a branch by ID
+router.put("/:id", updateBranch);
 
 module.exports = router;
