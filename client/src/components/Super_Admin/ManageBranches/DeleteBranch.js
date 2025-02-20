@@ -6,22 +6,43 @@ export default function DeleteBranch() {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
-    // Simulate fetching branches from an API
-    setBranches([
-      { id: 1, name: "Branch 1", location: "Location 1" },
-      { id: 2, name: "Branch 2", location: "Location 2" },
-    ]);
+    fetchBranches();
   }, []);
+
+  const fetchBranches = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/deletebranch/`); // Update if your endpoint is different
+      const data = await response.json();
+      setBranches(data);
+    } catch (error) {
+      console.error("Error fetching branches:", error);
+    }
+  };
 
   const handleDelete = (branch) => {
     setSelectedBranch(branch);
     setConfirmDelete(true);
   };
 
-  const confirmDeletion = () => {
-    // Simulate API call to delete branch
-    setBranches(branches.filter((branch) => branch.id !== selectedBranch.id));
-    alert("Branch deleted successfully!");
+  const confirmDeletion = async () => {
+    if (!selectedBranch) return;
+
+    try {
+      const response=await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/deletebranch/${selectedBranch.id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        setBranches(branches.filter((branch) => branch.id !== selectedBranch.id));
+        alert("Branch deleted successfully!");
+      } else {
+        alert("Failed to delete branch!");
+      }
+    } catch (error) {
+      console.error("Error deleting branch:", error);
+      alert("Error deleting branch!");
+    }
+
     setConfirmDelete(false);
     setSelectedBranch(null);
   };

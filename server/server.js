@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const db = require("./config/dbConfig");
-
+const deleteBranchRoute = require("./BRANCH_MANAGEMENT/deleteBranch/routes/deleteBranchRoutes"); 
 const authRoutes = require("./login/routes/authRoutes");
 const branchRoute = require("./BRANCH_MANAGEMENT/addBranch/routes/authRoutes");
 const updateBranchRoutes = require("./BRANCH_MANAGEMENT/updateBranch/routes/updateBranchRoutes");
@@ -18,6 +18,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/branch", branchRoute);
 app.use("/api/updatebranch", updateBranchRoutes);
 app.use("/api/students", studentRoutes);
+app.use("/api/deletebranch", deleteBranchRoute);
+
 
 // Start Server
 app.listen(PORT, () => {

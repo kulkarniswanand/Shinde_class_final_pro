@@ -1,6 +1,10 @@
 {
   "dependencies": {
+    "@shadcn/ui": "^0.0.4",
+    "framer-motion": "^12.4.2",
+    "lucide-react": "^0.475.0",
     "react-icons": "^5.4.0",
-    "react-router-dom": "^7.0.2"
+    "react-router-dom": "^7.0.2",
+    "tailwindcss": "^4.0.6"
   }
 }

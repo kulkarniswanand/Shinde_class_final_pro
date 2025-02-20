@@ -1,20 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { EyeIcon, EyeOffIcon } from "lucide-react"; // Import icons for show/hide password
-
-// const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+import { Eye, EyeOff } from "lucide-react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function UpdateBranch() {
   const [branches, setBranches] = useState([]);
   const [selectedBranch, setSelectedBranch] = useState(null);
   const [errors, setErrors] = useState({});
-  const [showPassword, setShowPassword] = useState(false); // <-- Add this state
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // Function to toggle password visibility
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
-  // Fetch branches from the backend
   useEffect(() => {
     fetchBranches();
   }, []);
@@ -50,8 +45,9 @@ export default function UpdateBranch() {
     e.preventDefault();
     if (!validate()) return;
 
+    setLoading(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/updatebranch/${selectedBranch.id}`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/updatebranch/${selectedBranch.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(selectedBranch),
@@ -59,37 +55,38 @@ export default function UpdateBranch() {
 
       if (!response.ok) throw new Error("Failed to update branch.");
 
-      alert("Branch Updated Successfully!");
+      toast.success("Branch Updated Successfully! 🎉");
       setSelectedBranch(null);
-      setErrors({});
       fetchBranches();
     } catch (error) {
       console.error("Update error:", error);
-      alert("An error occurred while updating the branch.");
+      toast.error("An error occurred while updating the branch.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto bg-gray-800 p-8 rounded-lg shadow-lg">
+    <div className="max-w-4xl mx-auto bg-gray-900 p-8 rounded-xl shadow-lg border border-gray-700">
       {!selectedBranch ? (
         <div>
           <h2 className="text-2xl font-bold text-white mb-6 text-center">Manage Branches</h2>
           <table className="w-full text-left text-gray-300 border-collapse border border-gray-700">
             <thead>
-              <tr>
-                <th className="border border-gray-700 p-3">Branch ID</th>
-                <th className="border border-gray-700 p-3">Branch Name</th>
-                <th className="border border-gray-700 p-3">Location</th>
-                <th className="border border-gray-700 p-3">Actions</th>
+              <tr className="bg-gray-800">
+                <th className="p-3">Branch ID</th>
+                <th className="p-3">Branch Name</th>
+                <th className="p-3">Location</th>
+                <th className="p-3">Actions</th>
               </tr>
             </thead>
             <tbody>
               {branches.map((branch) => (
-                <tr key={branch.id} className="hover:bg-gray-700">
-                  <td className="border border-gray-700 p-3">{branch.id}</td>
-                  <td className="border border-gray-700 p-3">{branch.name}</td>
-                  <td className="border border-gray-700 p-3">{branch.location}</td>
-                  <td className="border border-gray-700 p-3">
+                <tr key={branch.id} className="hover:bg-gray-700 border-t border-gray-700">
+                  <td className="p-3">{branch.id}</td>
+                  <td className="p-3">{branch.name}</td>
+                  <td className="p-3">{branch.location}</td>
+                  <td className="p-3">
                     <button
                       className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-md transition-all"
                       onClick={() => handleEdit(branch)}
@@ -106,73 +103,45 @@ export default function UpdateBranch() {
         <form onSubmit={handleUpdate} className="space-y-6">
           <h2 className="text-2xl font-bold text-white text-center mb-6">Edit Branch</h2>
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-300">
-              Branch Name
-            </label>
+            <label className="block text-gray-400">Branch Name</label>
             <input
               type="text"
-              name="name"
-              id="name"
               value={selectedBranch.name}
               onChange={(e) => setSelectedBranch({ ...selectedBranch, name: e.target.value })}
-              className={`w-full p-3 rounded-lg bg-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring ${
-                errors.name ? "border-red-500" : "border-gray-600"
-              }`}
+              className="w-full p-3 rounded-lg bg-gray-800 text-gray-100 border-gray-700 focus:ring focus:ring-blue-500"
               placeholder="Enter branch name"
             />
-            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
           </div>
 
           <div>
-            <label htmlFor="location" className="block text-sm font-medium text-gray-300">
-              Location
-            </label>
+            <label className="block text-gray-400">Location</label>
             <input
               type="text"
-              name="location"
-              id="location"
               value={selectedBranch.location}
               onChange={(e) => setSelectedBranch({ ...selectedBranch, location: e.target.value })}
-              className={`w-full p-3 rounded-lg bg-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring ${
-                errors.location ? "border-red-500" : "border-gray-600"
-              }`}
+              className="w-full p-3 rounded-lg bg-gray-800 text-gray-100 border-gray-700 focus:ring focus:ring-blue-500"
               placeholder="Enter location"
             />
-            {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location}</p>}
           </div>
-
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-300">
-              Username
-            </label>
+            <label className="block text-gray-400">Username</label>
             <input
               type="text"
-              name="username"
-              id="username"
               value={selectedBranch.username}
               onChange={(e) => setSelectedBranch({ ...selectedBranch, username: e.target.value })}
-              className={`w-full p-3 rounded-lg bg-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring ${
-                errors.username ? "border-red-500" : "border-gray-600"
-              }`}
+              className="w-full p-3 rounded-lg bg-gray-800 text-gray-100 border-gray-700 focus:ring focus:ring-blue-500"
               placeholder="Enter username"
             />
-            {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username}</p>}
           </div>
 
           <div className="relative">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-300">
-              Password
-            </label>
+            <label className="block text-gray-400">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
-                name="password"
-                id="password"
                 value={selectedBranch.password}
                 onChange={(e) => setSelectedBranch({ ...selectedBranch, password: e.target.value })}
-                className={`w-full p-3 rounded-lg bg-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring ${
-                  errors.password ? "border-red-500" : "border-gray-600"
-                }`}
+                className="w-full p-3 pr-10 rounded-lg bg-gray-800 text-gray-100 border-gray-700 focus:ring focus:ring-blue-500"
                 placeholder="Enter password"
               />
               <button
@@ -180,22 +149,22 @@ export default function UpdateBranch() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-3 text-gray-400 hover:text-white"
               >
-                {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
-            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
           </div>
 
           <div className="flex space-x-4">
             <button
               type="submit"
               className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-md transition-all"
+              disabled={loading}
             >
-              Update Branch
+              {loading ? "Updating..." : "Update Branch"}
             </button>
             <button
               type="button"
-              className="w-full py-3 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg shadow-md transition-all"
+              className="w-full py-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-lg shadow-md transition-all"
               onClick={() => setSelectedBranch(null)}
             >
               Cancel
