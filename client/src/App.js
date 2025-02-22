@@ -21,6 +21,7 @@ import NavbarMB from './components/Super_Admin/ManageBranches/NavbarMB';
 import DeleteBranch from './components/Super_Admin/ManageBranches/DeleteBranch';
 import StudentRegistrationForm from "./components/student_registration/studentRegistration";
 import FeeManagement from './components/FeeManagement/FeeManagement';
+import FeeStructure from './components/FeeStructure/feeStructure';
 
 
 // import StudentRegistration from './pages/StudentRegistration';
@@ -37,7 +38,7 @@ function MainApp() {
   const location = useLocation();
 
   // Define paths where the Navbar should not be displayed
-  const pathsWithoutNavbar = ['/login', '/admin-dashboard', '/superadmindashboard', '/managebranches','/studentregistrationform','/feemanagement'];
+  const pathsWithoutNavbar = ['/login', '/admin-dashboard', '/superadmindashboard', '/managebranches','/studentregistrationform','/feemanagement','/feestructure'];
 
   return (
     <div className="App">
@@ -60,6 +61,8 @@ function MainApp() {
         <Route path="/DeleteBranch" element={< DeleteBranch/>} />
         <Route path="/StudentRegistrationForm" element={<StudentRegistrationForm />} />
         <Route path="/FeeManagement" element={<FeeManagement />} />
+        <Route path="/FeeStructure" element={<FeeStructure />} />
+
 
 
 
