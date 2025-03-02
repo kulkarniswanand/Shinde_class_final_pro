@@ -13,7 +13,7 @@ const FeesManagement = () => {
       id: 1,
       registrationId: "REG001",
       name: "John Doe",
-      class: "10th",
+      class: "10th", 
       year: "2025",
       gender: "Male",
       totalFees: 50000,
