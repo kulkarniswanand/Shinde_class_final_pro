@@ -22,7 +22,7 @@ import DeleteBranch from './components/Super_Admin/ManageBranches/DeleteBranch';
 import StudentRegistrationForm from "./components/student_registration/studentRegistration";
 import FeeManagement from './components/FeeManagement/FeeManagement';
 import FeeStructure from './components/FeeStructure/feeStructure';
-import StudentDetails from './components/StudentDetails/studentDetails';
+import StudentDetails from './components/StudentDetails/studentDetails'; 
 
 
 // import StudentRegistration from './pages/StudentRegistration';
@@ -47,7 +47,7 @@ function MainApp() {
     '/studentregistrationform',
     '/feemanagement',
     '/feestructure',
-    '/student-details' // Added path
+    '/studentdetails' // Added path
   ];
 
   return (
@@ -72,7 +72,7 @@ function MainApp() {
         <Route path="/StudentRegistrationForm" element={<StudentRegistrationForm />} />
         <Route path="/FeeManagement" element={<FeeManagement />} />
         <Route path="/FeeStructure" element={<FeeStructure />} />
-        <Route path="/student-details" element={<StudentDetails />} />
+        <Route path="/studentdetails" element={<StudentDetails />} />
 
 
 

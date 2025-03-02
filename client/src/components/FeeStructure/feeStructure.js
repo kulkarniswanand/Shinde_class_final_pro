@@ -105,7 +105,7 @@ const AddFeesForm = ({ onClose, fetchFees, branches }) => {
   const [formData, setFormData] = useState({ class: "", year: "", gender: "", branch: "", totalAmount: "" });
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); 
     if (formData.totalAmount <= 0) {
       alert("Total Fees must be a positive amount.");
       return;

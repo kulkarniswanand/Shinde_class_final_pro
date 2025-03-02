@@ -68,7 +68,7 @@ const StudentRegistrationForm = () => {
   
         // Reset form fields
         setFormData({
-          name: "",
+          name: "", 
           address: "",
           gender: "",
           dob: "",
