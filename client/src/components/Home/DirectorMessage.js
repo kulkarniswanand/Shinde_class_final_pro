@@ -13,9 +13,9 @@ const DirectorsMessage = () => {
 
   return (
     <section className="relative bg-white py-5">
-      {/* Main Content */}
+    {/* Main Content */}
       <div className="relative z-10 border-4 border-purple-300 rounded-3xl p-8 shadow-2xl bg-white">
-        <div className="absolute inset-0 border-8 border-gray-200 rounded-3xl bg-black -z-10"></div>
+        <div className="absolute inset-0 border-8 border-gray-200 rounded-3xl bg-gradient-to-b from-gray-800 to-gray-900 py-16 -z-10"></div>
         <div className="container mx-auto px-6 md:px-12">
           <div className="flex flex-col lg:flex-row items-center gap-12">
             {/* Director's Image */}
@@ -31,7 +31,7 @@ const DirectorsMessage = () => {
               {/* Educational Image */}
               <div className="mt-8 relative group overflow-hidden rounded-3xl shadow-lg hover:shadow-2xl transition-shadow duration-500">
                 <img
-                  src="/Images/educational.jpg"
+                  src="/Images/school.jpg"
                   alt="Educational Environment"
                   className="object-cover w-full h-72 transform group-hover:scale-105 transition-transform duration-500 ease-in-out"
                 />
@@ -40,9 +40,9 @@ const DirectorsMessage = () => {
 
             {/* Director's Message */}
             <div className="lg:w-2/3 w-full text-center lg:text-left" data-aos="fade-left">
-            <h2 className="text-5xl font-extrabold text-white mb-6">
-             Director's Message
-            </h2>
+              <h2 className="text-5xl font-extrabold text-white mb-6">
+                Director's Message
+              </h2>
               <p
                 className="text-lg leading-relaxed mb-8 max-w-xl mx-auto bg-gradient-to-r from-gray-100 via-blue-50 to-gray-100 p-4 rounded-lg shadow-md text-gray-800"
                 data-aos="fade-up"                
@@ -105,7 +105,7 @@ const DirectorsMessage = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div>                                                                                   
     </section>
   );
 };

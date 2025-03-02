@@ -1,40 +1,25 @@
 {
-  "name": "shinde-class",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "animate.css": "^4.1.1",
-    "aos": "^2.3.4",
-    "axios": "^1.7.9",
-    "browserify-zlib": "^0.2.0",
-    "buffer": "^6.0.3",
-    "https-browserify": "^1.0.0",
-    "process": "^0.11.10",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-icons": "^5.4.0",
-    "react-router-dom": "^6.28.0",
-    "react-scripts": "^5.0.1",
-    "react-slick": "^0.30.3",
-    "slick-carousel": "^1.8.1",
-    "stream-browserify": "^3.0.0",
-    "stream-http": "^3.2.0",
-    "url": "^0.11.4",
-    "util": "^0.12.5",
-    "web-vitals": "^2.1.4"
-  },
+  "name": "shinde_class_project",
+  "version": "1.0.0",
+  "description": "Student management system",
+  "main": "index.js",
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build"
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+  "dependencies": {
+    "animate.css": "^4.1.1",
+    "aos": "^2.3.4",
+    "axios": "^1.8.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.2.0",
+    "react-scroll": "^1.9.3",
+    "react-slick": "^0.30.3",
+    "slick-carousel": "^1.8.1",
+    "web-vitals": "^4.2.4"
   },
   "browserslist": {
     "production": [
@@ -47,12 +32,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "autoprefixer": "^10.4.20",
-    "gh-pages": "^6.2.0",
-    "postcss": "^8.4.47",
-    "tailwindcss": "^3.4.13"
   }
 }

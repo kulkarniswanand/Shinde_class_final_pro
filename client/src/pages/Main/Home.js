@@ -1,7 +1,7 @@
 import React from "react";
 import ImageSlider from "../../components/Home/ImageSlider";
-import DirectorsMessage from "../../components/Home/DirectorsMessage";
-import VisionMission from "../../components/Home/visionMission";
+import DirectorMessage from "../../components/Home/DirectorMessage";
+import VisionMission from "../../components/Home/VisionMission";
 // import About from './Home/About';
 import Footer from "../../components/Home/Footer";
 
@@ -24,12 +24,12 @@ const HomePage = () => {
 
       {/* Director's Message Section */}
       <section>
-        <DirectorsMessage />
+        <DirectorMessage />
       </section>
 
       {/* VisionMission Section */}
       <section>
-        <VisionMission />
+        <visionMission />
       </section>
 
 
@@ -39,9 +39,9 @@ const HomePage = () => {
       </section> }
 
       {/* Footer Section */}
-      <section>
+      {/* <section>
         <Footer />
-      </section>
+      </section> */}
     </div>
   );
 };
