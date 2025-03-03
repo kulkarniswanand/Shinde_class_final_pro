@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { FaFacebook, FaTwitter, FaInstagram } from "react-icons/fa";
+import {
+  FaFacebook,
+  FaTwitter,
+  FaArrowUp,
+  FaEnvelope,
+  FaYoutube,
+} from "react-icons/fa";
 
 const Footer = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -8,41 +14,43 @@ const Footer = () => {
     setIsDarkMode(!isDarkMode);
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <footer
-      className={`${
+      className={`relative ${
         isDarkMode ? "bg-gray-900" : "bg-gradient-to-br from-gray-900 to-black"
       } text-white transition-all duration-500`}
     >
-      {/* Theme Toggle Button */}
-      <div className="absolute top-4 right-4 z-50">
+      {/* Dark Mode Toggle (Floating Button) */}
+      <div className="fixed bottom-5 right-5 z-50">
         <button
           onClick={toggleDarkMode}
-          className="bg-gray-800 p-2 rounded-full text-white hover:bg-gray-600 transition"
+          className="bg-gray-800 p-3 rounded-full text-white hover:bg-gray-600 transition"
         >
           {isDarkMode ? "🌞" : "🌙"}
         </button>
       </div>
 
       {/* Call-to-Action Section */}
-      <div className="py-8 bg-gradient-to-br from-purple-700 to-blue-600">
-        <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <h3 className="text-xl font-semibold text-white">
-            Join Shinde Classes and Shape Your Future!
-          </h3>
-          <a
-            href="/admissions"
-            className="px-6 py-3 bg-yellow-500 text-black rounded-full font-medium hover:bg-yellow-400 hover:text-black transition-all duration-300"
-          >
-            Enroll Now
-          </a>
-        </div>
+      <div className="py-5 bg-gradient-to-br from-purple-700 to-blue-600 text-center">
+        <h3 className="text-2xl font-semibold text-white mb-4">
+          Unlock Your Potential with Shinde Classes!
+        </h3>
+        <a
+          href="/admissions"
+          className="px-6 py-3 bg-yellow-500 text-black rounded-full font-medium hover:bg-yellow-400 hover:text-black transition-all duration-300 shadow-md transform hover:scale-105"
+        >
+          Enroll Now
+        </a>
       </div>
 
-      {/* Footer Sections */}
+      {/* Footer Content */}
       <div className="container mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
-          {/* Map Section (Unchanged) */}
+          {/* Map Section */}
           <div>
             <h3 className="text-xl font-semibold mb-4 border-b-2 border-primary inline-block">
               Location
@@ -56,9 +64,12 @@ const Footer = () => {
               title="Map"
               className="border-0 rounded-lg shadow-md"
             ></iframe>
+            <p className="text-gray-300 text-sm mt-2">
+              📍 Visit us at Kadegaon, near Bank of India.
+            </p>
           </div>
 
-          {/* Logo and Description Section */}
+          {/* Logo and Contact Info */}
           <div>
             <h3 className="text-xl font-semibold mb-4 border-b-2 border-primary inline-block">
               Shinde Classes
@@ -69,8 +80,10 @@ const Footer = () => {
               className="mb-4 w-32 transform hover:scale-105 transition-all duration-300"
             />
             <p className="text-gray-400 leading-relaxed">
-              Shinde Classes provides quality education, empowering students to achieve excellence in their academic and personal growth.
+              Providing quality education to empower students for academic and personal excellence.
             </p>
+            <p className="text-gray-400 mt-2">📞 +91 1234567890</p>
+            <p className="text-gray-400">✉️ contact@shindeclasses.com</p>
           </div>
 
           {/* Important Links */}
@@ -79,38 +92,18 @@ const Footer = () => {
               Important Links
             </h3>
             <ul className="space-y-3">
-              <li>
-                <a
-                  href="/privacy-policy"
-                  className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
-                >
-                  Privacy Policy
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/terms-of-service"
-                  className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
-                >
-                  Terms of Service
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/admissions"
-                  className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
-                >
-                  Admissions
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/careers"
-                  className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
-                >
-                  Careers
-                </a>
-              </li>
+              {["Privacy Policy", "Terms of Service", "Admissions", "Careers"].map(
+                (item, index) => (
+                  <li key={index}>
+                    <a
+                      href={`/${item.toLowerCase().replace(" ", "-")}`}
+                      className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
+                    >
+                      {item}
+                    </a>
+                  </li>
+                )
+              )}
             </ul>
           </div>
 
@@ -120,54 +113,18 @@ const Footer = () => {
               Navigation
             </h3>
             <ul className="space-y-3">
-              <li>
-                <a
-                  href="/"
-                  className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
-                >
-                  Home
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/about"
-                  className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
-                >
-                  About Us
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/features"
-                  className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
-                >
-                  Our Facilities
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/achievements"
-                  className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
-                >
-                  Achievements
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/gallery"
-                  className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
-                >
-                  Gallery
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/contact"
-                  className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
-                >
-                  Contact Us
-                </a>
-              </li>
+              {["Home", "About Us", "Our Facilities", "Achievements", "Gallery", "Contact Us"].map(
+                (item, index) => (
+                  <li key={index}>
+                    <a
+                      href={`/${item.toLowerCase().replace(" ", "-")}`}
+                      className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
+                    >
+                      {item}
+                    </a>
+                  </li>
+                )
+              )}
             </ul>
           </div>
         </div>
@@ -175,28 +132,37 @@ const Footer = () => {
         {/* Social Media and Copyright */}
         <div className="mt-12 flex flex-col items-center space-y-6 text-center">
           <div className="flex space-x-6">
-            <a
-              href="https://facebook.com"
-              className="text-gray-400 hover:text-primary hover:scale-110 transform transition"
-            >
-              <FaFacebook size={24} />
-            </a>
-            <a
-              href="https://twitter.com"
-              className="text-gray-400 hover:text-primary hover:scale-110 transform transition"
-            >
-              <FaTwitter size={24} />
-            </a>
-            <a
-              href="https://instagram.com"
-              className="text-gray-400 hover:text-primary hover:scale-110 transform transition"
-            >
-              <FaInstagram size={24} />
-            </a>
+            {[
+              { icon: FaFacebook, link: "https://www.facebook.com/share/1AHXyXfTvC/", color: "#1877F2" },
+              { icon: FaTwitter, link: "https://twitter.com", color: "#1DA1F2" },
+              { icon: FaEnvelope, link: "mailto:contact@shindeclasses.com", color: "#D44638" },
+              { icon: FaYoutube, link: "https://www.youtube.com/@shankarshinde6299", color: "#FF0000" },
+            ].map(({ icon: Icon, link, color }, index) => (
+              <a
+                key={index}
+                href={link}
+                className="text-gray-400 hover:text-primary transition transform hover:scale-110"
+                style={{ color }}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Icon size={24} />
+              </a>
+            ))}
           </div>
+
           <p className="text-gray-500 text-sm">
             &copy; {new Date().getFullYear()} Shinde Classes. All rights reserved.
           </p>
+
+          {/* Back to Top Button */}
+          <button
+            onClick={scrollToTop}
+            className="mt-4 bg-yellow-500 text-black px-4 py-2 rounded-full hover:bg-yellow-300 transition transform hover:scale-105 flex items-center space-x-1"
+          >
+            <FaArrowUp />
+            <span>Back to Top</span>
+          </button>
         </div>
       </div>
     </footer>

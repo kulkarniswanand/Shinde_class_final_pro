@@ -102,11 +102,11 @@ const Features = () => {
       </section>
 
       {/* Footer Section */}
-      <section className="mt-16">
+      {/* <section className="mt-16">
         <Suspense fallback={<div>Loading footer...</div>}>
           <Footer />
         </Suspense>
-      </section>
+      </section> */}
     </>
   );
 };
