@@ -66,7 +66,7 @@ function MainApp() {
             <>
               <Element name="home"><Home /></Element>
               <Element name="director-message"><DirectorMessage /></Element>
-              <Element name="vision-mission"><VisionMission /></Element>
+              <Element name="VisionMission"><VisionMission /></Element>
               <Element name="about"><About /></Element>
               <Element name="features"><Features /></Element>
               <Element name="achievements"><Achievements /></Element>
