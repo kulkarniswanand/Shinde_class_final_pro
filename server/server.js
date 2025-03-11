@@ -8,7 +8,8 @@ const updateBranchRoutes = require("./BRANCH_MANAGEMENT/updateBranch/routes/upda
 const studentRoutes = require("./STUDENT/registration/routes/studentRoutes");
 const feesStructure=require("./Fees_Management/FeesStructure/Routes/FeesStructureRoutes")
 const feesManagement=require("./Fees_Management/FeesManagement/Routes/FeesManagementRoutes")
-const studentsDetails = require("./StudentDetails/Routes/studentRoutes");
+const studentsRoutes = require("./StudentDetails/Routes/studentsRoutes"); 
+const staffRoutes = require("./StaffManagement/Routes/staffRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -18,7 +19,7 @@ app.use(express.json());
 
 // API Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/branch", branchRoute);
+app.use("/api/branch", branchRoute); 
 app.use("/api/updatebranch", updateBranchRoutes);
 app.use("/api/students", studentRoutes);
 app.use("/api/deletebranch", deleteBranchRoute);
@@ -26,6 +27,8 @@ app.use("/api/feesStructure",feesStructure);
 app.use("/api/feesManagement",feesManagement);
 
 app.use("/api/studentsDetails", studentsDetails);
+app.use("/api/students", studentsRoutes);
+app.use("/api/staff", staffRoutes);
 
 // Start Server
 app.listen(PORT, () => {

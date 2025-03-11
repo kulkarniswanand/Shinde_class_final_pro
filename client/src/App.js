@@ -24,8 +24,9 @@ import FeeManagement from './components/FeeManagement/FeeManagement';
 import FeeStructure from './components/FeeStructure/feeStructure';
 import ExamsScedule from './pages/Exams_Scedule/ExamsScedule';
 import StudentDashboard from './pages/Student_Dashboard/StudentDashboard';
-import StudentDetails from './components/StudentDetails/studentDetails';
-
+import StudentDetails from './components/StudentDetails/studentDetails'; 
+import StaffManagement from './components/StaffManagement/staffManagement';
+import StaffRegistrationForm from './components/StaffManagement/staffRegistration';
 
 // import StudentRegistration from './pages/StudentRegistration';
 
@@ -68,11 +69,8 @@ function MainApp() {
         <Route path="/ExamsScedule" element={<ExamsScedule />} />
         <Route path="/StudentDashboard" element={<StudentDashboard />} />
         <Route path="/student-details" element={<StudentDetails />} />
-
-
-
-
-
+        <Route path="/staff-management" element={< StaffManagement/>} />
+        <Route path="/staffRegistrationForm" element={< StaffRegistrationForm/>} />
 
         {/* <Route path="/student-registration" element={<StudentRegistration />} /> */}
       </Routes>

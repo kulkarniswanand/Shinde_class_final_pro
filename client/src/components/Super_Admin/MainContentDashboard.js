@@ -7,7 +7,7 @@ const superAdminOptions = [
 
 const SuperAdminDashboard = () => {
   const navigate = useNavigate();
-
+ 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 py-12">
       {/* Header */}

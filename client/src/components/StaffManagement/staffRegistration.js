@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 
-const StudentRegistrationForm = () => {
+const StaffRegistrationForm = () => {
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -100,7 +100,7 @@ const StudentRegistrationForm = () => {
         className="bg-gray-700 p-10 rounded-2xl shadow-xl w-full max-w-5xl"
       >
         <h1 className="text-3xl font-extrabold text-center mb-6 text-yellow-400">
-          Student Admission Form
+          Staff Admission Form
         </h1>
 
         {/* Success/Error Messages */}
@@ -194,4 +194,4 @@ const StudentRegistrationForm = () => {
   );
 };
 
-export default StudentRegistrationForm;
+export default StaffRegistrationForm;
