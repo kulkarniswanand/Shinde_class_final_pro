@@ -79,7 +79,7 @@ const FeesManagement = () => {
     student.name.toLowerCase().includes(filters.name?.toLowerCase() || "") &&
     student.class.toLowerCase().includes(filters.class.toLowerCase()) &&
     student.year.toLowerCase().includes(filters.year.toLowerCase()) &&
-    student.gender.toLowerCase().includes(filters.gender.toLowerCase())
+    student.gender.toLowerCase().includes(filters.gender?.toLowerCase())
   );
 
   const columns = [
@@ -100,13 +100,32 @@ const FeesManagement = () => {
       <h2 className="text-3xl font-semibold text-purple-400">Fees Management</h2>
       
       <div className="grid grid-cols-4 gap-4 my-4">
-        <Input name="name" placeholder="Filter by Name" className="bg-gray-800 text-white placeholder-gray-400 p-2 rounded-md" onChange={handleFilterChange} />
-        <Input name="class" placeholder="Filter by Class" className="bg-gray-800 text-white placeholder-gray-400 p-2 rounded-md" onChange={handleFilterChange} />
-        <Input name="year" placeholder="Filter by Year" className="bg-gray-800 text-white placeholder-gray-400 p-2 rounded-md" onChange={handleFilterChange} />
-        <Input name="gender" placeholder="Filter by Gender" className="bg-gray-800 text-white placeholder-gray-400 p-2 rounded-md" onChange={handleFilterChange} />
+        <Input name="name" placeholder="Filter by Name" className="bg-white text-black placeholder-black p-2 rounded-md" onChange={handleFilterChange} />
+        <Input name="class" placeholder="Filter by Class" className="bg-white text-black placeholder-black p-2 rounded-md" onChange={handleFilterChange} />
+        <Input name="year" placeholder="Filter by Year" className="bg-white text-black placeholder-black p-2 rounded-md" onChange={handleFilterChange} />
+        <Input name="gender" placeholder="Filter by Gender" className="bg-white text-black placeholder-black p-2 rounded-md" onChange={handleFilterChange} />
       </div>
       
       <Table dataSource={filteredStudents} columns={columns} rowKey="id" className="bg-gray-900 text-white" />
+      
+      <Modal title={<span className="text-white">Update Fee Details</span>} open={isModalOpen} onCancel={() => setIsModalOpen(false)} footer={null} className="bg-gray-900 text-white rounded-lg">
+        {selectedStudent && (
+          <div className="p-6">
+            <p className="mb-2 text-black"><strong>Name:</strong> {selectedStudent.name}</p>
+            <p className="mb-2 text-black"><strong>Total Fees:</strong> {selectedStudent.totalFees}</p>
+            <div className="mb-4">
+              <label className="block mb-1 text-sm font-medium text-black">Amount Given:</label>
+              <Input type="number" defaultValue={selectedStudent.amountGiven} className="bg-white text-black rounded-md p-2" />
+            </div>
+            <div className="mb-4">
+              <label className="block mb-1 text-sm font-medium text-black">Additional Discount:</label>
+              <Input type="number" value={discount.value} onChange={(e) => setDiscount({ ...discount, value: parseFloat(e.target.value) || 0 })} className="bg-white text-black rounded-md p-2" />
+            </div>
+            <p className="mb-4 text-black"><strong>Final Fees After Discount:</strong> {selectedStudent.totalFees - selectedStudent.amountGiven - discount.value}</p>
+            <Button type="primary" onClick={() => setIsModalOpen(false)} className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-md px-4 py-2">Update</Button>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
