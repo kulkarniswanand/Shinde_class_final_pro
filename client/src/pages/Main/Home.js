@@ -29,7 +29,7 @@ const HomePage = () => {
 
       {/* VisionMission Section */}
       <section>
-        <visionMission />
+        <VisionMission />
       </section>
 
 
