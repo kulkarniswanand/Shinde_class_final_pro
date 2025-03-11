@@ -56,12 +56,7 @@ function MainApp() {
           element={
             <>
               <Element name="home"><Home /></Element>
-<<<<<<< HEAD
-              <Element name="vision-mission"><VisionMission /></Element>
-=======
-              <Element name="director-message"><DirectorMessage /></Element>
-              <Element name="VisionMission"><VisionMission /></Element>
->>>>>>> c5e1c64940845a687c15022524244f7d9e0b551e
+              
               <Element name="about"><About /></Element>
               <Element name="features"><Features /></Element>
               <Element name="achievements"><Achievements /></Element>
