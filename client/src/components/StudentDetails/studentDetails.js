@@ -17,7 +17,7 @@ const StudentDetails = () => {
 
   const fetchStudents = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/students");
+      const response = await fetch("http://localhost:5000/api/studentsDetails");
       const data = await response.json();
       setStudents(data);
     } catch (error) {
@@ -65,7 +65,7 @@ const StudentDetails = () => {
     };
 
     try {
-      const response = await fetch(`http://localhost:5000/api/students/${id}`, {
+      const response = await fetch(`http://localhost:5000/api/studentsDetails/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -92,7 +92,7 @@ const StudentDetails = () => {
   const handleDelete = async () => {
     if (deleteStudentId) {
       try {
-        const response = await fetch(`http://localhost:5000/api/students/${deleteStudentId}`, {
+        const response = await fetch(`http://localhost:5000/api/studentsDetails/${deleteStudentId}`, {
           method: "DELETE",
         });
 

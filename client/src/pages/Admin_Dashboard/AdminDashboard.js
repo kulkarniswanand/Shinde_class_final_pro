@@ -4,15 +4,15 @@ import StudentRegistrationForm from "../../components/student_registration/stude
 
 const dashboardOptions = [
   { id: 1, name: "Student Registration", image: "/images/Dashboard/student_registration.jpeg", route: "/StudentRegistrationForm" },
-  { id: 2, name: "Fees Management", image: "/images/Dashboard/Fees Management.jpg", route: "/FeeManagement" },
-  { id: 3, name: "Student Details", image: "/images/Dashboard/Student Details.jpg", route: "/student-details" },
+  { id: 2, name: "Fees Management", image: "/images/Dashboard/Fees_Management.jpg", route: "/FeeManagement" },
+  { id: 3, name: "Student Details", image: "/images/Dashboard/Student_Details.jpg", route: "/student-details" },
   { id: 4, name: "Attendance", image: "/images/Dashboard/Attendance.jpg", route: "/attendance" },
-  { id: 5, name: "Exam Schedule", image: "/images/Dashboard/Exam Schedule.jpg", route: "/ExamsScedule" },
-  { id: 6, name: "Staff Management", image: "/images/Dashboard/Staff Management.jpg", route: "/staff-management" },
+  { id: 5, name: "Exam Schedule", image: "/images/Dashboard/Exam_Schedule.jpg", route: "/ExamsScedule" },
+  { id: 6, name: "Staff Management", image: "/images/Dashboard/Staff_Management.jpg", route: "/staff-management" },
   { id: 7, name: "Certificates", image: "/images/Dashboard/Certificates.jpg", route: "/certificates" },
-  { id: 8, name: "Exam Marks", image: "/images/Dashboard/Exam Marks.jpg", route: "/exam-marks" },
+  { id: 8, name: "Exam Marks", image: "/images/Dashboard/Exam_Marks.jpg", route: "/exam-marks" },
   { id: 9, name: "Results", image: "/images/Dashboard/Results.jpg", route: "/results" },
-  { id: 10, name: "Fees Structure", image: "/images/Dashboard/Fees Management.jpg", route: "/FeeStructure" },
+  { id: 10, name: "Fees Structure", image: "/images/Dashboard/Fees_Management.jpg", route: "/FeeStructure" },
 
 ];
 

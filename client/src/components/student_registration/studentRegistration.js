@@ -80,13 +80,12 @@ const StudentRegistrationForm = () => {
         });
   
         setErrors({});
-        setIsSubmitting(false); // ✅ Reset after success
       }
     } catch (error) {
       console.error("Error registering student:", error);
       setServerMessage({ type: "error", text: "Failed to register student. Please try again." });
     } finally {
-      setTimeout(() => setIsSubmitting(false), 500); // Small delay for better UX
+      setIsSubmitting(false); // ✅ Reset after success or failure
     }
   };
   

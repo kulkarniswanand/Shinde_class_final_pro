@@ -3,8 +3,8 @@ const router = express.Router();
 const { getAllStudents, updateStudent } = require("../Controller/studentsController");
 
 // ...existing code...
-
-router.put("/students/:id", updateStudent);
+router.get("/", getAllStudents);
+router.put("/studentDetails/:id", updateStudent);
 
 // ...existing code...
 

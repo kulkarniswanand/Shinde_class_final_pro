@@ -8,7 +8,7 @@ const updateBranchRoutes = require("./BRANCH_MANAGEMENT/updateBranch/routes/upda
 const studentRoutes = require("./STUDENT/registration/routes/studentRoutes");
 const feesStructure=require("./Fees_Management/FeesStructure/Routes/FeesStructureRoutes")
 const feesManagement=require("./Fees_Management/FeesManagement/Routes/FeesManagementRoutes")
-const studentsRoutes = require("./StudentDetails/Routes/studentsRoutes"); 
+const studentsDetails = require("./StudentDetails/Routes/studentsRoutes"); 
 const staffRoutes = require("./StaffManagement/Routes/staffRoutes");
 
 const app = express();
@@ -27,7 +27,7 @@ app.use("/api/feesStructure",feesStructure);
 app.use("/api/feesManagement",feesManagement);
 
 app.use("/api/studentsDetails", studentsDetails);
-app.use("/api/students", studentsRoutes);
+// app.use("/api/students", studentsRoutes);
 app.use("/api/staff", staffRoutes);
 
 // Start Server
