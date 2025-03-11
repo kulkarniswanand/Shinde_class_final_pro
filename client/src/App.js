@@ -41,7 +41,7 @@ function MainApp() {
   const location = useLocation();
 
   // Define paths where the Navbar should not be displayed
-  const pathsWithoutNavbar = ['/login', '/admin-dashboard', '/superadmindashboard', '/managebranches','/studentregistrationform','/feemanagement','/feestructure','/examsscedule','/studentdashboard'];
+  const pathsWithoutNavbar = ['/login', '/admin-dashboard', '/superadmindashboard', '/managebranches','/studentregistrationform','/feemanagement','/feestructure','/examsscedule','/studentdashboard','/student-details'];
 
   return (
     <div className="App">
