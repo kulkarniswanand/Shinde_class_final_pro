@@ -7,7 +7,7 @@ const dashboardOptions = [
   { id: 2, name: "Fees Management", image: "/images/Dashboard/Fees Management.jpg", route: "/FeeManagement" },
   { id: 3, name: "Student Details", image: "/images/Dashboard/Student Details.jpg", route: "/student-details" },
   { id: 4, name: "Attendance", image: "/images/Dashboard/Attendance.jpg", route: "/attendance" },
-  { id: 5, name: "Exam Schedule", image: "/images/Dashboard/Exam Schedule.jpg", route: "/exam-schedule" },
+  { id: 5, name: "Exam Schedule", image: "/images/Dashboard/Exam Schedule.jpg", route: "/ExamsScedule" },
   { id: 6, name: "Staff Management", image: "/images/Dashboard/Staff Management.jpg", route: "/staff-management" },
   { id: 7, name: "Certificates", image: "/images/Dashboard/Certificates.jpg", route: "/certificates" },
   { id: 8, name: "Exam Marks", image: "/images/Dashboard/Exam Marks.jpg", route: "/exam-marks" },

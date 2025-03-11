@@ -7,7 +7,7 @@ const branchRoute = require("./BRANCH_MANAGEMENT/addBranch/routes/authRoutes");
 const updateBranchRoutes = require("./BRANCH_MANAGEMENT/updateBranch/routes/updateBranchRoutes");
 const studentRoutes = require("./STUDENT/registration/routes/studentRoutes");
 const feesStructure=require("./Fees_Management/FeesStructure/Routes/FeesStructureRoutes")
-
+const feesManagement=require("./Fees_Management/FeesManagement/Routes/FeesManagementRoutes")
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -21,6 +21,7 @@ app.use("/api/updatebranch", updateBranchRoutes);
 app.use("/api/students", studentRoutes);
 app.use("/api/deletebranch", deleteBranchRoute);
 app.use("/api/feesStructure",feesStructure);
+app.use("/api/feesManagement",feesManagement);
 
 
 // Start Server

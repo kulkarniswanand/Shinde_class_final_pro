@@ -3,7 +3,7 @@ const router = express.Router();
 const feesStructureController = require("../Controller/FeesStructureController");
 
 router.get("/", feesStructureController.getAllFeesStructures);
-router.get("/:id", feesStructureController.getFeesStructureById);
+router.get("feeStructure/:id", feesStructureController.getFeesStructureById);
 router.post("/", feesStructureController.createFeesStructure);
 router.put("/:id", feesStructureController.updateFeesStructure);
 router.delete("/:id", feesStructureController.deleteFeesStructure);

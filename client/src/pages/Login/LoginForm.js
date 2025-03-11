@@ -7,45 +7,48 @@ const LoginForm = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate(); // React Router navigation hook
 
- const handleLogin = async (e) => {
-  e.preventDefault();
+  const handleLogin = async (e) => {
+    e.preventDefault();
 
-  try {
-    const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ role, username, password }),
-    });
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role, username, password }),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (response.ok) {
-      console.log(`Login successful as ${data.role}`);
-      switch (data.role) {
-        case "superadmin":
-          navigate("/superadmindashboard");
-          break;
-        case "admin":
-          navigate("/admin-dashboard");
-          break;  
-        case "user":
-          navigate("/user-dashboard");
-          break;
-        case "student":
-          navigate("/student-dashboard");
-          break;
-        default:
-          alert("Unknown role received.");
+      if (response.ok) {
+        console.log(`Login successful as ${data.role}`);
+
+        // Store username in localStorage
+        localStorage.setItem("loggedInUser", JSON.stringify({ username }));
+
+        switch (data.role) {
+          case "superadmin":
+            navigate("/superadmindashboard");
+            break;
+          case "admin":
+            navigate("/admin-dashboard");
+            break;
+          case "user":
+            navigate("/user-dashboard");
+            break;
+          case "student":
+            navigate("/StudentDashboard");
+            break;
+          default:
+            alert("Unknown role received.");
+        }
+      } else {
+        alert(data.message || "Login failed. Please check your credentials.");
       }
-    } else {
-      alert(data.message || "Login failed. Please check your credentials.");
+    } catch (error) {
+      console.error("Error logging in:", error);
+      alert("An error occurred while logging in. Please try again.");
     }
-  } catch (error) {
-    console.error("Error logging in:", error);
-    alert("An error occurred while logging in. Please try again.");
-  }
-};
-
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
@@ -66,7 +69,6 @@ const LoginForm = () => {
               <option value="admin">Admin</option>
               <option value="user">User</option>
               <option value="student">Student</option>
-
             </select>
           </div>
           <div className="mb-5">

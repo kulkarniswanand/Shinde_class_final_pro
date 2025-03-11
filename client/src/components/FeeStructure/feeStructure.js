@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 
 const FeesStructure = () => {
   const [feesData, setFeesData] = useState([]);
@@ -15,8 +14,9 @@ const FeesStructure = () => {
 
   const fetchFeesData = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/feesStructure`);
-      setFeesData(response.data);
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/feesStructure`);
+      const data = await response.json();
+      setFeesData(data);
     } catch (error) {
       console.error("Error fetching fees data:", error);
     } finally {
@@ -26,8 +26,9 @@ const FeesStructure = () => {
 
   const fetchBranches = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/updatebranch`);
-      setBranches(response.data);
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/updatebranch`);
+      const data = await response.json();
+      setBranches(data);
     } catch (error) {
       console.error("Error fetching branches:", error);
     }
@@ -36,7 +37,9 @@ const FeesStructure = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this fee structure?")) {
       try {
-        await axios.delete(`${process.env.REACT_APP_BACKEND_URL}/api/feesStructure/${id}`);
+        await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/feesStructure/${id}`, {
+          method: 'DELETE'
+        });
         fetchFeesData();
       } catch (error) {
         console.error("Error deleting fee structure:", error);
@@ -102,12 +105,19 @@ const FeesStructure = () => {
 };
 
 const AddFeesForm = ({ onClose, fetchFees, branches }) => {
-  const [formData, setFormData] = useState({ class: "", year: "", gender: "", branch: "", totalAmount: "" });
+  const [formData, setFormData] = useState({ className: "", year: "", gender: "", branch: "", totalAmount: "" });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Form Data:", formData); // Debugging log
     try {
-      await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/feesStructure`, formData);
+      await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/feesStructure`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
       fetchFees();
       onClose();
     } catch (error) {
@@ -121,7 +131,7 @@ const AddFeesForm = ({ onClose, fetchFees, branches }) => {
         <h2 className="text-xl font-semibold mb-4">Add Fees Structure</h2>
         <form onSubmit={handleSubmit} className="space-y-3">
           <input type="text" placeholder="Class" className="w-full p-2 bg-gray-800 text-white rounded"
-            value={formData.class} onChange={(e) => setFormData({ ...formData, class: e.target.value })} required />
+            value={formData.className} onChange={(e) => setFormData({ ...formData, className: e.target.value })} required />
           <input type="text" placeholder="Year" className="w-full p-2 bg-gray-800 text-white rounded"
             value={formData.year} onChange={(e) => setFormData({ ...formData, year: e.target.value })} required />
 
@@ -158,8 +168,15 @@ const UpdateFeesForm = ({ data, onClose, fetchFees, branches }) => {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
+    console.log("Form Data:", formData); // Debugging log
     try {
-      await axios.put(`${process.env.REACT_APP_BACKEND_URL}/api/feesStructure/${data.id}`, formData);
+      await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/feesStructure/${data.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
       fetchFees();
       onClose();
     } catch (error) {
@@ -173,7 +190,7 @@ const UpdateFeesForm = ({ data, onClose, fetchFees, branches }) => {
         <h2 className="text-xl font-semibold mb-4">Update Fees Structure</h2>
         <form onSubmit={handleUpdate} className="space-y-3">
           <input type="text" placeholder="Class" className="w-full p-2 bg-gray-800 text-white rounded"
-            value={formData.class} onChange={(e) => setFormData({ ...formData, class: e.target.value })} required />
+            value={formData.className} onChange={(e) => setFormData({ ...formData, className: e.target.value })} required />
           
           <input type="text" placeholder="Year" className="w-full p-2 bg-gray-800 text-white rounded"
             value={formData.year} onChange={(e) => setFormData({ ...formData, year: e.target.value })} required />
