@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom"; // Import Link from React Router
 import {
   FaFacebook,
   FaTwitter,
@@ -24,7 +25,7 @@ const Footer = () => {
         isDarkMode ? "bg-gray-900" : "bg-gradient-to-br from-gray-900 to-black"
       } text-white transition-all duration-500`}
     >
-      {/* Dark Mode Toggle (Floating Button) */}
+      {/* Dark Mode Toggle */}
       <div className="fixed bottom-5 right-5 z-50">
         <button
           onClick={toggleDarkMode}
@@ -39,12 +40,12 @@ const Footer = () => {
         <h3 className="text-2xl font-semibold text-white mb-4">
           Unlock Your Potential with Shinde Classes!
         </h3>
-        <a
-          href="/admissions"
+        <Link
+          to="/admissions"
           className="px-6 py-3 bg-yellow-500 text-black rounded-full font-medium hover:bg-yellow-400 hover:text-black transition-all duration-300 shadow-md transform hover:scale-105"
         >
           Enroll Now
-        </a>
+        </Link>
       </div>
 
       {/* Footer Content */}
@@ -95,36 +96,41 @@ const Footer = () => {
               {["Privacy Policy", "Terms of Service", "Admissions", "Careers"].map(
                 (item, index) => (
                   <li key={index}>
-                    <a
-                      href={`/${item.toLowerCase().replace(" ", "-")}`}
+                    <Link
+                      to={`/${item.toLowerCase().replace(" ", "-")}`}
                       className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
                     >
                       {item}
-                    </a>
+                    </Link>
                   </li>
                 )
               )}
             </ul>
           </div>
 
-          {/* Navigation Links */}
+          {/* Navigation Links (Updated with React Router Links) */}
           <div>
             <h3 className="text-xl font-semibold mb-4 border-b-2 border-primary inline-block">
               Navigation
             </h3>
             <ul className="space-y-3">
-              {["Home", "About Us", "Our Facilities", "Achievements", "Gallery", "Contact Us"].map(
-                (item, index) => (
-                  <li key={index}>
-                    <a
-                      href={`/${item.toLowerCase().replace(" ", "-")}`}
-                      className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
-                    >
-                      {item}
-                    </a>
-                  </li>
-                )
-              )}
+              {[
+                { name: "Home", path: "/" },
+                { name: "About Us", path: "/about-us" },
+                { name: "Our Facilities", path: "/our-facilities" },
+                { name: "Achievements", path: "/achievements" },
+                { name: "Gallery", path: "/gallery" },
+                { name: "Contact Us", path: "/contact-us" },
+              ].map(({ name, path }, index) => (
+                <li key={index}>
+                  <Link
+                    to={path}
+                    className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
+                  >
+                    {name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
