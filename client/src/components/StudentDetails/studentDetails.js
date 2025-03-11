@@ -116,9 +116,12 @@ const StudentDetails = () => {
     setDeleteStudentId(null);
   };
 
-  const filteredStudents = students.filter((student) =>
-    student[searchCriteria].toString().toLowerCase().includes(searchValue.toLowerCase())
-  );
+  const filteredStudents = students.filter((student) => {
+    if (searchCriteria === "gender") {
+      return student[searchCriteria].toLowerCase() === searchValue.toLowerCase();
+    }
+    return student[searchCriteria].toString().toLowerCase().includes(searchValue.toLowerCase());
+  });
 
   const handleNewStudent = () => {
     navigate("/studentRegistrationForm");

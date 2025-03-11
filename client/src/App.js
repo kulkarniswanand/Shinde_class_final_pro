@@ -23,7 +23,8 @@ import StudentRegistrationForm from "./components/student_registration/studentRe
 import FeeManagement from './components/FeeManagement/FeeManagement';
 import FeeStructure from './components/FeeStructure/feeStructure';
 import StudentDetails from './components/StudentDetails/studentDetails'; 
-
+import StaffManagement from './components/StaffManagement/staffManagement';
+import StaffRegistrationForm from './components/StaffManagement/staffRegistration';
 
 // import StudentRegistration from './pages/StudentRegistration';
 
@@ -47,7 +48,10 @@ function MainApp() {
     '/studentregistrationform',
     '/feemanagement',
     '/feestructure',
-    '/studentdetails' // Added path
+    '/student-details',
+    '/staff-management',
+    '/staffregistrationform',
+
   ];
 
   return (
@@ -72,12 +76,9 @@ function MainApp() {
         <Route path="/StudentRegistrationForm" element={<StudentRegistrationForm />} />
         <Route path="/FeeManagement" element={<FeeManagement />} />
         <Route path="/FeeStructure" element={<FeeStructure />} />
-        <Route path="/studentdetails" element={<StudentDetails />} />
-
-
-
-
-
+        <Route path="/student-details" element={<StudentDetails />} />
+        <Route path="/staff-management" element={< StaffManagement/>} />
+        <Route path="/staffRegistrationForm" element={< StaffRegistrationForm/>} />
 
         {/* <Route path="/student-registration" element={<StudentRegistration />} /> */}
       </Routes>
