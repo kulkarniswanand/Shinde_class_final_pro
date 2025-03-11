@@ -1,0 +1,11 @@
+const express = require("express");
+const router = express.Router();
+const feesStructureController = require("../Controller/studentController");
+
+router.get("/", feesStructureController.getAllFeesStructures);
+router.get("/:id", feesStructureController.getFeesStructureById);
+router.post("/", feesStructureController.createFeesStructure);
+router.put("/:id", feesStructureController.updateFeesStructure);
+router.delete("/:id", feesStructureController.deleteFeesStructure);
+
+module.exports = router;

@@ -6,7 +6,7 @@ import Home from './pages/Main/Home';
 import About from './pages/Main/About';
 import Features from './pages/Main/Features';
 import Achievements from './pages/Main/Achievements';
-import Gallery from './pages/Main/Gallery';
+import Gallery from './pages/Main/Gallery'; 
 import Contact from './pages/Main/Contact';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -24,6 +24,8 @@ import FeeManagement from './components/FeeManagement/FeeManagement';
 import FeeStructure from './components/FeeStructure/feeStructure';
 import ExamsScedule from './pages/Exams_Scedule/ExamsScedule';
 import StudentDashboard from './pages/Student_Dashboard/StudentDashboard';
+import StudentDetails from './components/StudentDetails/studentDetails';
+
 
 // import StudentRegistration from './pages/StudentRegistration';
 
@@ -55,16 +57,17 @@ function MainApp() {
         <Route path="/login" element={<LoginForm />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/superadmindashboard" element={<SuperAdminDashboard />} />
-        <Route path="/ManageBranches" element={< ManageBranches/>} />
-        <Route path="/UpdateBranch" element={< UpdateBranch/>} />
-        <Route path="/AddBranch" element={< AddBranch/>} />
-        <Route path="/NavbarMB" element={< NavbarMB/>} />
-        <Route path="/DeleteBranch" element={< DeleteBranch/>} />
+        <Route path="/ManageBranches" element={< ManageBranches />} />
+        <Route path="/UpdateBranch" element={< UpdateBranch />} />
+        <Route path="/AddBranch" element={< AddBranch />} />
+        <Route path="/NavbarMB" element={< NavbarMB />} />
+        <Route path="/DeleteBranch" element={< DeleteBranch />} />
         <Route path="/StudentRegistrationForm" element={<StudentRegistrationForm />} />
         <Route path="/FeeManagement" element={<FeeManagement />} />
         <Route path="/FeeStructure" element={<FeeStructure />} />
         <Route path="/ExamsScedule" element={<ExamsScedule />} />
         <Route path="/StudentDashboard" element={<StudentDashboard />} />
+        <Route path="/student-details" element={<StudentDetails />} />
 
 
 

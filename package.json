@@ -1,10 +1,44 @@
 {
+  "name": "shinde_class_final_pro",
+  "version": "1.0.0",
+  "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
+  "main": "tailwind.config.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kulkarniswanand/Shinde_class_final_pro.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kulkarniswanand/Shinde_class_final_pro/issues"
+  },
+  "homepage": "/",
   "dependencies": {
-    "@shadcn/ui": "^0.0.4",
-    "framer-motion": "^12.4.2",
-    "lucide-react": "^0.475.0",
-    "react-icons": "^5.4.0",
-    "react-router-dom": "^7.0.2",
-    "tailwindcss": "^4.0.6"
+    "react": "^18.3.1",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.2.0",
+    "react-scripts": "^5.0.1",
+    "react-slick": "^0.30.3",
+    "shinde_class_final_pro": "file:",
+    "slick-carousel": "^1.8.1",
+    "web-vitals": "^4.2.4",
+    "webpack": "4.29.6"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

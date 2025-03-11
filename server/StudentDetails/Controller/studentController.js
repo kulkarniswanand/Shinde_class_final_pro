@@ -1,4 +1,4 @@
-const FeesStructureModel = require("../Model/FeesStructureModel");
+const FeesStructureModel = require("../Model/studentModel");
 
 // Get all Fees Structures
 exports.getAllFeesStructures = async (req, res) => {
@@ -6,7 +6,7 @@ exports.getAllFeesStructures = async (req, res) => {
     const feesStructures = await FeesStructureModel.getAllFeesStructures();
     res.json(feesStructures);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching fees structures", error }); 
+    res.status(500).json({ message: "Error fetching fees structures", error });
   }
 };
 

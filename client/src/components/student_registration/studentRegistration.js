@@ -13,7 +13,7 @@ const StudentRegistrationForm = () => {
     email: "",
     class: "",
     branch: "",
-  });
+  }); 
 
   const [errors, setErrors] = useState({});
   const [admissionDate] = useState(new Date().toISOString().split("T")[0]);

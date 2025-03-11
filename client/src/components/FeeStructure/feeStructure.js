@@ -8,7 +8,7 @@ const FeesStructure = () => {
   const [showUpdateForm, setShowUpdateForm] = useState(null);
 
   useEffect(() => {
-    fetchFeesData();
+    fetchFeesData(); 
     fetchBranches();
   }, []);
 
@@ -224,3 +224,4 @@ const UpdateFeesForm = ({ data, onClose, fetchFees, branches }) => {
 };
 
 export default FeesStructure;
+ 
