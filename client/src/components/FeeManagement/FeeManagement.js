@@ -97,7 +97,7 @@ const FeesManagement = () => {
         )}
       </Modal>
     </div>
-  );
+  ); 
 };
 
 export default FeesManagement;

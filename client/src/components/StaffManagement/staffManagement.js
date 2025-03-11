@@ -53,29 +53,25 @@ const StaffManagement = () => {
     }
   };
 
-  
-  // ... rest of your code ...
   const handleEdit = (staff) => {
     setEditStaff(staff);
   };
 
   const validate = () => {
     const newErrors = {};
-    if (!editStaff.staffname) newErrors.staffname = "Name is required.";
+    if (!editStaff.name) newErrors.name = "Name is required.";
     if (!editStaff.email) newErrors.email = "Email is required.";
     else if (!/\S+@\S+\.\S+/.test(editStaff.email)) newErrors.email = "Email is invalid.";
     if (!editStaff.branch) newErrors.branch = "Branch is required.";
-    if (editStaff.mobile && !/^\d{10}$/.test(editStaff.mobile)) newErrors.mobile = "Mobile must be 10 digits.";
+    if (editStaff.contact && !/^\d{10}$/.test(editStaff.contact)) newErrors.contact = "Mobile must be 10 digits.";
     return newErrors;
   };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-    console.log("Update button clicked"); // Add logging
     const newErrors = validate();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      console.log("Validation errors:", newErrors); // Add logging
       return;
     }
 
@@ -85,16 +81,16 @@ const StaffManagement = () => {
     const formattedJoinDate = new Date(editStaff.join_date).toISOString().split('T')[0];
 
     const formData = {
-      staffname: editStaff.staffname,
+      name: editStaff.name,
       address: editStaff.address || "",
       contact: editStaff.contact || "",
       email: editStaff.email,
       branch: editStaff.branch,
       join_date: formattedJoinDate,
+      designation: editStaff.designation || "",
     };
 
     try {
-      console.log("Sending update request with data:", formData); // Add logging
       const response = await fetch(`http://localhost:5000/api/staff/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -106,7 +102,6 @@ const StaffManagement = () => {
         throw new Error(result.message || "Failed to update staff");
       }
 
-      console.log("Update successful:", result); // Add logging
       fetchStaff(); // Refresh staff list after update
       onClose(); // Close the edit modal
       setTimeout(() => {
@@ -147,18 +142,22 @@ const StaffManagement = () => {
     setDeleteStaffId(null);
   };
 
-  // const filteredStaff = staff.filter((staff) => {
-  //   return staff[searchCriteria] && staff[searchCriteria].toString().toLowerCase().includes(searchValue.toLowerCase());
-  // });
-
-  //??
-
   const handleNewStaff = () => {
     navigate("/staffRegistrationForm");
   };
 
+  const handleDashboard = () => {
+    navigate("/admin-dashboard");
+  };
+
   return (
-    <div className="container mx-auto p-6 bg-black min-h-screen text-white">
+    <div className="container mx-auto p-6 bg-black min-h-screen text-white relative">
+      <button
+        onClick={handleDashboard}
+        className="bg-purple-600 hover:bg-blue-600 text-white px-2 py-1 rounded border border-white absolute top-4 right-4"
+      >
+        Go to Dashboard
+      </button>
       <h1 className="text-3xl font-bold text-center mb-6 text-violet-600">Staff Management</h1>
 
       {/* Search Bars and New Staff Button */}
@@ -169,8 +168,8 @@ const StaffManagement = () => {
             onChange={(e) => setSearchCriteria(e.target.value)}
             className="p-2 border rounded bg-gray text-black mr-2"
           >
-            <option value="staffname">Name</option>
-            <option value="subject">Subject</option>
+            <option value="name">Name</option>
+            <option value="designation">Designation</option>
             <option value="branch">Branch</option>
           </select>
           <input
@@ -187,6 +186,9 @@ const StaffManagement = () => {
         >
           New Staff
         </button>
+
+        {/* <Button className="bg-violet-600 text-white">Go to Dashboard</Button> */}
+
       </div>
 
       {/* Success Message */}
@@ -248,31 +250,35 @@ const StaffManagement = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-white mb-1">Name</label>
-                <input type="text" placeholder="Name" value={editStaff.name} onChange={(e) => setEditStaff({ ...editStaff, name: e.target.value })} className="p-2 border rounded bg-gray text-black" required />
-                {errors.staffname && <p className="text-red-500 text-sm">{errors.name}</p>}
+                <input type="text" placeholder="Name" value={editStaff.name} onChange={(e) => setEditStaff({ ...editStaff, name: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" required />
+                {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
               </div>
               <div>
                 <label className="block text-white mb-1">Address</label>
-                <input type="text" placeholder="Address" value={editStaff.address} onChange={(e) => setEditStaff({ ...editStaff, address: e.target.value })} className="p-2 border rounded bg-gray text-black" />
+                <input type="text" placeholder="Address" value={editStaff.address} onChange={(e) => setEditStaff({ ...editStaff, address: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" />
               </div>
               <div>
                 <label className="block text-white mb-1">Contact</label>
-                <input type="text" placeholder="Mobile" value={editStaff.contact} onChange={(e) => setEditStaff({ ...editStaff, contact: e.target.value })} className="p-2 border rounded bg-gray text-black" />
-                {errors.mobile && <p className="text-red-500 text-sm">{errors.contact}</p>}
+                <input type="text" placeholder="Mobile" value={editStaff.contact} onChange={(e) => setEditStaff({ ...editStaff, contact: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" />
+                {errors.contact && <p className="text-red-500 text-sm">{errors.contact}</p>}
               </div>
               <div>
                 <label className="block text-white mb-1">Email</label>
-                <input type="email" placeholder="Email" value={editStaff.email} onChange={(e) => setEditStaff({ ...editStaff, email: e.target.value })} className="p-2 border rounded bg-gray text-black" required />
+                <input type="email" placeholder="Email" value={editStaff.email} onChange={(e) => setEditStaff({ ...editStaff, email: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" required />
                 {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
               </div>
               <div>
                 <label className="block text-white mb-1">Branch</label>
-                <input type="text" placeholder="Branch" value={editStaff.branch} onChange={(e) => setEditStaff({ ...editStaff, branch: e.target.value })} className="p-2 border rounded bg-gray text-black" required />
+                <input type="text" placeholder="Branch" value={editStaff.branch} onChange={(e) => setEditStaff({ ...editStaff, branch: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" required />
                 {errors.branch && <p className="text-red-500 text-sm">{errors.branch}</p>}
               </div>
               <div>
                 <label className="block text-white mb-1">Joining Date</label>
-                <input type="date" value={editStaff.join_date} onChange={(e) => setEditStaff({ ...editStaff, join_date: e.target.value })} className="p-2 border rounded bg-gray text-black" />
+                <input type="date" value={editStaff.join_date} onChange={(e) => setEditStaff({ ...editStaff, join_date: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" />
+              </div>
+              <div>
+                <label className="block text-white mb-1">Designation</label>
+                <input type="text" placeholder="Designation" value={editStaff.designation} onChange={(e) => setEditStaff({ ...editStaff, designation: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" />
               </div>
             </div>
 
@@ -317,6 +323,7 @@ const StaffManagement = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };

@@ -11,7 +11,7 @@ const StudentDetails = () => {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
-  useEffect(() => {
+  useEffect(() => { 
     fetchStudents();
   }, []);
 
@@ -127,8 +127,18 @@ const StudentDetails = () => {
     navigate("/studentRegistrationForm");
   };
 
+  const handleDashboard = () => {
+    navigate("/admin-dashboard");
+  };
+
   return (
-    <div className="container mx-auto p-6 bg-black min-h-screen text-white">
+    <div className="container mx-auto p-6 bg-black min-h-screen text-white relative">
+       <button
+        onClick={handleDashboard}
+        className="bg-purple-600 hover:bg-blue-600 text-white px-2 py-1 rounded border border-white absolute top-4 right-4"
+      >
+        Go to Dashboard
+      </button>
       <h1 className="text-3xl font-bold text-center mb-6 text-violet-600">Student Details</h1>
 
       {/* Search Bars and New Student Button */}
@@ -225,49 +235,49 @@ const StudentDetails = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-white mb-1">Name</label>
-                <input type="text" placeholder="Name" value={editStudent.studentname} onChange={(e) => setEditStudent({ ...editStudent, studentname: e.target.value })} className="p-2 border rounded bg-gray text-black" required />
+                <input type="text" placeholder="Name" value={editStudent.studentname} onChange={(e) => setEditStudent({ ...editStudent, studentname: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" required />
                 {errors.studentname && <p className="text-red-500 text-sm">{errors.studentname}</p>}
               </div>
               <div>
                 <label className="block text-white mb-1">Address</label>
-                <input type="text" placeholder="Address" value={editStudent.address} onChange={(e) => setEditStudent({ ...editStudent, address: e.target.value })} className="p-2 border rounded bg-gray text-black" />
+                <input type="text" placeholder="Address" value={editStudent.address} onChange={(e) => setEditStudent({ ...editStudent, address: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" />
               </div>
               <div>
                 <label className="block text-white mb-1">Gender</label>
-                <input type="text" placeholder="Gender" value={editStudent.gender} onChange={(e) => setEditStudent({ ...editStudent, gender: e.target.value })} className="p-2 border rounded bg-gray text-black" />
+                <input type="text" placeholder="Gender" value={editStudent.gender} onChange={(e) => setEditStudent({ ...editStudent, gender: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" />
               </div>
               <div>
                 <label className="block text-white mb-1">DOB</label>
-                <input type="date" value={editStudent.dob} onChange={(e) => setEditStudent({ ...editStudent, dob: e.target.value })} className="p-2 border rounded bg-gray text-black" />
+                <input type="date" value={editStudent.dob} onChange={(e) => setEditStudent({ ...editStudent, dob: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" />
               </div>
               <div>
                 <label className="block text-white mb-1">Parent Mobile</label>
-                <input type="text" placeholder="Parent Mobile" value={editStudent.parentMobile} onChange={(e) => setEditStudent({ ...editStudent, parentMobile: e.target.value })} className="p-2 border rounded bg-gray text-black" />
+                <input type="text" placeholder="Parent Mobile" value={editStudent.parentMobile} onChange={(e) => setEditStudent({ ...editStudent, parentMobile: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" />
                 {errors.parentMobile && <p className="text-red-500 text-sm">{errors.parentMobile}</p>}
               </div>
               <div>
                 <label className="block text-white mb-1">Student Mobile</label>
-                <input type="text" placeholder="Student Mobile" value={editStudent.studentMobile} onChange={(e) => setEditStudent({ ...editStudent, studentMobile: e.target.value })} className="p-2 border rounded bg-gray text-black" />
+                <input type="text" placeholder="Student Mobile" value={editStudent.studentMobile} onChange={(e) => setEditStudent({ ...editStudent, studentMobile: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" />
                 {errors.studentMobile && <p className="text-red-500 text-sm">{errors.studentMobile}</p>}
               </div>
               <div>
                 <label className="block text-white mb-1">Email</label>
-                <input type="email" placeholder="Email" value={editStudent.email} onChange={(e) => setEditStudent({ ...editStudent, email: e.target.value })} className="p-2 border rounded bg-gray text-black" required />
+                <input type="email" placeholder="Email" value={editStudent.email} onChange={(e) => setEditStudent({ ...editStudent, email: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" required />
                 {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
               </div>
               <div>
                 <label className="block text-white mb-1">Class</label>
-                <input type="text" placeholder="Class" value={editStudent.class} onChange={(e) => setEditStudent({ ...editStudent, class: e.target.value })} className="p-2 border rounded bg-gray text-black" required />
+                <input type="text" placeholder="Class" value={editStudent.class} onChange={(e) => setEditStudent({ ...editStudent, class: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" required />
                 {errors.class && <p className="text-red-500 text-sm">{errors.class}</p>}
               </div>
               <div>
                 <label className="block text-white mb-1">Branch</label>
-                <input type="text" placeholder="Branch" value={editStudent.branch} onChange={(e) => setEditStudent({ ...editStudent, branch: e.target.value })} className="p-2 border rounded bg-gray text-black" required />
+                <input type="text" placeholder="Branch" value={editStudent.branch} onChange={(e) => setEditStudent({ ...editStudent, branch: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" required />
                 {errors.branch && <p className="text-red-500 text-sm">{errors.branch}</p>}
               </div>
               <div>
                 <label className="block text-white mb-1">Admission Date</label>
-                <input type="date" value={editStudent.admissionDate} onChange={(e) => setEditStudent({ ...editStudent, admissionDate: e.target.value })} className="p-2 border rounded bg-gray text-black" />
+                <input type="date" value={editStudent.admissionDate} onChange={(e) => setEditStudent({ ...editStudent, admissionDate: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" />
               </div>
             </div>
 
