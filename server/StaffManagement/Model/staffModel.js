@@ -10,7 +10,7 @@ const getAllStaff = async () => {
 const getStaffById = async (id) => {
     const [rows] = await pool.query("SELECT *, DATE_FORMAT(join_date, '%Y-%m-%d') as join_date FROM staff WHERE id = ?", [id]);
     return rows[0];
-};
+}; 
 
 // Create new staff
 const createStaff = async (staff) => {

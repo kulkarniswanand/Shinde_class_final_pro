@@ -9,6 +9,6 @@ router.get("/branch/:branch", staffController.getStaffByBranch);
 router.post("/", staffController.createStaff);
 router.put("/:id", staffController.updateStaff);
 router.delete("/:id", staffController.deleteStaff);
-
+ 
 module.exports = router;
  

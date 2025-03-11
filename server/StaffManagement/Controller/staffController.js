@@ -9,7 +9,7 @@ exports.getAllStaff = async (req, res) => {
         res.status(500).json({ message: "Error retrieving staff details", error });
     }
 };
-
+ 
 // Get staff by ID
 exports.getStaffById = async (req, res) => {
     try { 
