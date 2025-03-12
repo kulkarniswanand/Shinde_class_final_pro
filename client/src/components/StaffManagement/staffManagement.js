@@ -27,7 +27,7 @@ const StaffManagement = () => {
 
   const fetchStaff = async () => {
     try {
-      const response = await fetch("${process.env.REACT_APP_BACKEND_URL}/api/staff");
+      const response = await fetch("http://localhost:5000/api/staff");
       const data = await response.json();
       console.log("API Response:", data);
       if (data.error) {

@@ -89,9 +89,9 @@ const OurAchievements = () => {
       </div>
 
       {/* Footer Section */}
-      <section className="mt-16">
+      {/* <section className="mt-16">
         <Footer />
-      </section>
+      </section> */}
     </div>
   );
 };

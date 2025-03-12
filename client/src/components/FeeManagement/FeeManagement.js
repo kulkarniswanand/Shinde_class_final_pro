@@ -157,10 +157,10 @@ const FeesManagement = () => {
               <label className="block mb-1 text-sm font-medium text-black">Amount Given:</label>
               <Input type="number" value={amountGiven} onChange={(e) => setAmountGiven(parseFloat(e.target.value) || 0)} className="bg-white text-black rounded-md p-2" />
             </div>
-            <div className="mb-4">
+            {/* <div className="mb-4">
               <label className="block mb-1 text-sm font-medium text-black">Additional Discount:</label>
               <Input type="number" value={discount} onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)} className="bg-white text-black rounded-md p-2" />
-            </div>
+            </div> */}
             <p className="mb-4 text-black"><strong>Final Fees After Discount:</strong> {selectedStudent.totalFees - amountGiven - discount}</p>
             <Button type="primary" onClick={handleUpdate} className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-md px-4 py-2">Update</Button>
           </div>

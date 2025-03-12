@@ -1,47 +1,35 @@
 import React from "react";
 import ImageSlider from "../../components/Home/ImageSlider";
-import DirectorsMessage from "../../components/Home/DirectorsMessage";
-import VisionMission from "../../components/Home/visionMission";
-// import About from './Home/About';
+import DirectorMessage from "../../components/Home/DirectorMessage";
+import VisionMission from "../../components/Home/VisionMission";
 import Footer from "../../components/Home/Footer";
 
 const HomePage = () => {
   return (
     <div
       style={{
-        background: "linear-gradient(to bottom, #6a11cb, #2575fc)", // Gradient colors
-        minHeight: "100vh", // Ensure it covers the full viewport
-        color: "white", // Optional: Change text color for better readability
+        background: "linear-gradient(to bottom, #6a11cb, #2575fc)",
+        minHeight: "100vh",
+        color: "white",
       }}
     >
-      {/* Header or Navbar */}
-      <header>
-        {/* Your Navbar Component */}
-        {/* <Navbar /> */}
-      </header>
-
-      {/* Add additional sections like about, features, etc., below */}
-
       {/* Director's Message Section */}
       <section>
-        <DirectorsMessage />
+        <DirectorMessage />
       </section>
 
-      {/* VisionMission Section */}
+      {/* Image Slider Section */}
+      <section>
+        <ImageSlider />
+      </section>
+
+      {/* Vision Mission Section (Only Once) */}
       <section>
         <VisionMission />
       </section>
 
-
-      {/* Image Slider */}
-      { <section>
-        <ImageSlider />
-      </section> }
-
-      {/* Footer Section */}
-      <section>
-        <Footer />
-      </section>
+      {/* Footer Section (if needed) */}
+      {/* <Footer /> */}
     </div>
   );
 };

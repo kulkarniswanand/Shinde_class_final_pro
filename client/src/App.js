@@ -1,32 +1,41 @@
-// src/App.js
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
+import { Element } from "react-scroll";
 
-import Home from './pages/Main/Home';
-import About from './pages/Main/About';
-import Features from './pages/Main/Features';
-import Achievements from './pages/Main/Achievements';
-import Gallery from './pages/Main/Gallery'; 
-import Contact from './pages/Main/Contact';
+import Home from "./pages/Main/Home";
+import VisionMission from "./components/Home/VisionMission";
+import About from "./pages/Main/About";
+import Features from "./pages/Main/Features";
+import Achievements from "./pages/Main/Achievements";
+import Gallery from "./pages/Main/Gallery";
+import Contact from "./pages/Main/Contact";
+import Footer from "./components/Home/Footer";
+
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+
 import LoginForm from "./pages/Login/LoginForm";
-import AdminDashboard from './pages/Admin_Dashboard/AdminDashboard';
-import Navbar from './pages/Main/Navbar';
-import SuperAdminDashboard from './pages/super_admin/SuperAdminDashboard';
-import ManageBranches from './pages/super_admin/ManageBranches';
-import UpdateBranch from './components/Super_Admin/ManageBranches/UpdateBranch';
-import AddBranch from './components/Super_Admin/ManageBranches/AddBranch';
-import NavbarMB from './components/Super_Admin/ManageBranches/NavbarMB';
-import DeleteBranch from './components/Super_Admin/ManageBranches/DeleteBranch';
+import AdminDashboard from "./pages/Admin_Dashboard/AdminDashboard";
+import Navbar from "./pages/Main/Navbar";
+import SuperAdminDashboard from "./pages/super_admin/SuperAdminDashboard";
+import ManageBranches from "./pages/super_admin/ManageBranches";
+import UpdateBranch from "./components/Super_Admin/ManageBranches/UpdateBranch";
+import AddBranch from "./components/Super_Admin/ManageBranches/AddBranch";
+import NavbarMB from "./components/Super_Admin/ManageBranches/NavbarMB";
+import DeleteBranch from "./components/Super_Admin/ManageBranches/DeleteBranch";
 import StudentRegistrationForm from "./components/student_registration/studentRegistration";
-import FeeManagement from './components/FeeManagement/FeeManagement';
-import FeeStructure from './components/FeeStructure/feeStructure';
-import ExamsScedule from './pages/Exams_Scedule/ExamsScedule';
-import StudentDashboard from './pages/Student_Dashboard/StudentDashboard';
-import StudentDetails from './components/StudentDetails/studentDetails'; 
-import StaffManagement from './components/StaffManagement/staffManagement';
-import StaffRegistrationForm from './components/StaffManagement/staffRegistration';
+import FeeManagement from "./components/FeeManagement/FeeManagement";
+import FeeStructure from "./components/FeeStructure/feeStructure";
+import ExamsScedule from "./pages/Exams_Scedule/ExamsScedule";
+import StudentDashboard from "./pages/Student_Dashboard/StudentDashboard";
+import StudentDetails from "./components/StudentDetails/studentDetails";
+import StaffManagement from "./components/StaffManagement/staffManagement";
+import StaffRegistrationForm from "./components/StaffManagement/staffRegistration";
 
 // import StudentRegistration from './pages/StudentRegistration';
 
@@ -42,36 +51,77 @@ function MainApp() {
   const location = useLocation();
 
   // Define paths where the Navbar should not be displayed
-  const pathsWithoutNavbar = ['/login', '/admin-dashboard', '/superadmindashboard', '/managebranches','/studentregistrationform','/feemanagement','/feestructure','/examsscedule','/studentdashboard','/student-details'];
+  const pathsWithoutNavbar = [
+    "/login",
+    "/admin-dashboard",
+    "/superadmindashboard",
+    "/managebranches",
+    "/studentregistrationform",
+    "/feemanagement",
+    "/feestructure",
+    "/examsscedule",
+    "/studentdashboard",
+    "/student-details",
+    "/staff-management",
+    "/staffregistrationform",
+  ];
 
   return (
     <div className="App">
-      {/* Render Navbar conditionally */}
-      {!pathsWithoutNavbar.includes(location.pathname.toLowerCase()) && <Navbar />}
+      {!pathsWithoutNavbar.includes(location.pathname.toLowerCase()) && (
+        <Navbar />
+      )}
+
       <Routes>
-        <Route path="/home" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/features" element={<Features />} />
-        <Route path="/achievements" element={<Achievements />} />
-        <Route path="/gallery" element={<Gallery />} />
-        <Route path="/contact" element={<Contact />} />
+        <Route
+          path="/"
+          element={
+            <>
+              <Element name="home">
+                <Home />
+              </Element>
+
+              <Element name="about">
+                <About />
+              </Element>
+              <Element name="features">
+                <Features />
+              </Element>
+              <Element name="achievements">
+                <Achievements />
+              </Element>
+              <Element name="gallery">
+                <Gallery />
+              </Element>
+              <Element name="footer">
+                <Footer />
+              </Element>
+            </>
+          }
+        />
+        //swanand
         <Route path="/login" element={<LoginForm />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/superadmindashboard" element={<SuperAdminDashboard />} />
-        <Route path="/ManageBranches" element={< ManageBranches />} />
-        <Route path="/UpdateBranch" element={< UpdateBranch />} />
-        <Route path="/AddBranch" element={< AddBranch />} />
-        <Route path="/NavbarMB" element={< NavbarMB />} />
-        <Route path="/DeleteBranch" element={< DeleteBranch />} />
-        <Route path="/StudentRegistrationForm" element={<StudentRegistrationForm />} />
+        <Route path="/ManageBranches" element={<ManageBranches />} />
+        <Route path="/UpdateBranch" element={<UpdateBranch />} />
+        <Route path="/AddBranch" element={<AddBranch />} />
+        <Route path="/NavbarMB" element={<NavbarMB />} />
+        <Route path="/DeleteBranch" element={<DeleteBranch />} />
+        <Route
+          path="/StudentRegistrationForm"
+          element={<StudentRegistrationForm />}
+        />
         <Route path="/FeeManagement" element={<FeeManagement />} />
         <Route path="/FeeStructure" element={<FeeStructure />} />
         <Route path="/ExamsScedule" element={<ExamsScedule />} />
         <Route path="/StudentDashboard" element={<StudentDashboard />} />
         <Route path="/student-details" element={<StudentDetails />} />
-        <Route path="/staff-management" element={< StaffManagement/>} />
-        <Route path="/staffRegistrationForm" element={< StaffRegistrationForm/>} />
-
+        <Route path="/staff-management" element={<StaffManagement />} />
+        <Route
+          path="/staffRegistrationForm"
+          element={<StaffRegistrationForm />}
+        />
         {/* <Route path="/student-registration" element={<StudentRegistration />} /> */}
       </Routes>
     </div>

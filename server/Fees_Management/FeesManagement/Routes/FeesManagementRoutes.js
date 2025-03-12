@@ -6,6 +6,6 @@ const FeesManagementController = require("../Controller/FeesManagementController
 router.get("/", FeesManagementController.getStudentsWithFees);
 
 // Update student fee payment
-router.post("/feesManagement/update", FeesManagementController.updateStudentFees);
+router.put("/update", FeesManagementController.updateStudentFees);
 
 module.exports = router;

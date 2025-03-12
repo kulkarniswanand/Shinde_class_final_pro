@@ -25,18 +25,31 @@ const getStudentsWithFees = async () => {
     throw err;
   }
 };
-exports.updateFees = async (studentId, totalFees, amountGiven, remainingFees) => {
+
+const updateFees = async (studentId, totalFees, amountGiven, paymentDate) => {
   try {
-    await pool.query(
-      "UPDATE feesManagement SET totalFees = ?, amountGiven = ?, remainingFees = ? WHERE studentId = ?",
-      [totalFees, amountGiven, remainingFees, studentId]
+    const [results] = await db.query(
+      "SELECT COUNT(*) AS count FROM feesManagement WHERE studentId = ?",
+      [studentId]
     );
+
+    if (results[0].count > 0) {
+      // Update existing record
+      await db.query(
+        "UPDATE feesManagement SET totalFees = ?, amountGiven = ?, paymentDate = ? WHERE studentId = ?",
+        [totalFees, amountGiven, paymentDate, studentId]
+      );
+    } else {
+      // Insert new record
+      await db.query(
+        "INSERT INTO feesManagement (studentId, totalFees, amountGiven, paymentDate) VALUES (?, ?, ?, ?)",
+        [studentId, totalFees, amountGiven, paymentDate]
+      );
+    }
   } catch (error) {
     console.error("Error updating fees:", error);
     throw error;
   }
 };
 
-
-
-module.exports = { getStudentsWithFees };
+module.exports = { getStudentsWithFees, updateFees };

@@ -16,7 +16,10 @@ const FeesStructure = () => {
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/feesStructure`);
       const data = await response.json();
-      setFeesData(data);
+      setFeesData(data.map(fee => ({
+        ...fee,
+        className: fee.class // Ensure className is correctly set
+      })));
     } catch (error) {
       console.error("Error fetching fees data:", error);
     } finally {
@@ -75,7 +78,7 @@ const FeesStructure = () => {
             {feesData.map((fee) => (
               <tr key={fee.id} className="border-b border-gray-700 hover:bg-gray-900">
                 <td className="p-3">{fee.id}</td>
-                <td className="p-3">{fee.class}</td>
+                <td className="p-3">{fee.className}</td>
                 <td className="p-3">{fee.year}</td>
                 <td className="p-3">{fee.gender}</td>
                 <td className="p-3">{fee.branch}</td>
@@ -224,4 +227,3 @@ const UpdateFeesForm = ({ data, onClose, fetchFees, branches }) => {
 };
 
 export default FeesStructure;
- 

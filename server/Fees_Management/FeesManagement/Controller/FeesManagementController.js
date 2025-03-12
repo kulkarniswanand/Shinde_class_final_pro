@@ -13,14 +13,14 @@ const getStudentsWithFees = async (req, res) => {
 
 
 const updateStudentFees = async (req, res) => {
-  const { studentId, totalFees, amountGiven, remainingFees } = req.body;
+  const { studentId, totalFees, amountGiven, paymentDate } = req.body;
 
-  if (!studentId || totalFees === undefined || amountGiven === undefined || remainingFees === undefined) {
+  if (!studentId || totalFees === undefined || amountGiven === undefined || !paymentDate) {
     return res.status(400).json({ error: "All fields are required" });
   }
 
   try {
-    await FeesManagementModel.updateFees(studentId, totalFees, amountGiven, remainingFees);
+    await FeesManagementModel.updateFees(studentId, totalFees, amountGiven, paymentDate);
     res.status(200).json({ message: "Fees updated successfully" });
   } catch (error) {
     console.error("Error updating fees:", error);
