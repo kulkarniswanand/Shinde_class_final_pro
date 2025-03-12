@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Table, Button, Modal, Input } from "antd";
+import { Link } from "react-router-dom";
 import "tailwindcss/tailwind.css";
 
 const FeesManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [discount, setDiscount] = useState({ type: "amount", value: 0 });
+  const [amountGiven, setAmountGiven] = useState(0);
+  const [discount, setDiscount] = useState(0);
   const [students, setStudents] = useState([]);
   const [filters, setFilters] = useState({ class: "", year: "", gender: "" });
 
@@ -35,6 +37,8 @@ const FeesManagement = () => {
 
   const handleStatusClick = (record) => {
     setSelectedStudent(record);
+    setAmountGiven(record.amountGiven);
+    setDiscount(0);
     setIsModalOpen(true);
   };
 
@@ -75,6 +79,37 @@ const FeesManagement = () => {
     printWindow.document.close();
   };
 
+  const handleUpdate = async () => {
+    const finalAmount = selectedStudent.totalFees - amountGiven - discount;
+    const paymentDate = new Date().toISOString().split("T")[0];
+    const updatedData = {
+      studentId: selectedStudent.registrationId,
+      totalFees: selectedStudent.totalFees,
+      amountGiven,
+      remainingFees: finalAmount,
+      paymentDate,
+    };
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/feesManagement/update`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedData)
+      });
+
+      if (response.ok) {
+        setStudents(students.map(student => student.registrationId === selectedStudent.registrationId ? { ...student, amountGiven, remainingFees: finalAmount } : student));
+        setIsModalOpen(false);
+      } else {
+        console.error("Failed to update fees");
+      }
+    } catch (error) {
+      console.error("Error updating fees:", error);
+    }
+  };
+
   const filteredStudents = students.filter(student =>
     student.name.toLowerCase().includes(filters.name?.toLowerCase() || "") &&
     student.class.toLowerCase().includes(filters.class.toLowerCase()) &&
@@ -97,7 +132,12 @@ const FeesManagement = () => {
 
   return (
     <div className="p-5 bg-black text-white min-h-screen">
-      <h2 className="text-3xl font-semibold text-purple-400">Fees Management</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-3xl font-semibold text-purple-400">Fees Management</h2>
+        <Link to="/admin-dashboard">
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white">Go to Dashboard</Button>
+        </Link>
+      </div>
       
       <div className="grid grid-cols-4 gap-4 my-4">
         <Input name="name" placeholder="Filter by Name" className="bg-white text-black placeholder-black p-2 rounded-md" onChange={handleFilterChange} />
@@ -115,14 +155,14 @@ const FeesManagement = () => {
             <p className="mb-2 text-black"><strong>Total Fees:</strong> {selectedStudent.totalFees}</p>
             <div className="mb-4">
               <label className="block mb-1 text-sm font-medium text-black">Amount Given:</label>
-              <Input type="number" defaultValue={selectedStudent.amountGiven} className="bg-white text-black rounded-md p-2" />
+              <Input type="number" value={amountGiven} onChange={(e) => setAmountGiven(parseFloat(e.target.value) || 0)} className="bg-white text-black rounded-md p-2" />
             </div>
             <div className="mb-4">
               <label className="block mb-1 text-sm font-medium text-black">Additional Discount:</label>
-              <Input type="number" value={discount.value} onChange={(e) => setDiscount({ ...discount, value: parseFloat(e.target.value) || 0 })} className="bg-white text-black rounded-md p-2" />
+              <Input type="number" value={discount} onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)} className="bg-white text-black rounded-md p-2" />
             </div>
-            <p className="mb-4 text-black"><strong>Final Fees After Discount:</strong> {selectedStudent.totalFees - selectedStudent.amountGiven - discount.value}</p>
-            <Button type="primary" onClick={() => setIsModalOpen(false)} className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-md px-4 py-2">Update</Button>
+            <p className="mb-4 text-black"><strong>Final Fees After Discount:</strong> {selectedStudent.totalFees - amountGiven - discount}</p>
+            <Button type="primary" onClick={handleUpdate} className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-md px-4 py-2">Update</Button>
           </div>
         )}
       </Modal>

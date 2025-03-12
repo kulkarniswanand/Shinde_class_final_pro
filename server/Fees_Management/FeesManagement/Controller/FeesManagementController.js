@@ -13,19 +13,19 @@ const getStudentsWithFees = async (req, res) => {
 
 
 const updateStudentFees = async (req, res) => {
-    try {
-        const { student_id, amount_paid } = req.body;
+  const { studentId, totalFees, amountGiven, remainingFees } = req.body;
 
-        if (!student_id || !amount_paid) {
-            return res.status(400).json({ message: "Missing required fields" });
-        }
+  if (!studentId || totalFees === undefined || amountGiven === undefined || remainingFees === undefined) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
 
-        await FeesManagementModel.updateStudentFees(student_id, amount_paid);
-        res.status(200).json({ message: "Student fees updated successfully" });
-    } catch (error) {
-        console.error("Error updating student fees:", error);
-        res.status(500).json({ message: "Server error updating student fees", error: error.message });
-    }
+  try {
+    await FeesManagementModel.updateFees(studentId, totalFees, amountGiven, remainingFees);
+    res.status(200).json({ message: "Fees updated successfully" });
+  } catch (error) {
+    console.error("Error updating fees:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 };
 
 module.exports = { getStudentsWithFees, updateStudentFees };

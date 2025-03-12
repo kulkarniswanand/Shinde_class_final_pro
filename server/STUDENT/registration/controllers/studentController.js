@@ -1,47 +1,36 @@
-const Student = require("../models/studentModel");
+const { addStudent } = require("../models/studentModel");
 
-// Get all students
-exports.getAllStudents = async (req, res) => {
-  try {
-    const students = await Student.getAllStudents();
-    res.json(students);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching students", error });
+const registerStudent = (req, res) => {
+  const studentData = req.body;
+
+  // Validation: Check if all required fields are present
+  if (
+    !studentData.name ||
+    !studentData.address ||
+    !studentData.gender ||
+    !studentData.dob ||
+    !studentData.parentMobile ||
+    !studentData.class ||
+    !studentData.branch
+  ) {
+    return res.status(400).json({ error: "All required fields must be filled." });
   }
-};
 
-// Get a student by ID
-exports.getStudentById = async (req, res) => {
-  try {
-    const student = await Student.getStudentById(req.params.id);
-    if (!student) {
-      return res.status(404).json({ message: "Student not found" });
+  // Debugging: Log received data
+  console.log("Received student data:", studentData);
+
+  addStudent(studentData, (err, result) => {
+    if (err) {
+      console.error("Error inserting student:", err);
+      return res.status(500).json({ error: "Failed to register student." });
     }
-    res.json(student);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching student", error });
-  }
+
+    console.log("Student registered successfully with ID:", result.insertId);
+    res.status(201).json({
+      message: "Student registered successfully!",
+      studentId: result.insertId,
+    });
+  });
 };
 
-// Update student details
-exports.updateStudent = async (req, res) => {
-  try {
-    const updated = await Student.updateStudent(req.params.id, req.body);
-    if (!updated) {
-      return res.status(404).json({ message: "Student not found" });
-    }
-    res.json({ message: "Student updated successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Error updating student", error });
-  }
-};
-
-// Add a new student
-exports.addStudent = async (req, res) => {
-  try {
-    const studentId = await Student.addStudent(req.body);
-    res.json({ message: "Student added successfully", studentId });
-  } catch (error) {
-    res.status(500).json({ message: "Error adding student", error });
-  }
-};
+module.exports = { registerStudent };

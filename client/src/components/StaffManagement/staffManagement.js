@@ -27,7 +27,7 @@ const StaffManagement = () => {
 
   const fetchStaff = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/staff");
+      const response = await fetch("${process.env.REACT_APP_BACKEND_URL}/api/staff");
       const data = await response.json();
       console.log("API Response:", data);
       if (data.error) {
@@ -43,7 +43,7 @@ const StaffManagement = () => {
 
   const fetchStaffByBranch = async (branch) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/staff/branch/${branch}`);
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/staff/branch/${branch}`);
       const data = await response.json();
       console.log("Fetched staff data by branch:", data); // Add logging
       setStaff(data);
@@ -91,7 +91,7 @@ const StaffManagement = () => {
     };
 
     try {
-      const response = await fetch(`http://localhost:5000/api/staff/${id}`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/staff/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -118,7 +118,7 @@ const StaffManagement = () => {
   const handleDelete = async () => {
     if (deleteStaffId) {
       try {
-        const response = await fetch(`http://localhost:5000/api/staff/${deleteStaffId}`, {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/staff/${deleteStaffId}`, {
           method: "DELETE",
         });
 

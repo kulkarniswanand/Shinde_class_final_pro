@@ -25,6 +25,17 @@ const getStudentsWithFees = async () => {
     throw err;
   }
 };
+exports.updateFees = async (studentId, totalFees, amountGiven, remainingFees) => {
+  try {
+    await pool.query(
+      "UPDATE feesManagement SET totalFees = ?, amountGiven = ?, remainingFees = ? WHERE studentId = ?",
+      [totalFees, amountGiven, remainingFees, studentId]
+    );
+  } catch (error) {
+    console.error("Error updating fees:", error);
+    throw error;
+  }
+};
 
 
 
