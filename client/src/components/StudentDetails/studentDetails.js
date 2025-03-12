@@ -11,7 +11,7 @@ const StudentDetails = () => {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
-  useEffect(() => { 
+  useEffect(() => {
     fetchStudents();
   }, []);
 
@@ -47,7 +47,7 @@ const StudentDetails = () => {
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
-    }
+    } 
 
     const id = editStudent.id;
 
@@ -70,7 +70,7 @@ const StudentDetails = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
+ 
       const result = await response.json();
       if (!response.ok) {
         throw new Error(result.message || "Failed to update student");
@@ -81,8 +81,21 @@ const StudentDetails = () => {
       setTimeout(() => {
         alert("Student updated successfully!");
         console.log("Student updated successfully!");
-      }, 100); // Alert appears with a small delay
 
+        // Send WhatsApp message to student or parent
+        const studentMobile = editStudent.studentMobile;
+        const parentMobile = editStudent.parentMobile;
+        // const message = `Hello, this is to inform you that ${editStudent.studentname}'s details have been updated successfully.`;
+        // const message = `Hello, this is to inform you that ${editStudent.studentname}'s details have been updated successfully. \nThe updated details are: Name - ${editStudent.studentname}, Class - ${editStudent.class}, Branch - ${editStudent.branch}, Email - ${editStudent.email}, Mobile - ${editStudent.studentMobile}.`;
+        const message = `Hello, this is to inform you that ${editStudent.studentname}'s details have been updated successfully. \n\nThe updated details are: \nName - ${editStudent.studentname}, \nClass - ${editStudent.class}, \nBranch - ${editStudent.branch}, \nEmail - ${editStudent.email}, \nMobile - ${editStudent.studentMobile}, \nDOB - ${editStudent.dob}, \nParent Mobile - ${editStudent.parentMobile}, \nAdmission Date - ${editStudent.admissionDate}.`;
+        // Use the WhatsApp link to send the message
+        const country_code = "+91"; // Replace with your country code
+        const your_phone_number = editStudent.studentMobile; // Replace with your phone number
+        const whatsappLink = `https://wa.me/${country_code}${your_phone_number}?text=${encodeURIComponent(message)}`;
+
+        // Open the WhatsApp link in a new tab
+        window.open(whatsappLink, '_blank');
+      }, 100); // Alert appears with a small delay
     } catch (error) {
       console.error("Error updating student:", error);
       alert(`Error updating student: ${error.message}`);
@@ -133,7 +146,7 @@ const StudentDetails = () => {
 
   return (
     <div className="container mx-auto p-6 bg-black min-h-screen text-white relative">
-       <button
+      <button
         onClick={handleDashboard}
         className="bg-purple-600 hover:bg-blue-600 text-white px-2 py-1 rounded border border-white absolute top-4 right-4"
       >

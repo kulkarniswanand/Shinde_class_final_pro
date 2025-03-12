@@ -17,7 +17,7 @@ app.use(cors());
 app.use(express.json());
 
 // API Routes
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", authRoutes); 
 app.use("/api/branch", branchRoute); 
 app.use("/api/updatebranch", updateBranchRoutes);
 app.use("/api/students", studentRoutes);

@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 const StudentRegistrationForm = () => {
   const [formData, setFormData] = useState({
@@ -13,11 +16,11 @@ const StudentRegistrationForm = () => {
     email: "",
     class: "",
     branch: "",
-  }); 
+  });
 
   const [errors, setErrors] = useState({});
   const [admissionDate] = useState(new Date().toISOString().split("T")[0]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverMessage, setServerMessage] = useState({ type: "", text: "" });
 
   // Handle input changes
@@ -48,48 +51,82 @@ const StudentRegistrationForm = () => {
   };
 
   // Form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-  
-    if (!window.confirm("Are you sure you want to submit this form?")) return;
-  
-    setIsSubmitting(true);
-    setServerMessage({ type: "", text: "" });
-  
-    try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/api/students/register`,
-        { ...formData, admissionDate }
-      );
-  
-      if (response.status === 201) {
-        setServerMessage({ type: "success", text: "Student registered successfully!" });
-  
-        // Reset form fields
-        setFormData({
-          name: "", 
-          address: "",
-          gender: "",
-          dob: "",
-          parentMobile: "",
-          studentMobile: "",
-          email: "",
-          class: "",
-          branch: "",
-        });
-  
-        setErrors({});
-        setIsSubmitting(false); // ✅ Reset after success
-      }
-    } catch (error) {
-      console.error("Error registering student:", error);
-      setServerMessage({ type: "error", text: "Failed to register student. Please try again." });
-    } finally {
-      setTimeout(() => setIsSubmitting(false), 500); // Small delay for better UX
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!validateForm()) return;
+
+  if (!window.confirm("Are you sure you want to submit this form?")) return;
+
+  // setIsSubmitting(true);
+  setServerMessage({ type: "", text: "" });
+
+  try {
+    const response = await axios.post(
+      `${process.env.REACT_APP_BACKEND_URL}/api/students/register`,
+      { ...formData, admissionDate }
+    );
+
+    if (response.status === 201) {
+      setServerMessage({ type: "success", text: "Student registered successfully!" });
+
+      // Display toast notification
+      toast.success("Student registered successfully!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+
+      // Reset form fields
+      setFormData({
+        name: "",
+        address: "",
+        gender: "",
+        dob: "",
+        parentMobile: "",
+        studentMobile: "",
+        email: "",
+        class: "",
+        branch: "",
+      });
+
+      // Send WhatsApp message to user
+      const whatsappMessage = `Hello, your student has been registered successfully! \n\nThe details are: \nName - ${formData.name}, \nClass - ${formData.class}, \nBranch - ${formData.branch}, \nEmail - ${formData.email}, \nMobile - ${formData.studentMobile}, \nDOB - ${formData.dob}, \nParent Mobile - ${formData.parentMobile}, \nAdmission Date - ${admissionDate}.`;
+      const whatsappUrl = `https://wa.me/${formData.parentMobile}?text=${encodeURIComponent(whatsappMessage)}`;
+
+      // Open WhatsApp link in new tab
+      const whatsappLink = document.createElement("a");
+      whatsappLink.href = whatsappUrl;
+      whatsappLink.target = "_blank";
+      whatsappLink.rel = "noopener noreferrer";
+      whatsappLink.click();
+
+      setErrors({});
+      // setIsSubmitting(false); // Reset after success
     }
-  };
-  
+  } catch (error) {
+    console.error("Error registering student:", error);
+    setServerMessage({ type: "error", text: "Failed to register student. Please try again." });
+
+    // Display toast notification
+    toast.error("Failed to register student. Please try again.", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  }
+};
+
+// ...
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 text-white px-6 py-10">
@@ -184,9 +221,10 @@ const StudentRegistrationForm = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="col-span-2 w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-3 px-4 rounded-lg font-semibold transition-all duration-300"
-            disabled={isSubmitting}
+            // disabled={isSubmitting}
           >
-            {isSubmitting ? "Submitting..." : "Submit Admission"}
+            {/* {isSubmitting ? "Submitting..." : "Submit Admission"} */}
+            Submit Admission
           </motion.button>
         </form>
       </motion.div>
