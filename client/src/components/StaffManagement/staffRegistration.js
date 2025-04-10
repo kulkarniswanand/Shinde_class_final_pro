@@ -7,7 +7,7 @@ const StaffRegistrationForm = () => {
     name: "",
     address: "",
     gender: "",
-    dob: "",
+    dob: "", 
     parentMobile: "",
     studentMobile: "",
     email: "",

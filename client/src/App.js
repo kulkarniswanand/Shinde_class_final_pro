@@ -25,6 +25,7 @@ import FeeStructure from './components/FeeStructure/feeStructure';
 import StudentDetails from './components/StudentDetails/studentDetails'; 
 import StaffManagement from './components/StaffManagement/staffManagement';
 import StaffRegistrationForm from './components/StaffManagement/staffRegistration';
+import AttendanceDashboard from './components/Attendance/attendance';
 
 // import StudentRegistration from './pages/StudentRegistration';
 
@@ -51,7 +52,7 @@ function MainApp() {
     '/student-details',
     '/staff-management',
     '/staffregistrationform',
-
+    '/attendance',
   ];
 
   return (
@@ -59,7 +60,7 @@ function MainApp() {
       {/* Render Navbar conditionally */}
       {!pathsWithoutNavbar.includes(location.pathname.toLowerCase()) && <Navbar />}
       <Routes>
-        <Route path="/home" element={<Home />} />
+        <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/features" element={<Features />} />
         <Route path="/achievements" element={<Achievements />} />
@@ -71,7 +72,7 @@ function MainApp() {
         <Route path="/ManageBranches" element={< ManageBranches />} />
         <Route path="/UpdateBranch" element={< UpdateBranch />} />
         <Route path="/AddBranch" element={< AddBranch />} />
-        <Route path="/NavbarMB" element={< NavbarMB />} />
+        <Route path="/NavbarMB" element={< NavbarMB />} /> 
         <Route path="/DeleteBranch" element={< DeleteBranch />} />
         <Route path="/StudentRegistrationForm" element={<StudentRegistrationForm />} />
         <Route path="/FeeManagement" element={<FeeManagement />} />
@@ -79,11 +80,12 @@ function MainApp() {
         <Route path="/student-details" element={<StudentDetails />} />
         <Route path="/staff-management" element={< StaffManagement/>} />
         <Route path="/staffRegistrationForm" element={< StaffRegistrationForm/>} />
+        <Route path="/attendance" element={< AttendanceDashboard/>} />
 
         {/* <Route path="/student-registration" element={<StudentRegistration />} /> */}
       </Routes>
     </div>
-  );
+  );    
 }
 
 export default App;

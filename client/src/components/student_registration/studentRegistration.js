@@ -4,8 +4,7 @@ import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-
-const StudentRegistrationForm = () => {
+const SimpleRegistrationForm = () => {
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -19,11 +18,8 @@ const StudentRegistrationForm = () => {
   });
 
   const [errors, setErrors] = useState({});
-  const [admissionDate] = useState(new Date().toISOString().split("T")[0]);
-  // const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverMessage, setServerMessage] = useState({ type: "", text: "" });
 
-  // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -32,7 +28,6 @@ const StudentRegistrationForm = () => {
     });
   };
 
-  // Form validation
   const validateForm = () => {
     const newErrors = {};
     if (!formData.name.trim()) newErrors.name = "Name is required.";
@@ -50,28 +45,63 @@ const StudentRegistrationForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Form submission
-
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!validateForm()) return;
-
-  if (!window.confirm("Are you sure you want to submit this form?")) return;
-
-  // setIsSubmitting(true);
-  setServerMessage({ type: "", text: "" });
-
-  try {
-    const response = await axios.post(
-      `${process.env.REACT_APP_BACKEND_URL}/api/students/register`,
-      { ...formData, admissionDate }
-    );
-
-    if (response.status === 201) {
-      setServerMessage({ type: "success", text: "Student registered successfully!" });
-
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+  
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_BACKEND_URL}/api/students/register`,
+        formData
+      );
+  
+      if (response.status === 201) {
+        setServerMessage({ type: "success", text: "Registration successful!" });
+  
+        // Display toast notification
+        toast.success("Registration successful!", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+  
+        // Send WhatsApp message to user
+        const whatsappMessage = `Hello, your registration has been successful! \n\nThe details are: \nName - ${formData.name}, \nAddress - ${formData.address}, \nGender - ${formData.gender}, \nDate of Birth - ${formData.dob}, \nParent's Mobile - ${formData.parentMobile}, \nStudent's Mobile - ${formData.studentMobile}, \nEmail - ${formData.email}, \nClass - ${formData.class}, \nBranch - ${formData.branch}.`;
+        const whatsappUrl = `https://wa.me/${formData.parentMobile}?text=${encodeURIComponent(whatsappMessage)}`;
+  
+        // Open WhatsApp link in new tab
+        const whatsappLink = document.createElement("a");
+        whatsappLink.href = whatsappUrl;
+        whatsappLink.target = "_blank";
+        whatsappLink.rel = "noopener noreferrer";
+        whatsappLink.click();
+  
+        setErrors({});
+      } else {
+        console.error("Error registering:", response);
+        setServerMessage({ type: "error", text: "Failed to register. Please try again." });
+  
+        // Display toast notification
+        toast.error("Failed to register. Please try again.", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      }
+    } catch (error) {
+      console.error("Error registering:", error);
+      setServerMessage({ type: "error", text: "Failed to register. Please try again." });
+  
       // Display toast notification
-      toast.success("Student registered successfully!", {
+      toast.error("Failed to register. Please try again.", {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: false,
@@ -80,53 +110,8 @@ const handleSubmit = async (e) => {
         draggable: true,
         progress: undefined,
       });
-
-      // Reset form fields
-      setFormData({
-        name: "",
-        address: "",
-        gender: "",
-        dob: "",
-        parentMobile: "",
-        studentMobile: "",
-        email: "",
-        class: "",
-        branch: "",
-      });
-
-      // Send WhatsApp message to user
-      const whatsappMessage = `Hello, your student has been registered successfully! \n\nThe details are: \nName - ${formData.name}, \nClass - ${formData.class}, \nBranch - ${formData.branch}, \nEmail - ${formData.email}, \nMobile - ${formData.studentMobile}, \nDOB - ${formData.dob}, \nParent Mobile - ${formData.parentMobile}, \nAdmission Date - ${admissionDate}.`;
-      const whatsappUrl = `https://wa.me/${formData.parentMobile}?text=${encodeURIComponent(whatsappMessage)}`;
-
-      // Open WhatsApp link in new tab
-      const whatsappLink = document.createElement("a");
-      whatsappLink.href = whatsappUrl;
-      whatsappLink.target = "_blank";
-      whatsappLink.rel = "noopener noreferrer";
-      whatsappLink.click();
-
-      setErrors({});
-      // setIsSubmitting(false); // Reset after success
     }
-  } catch (error) {
-    console.error("Error registering student:", error);
-    setServerMessage({ type: "error", text: "Failed to register student. Please try again." });
-
-    // Display toast notification
-    toast.error("Failed to register student. Please try again.", {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
-  }
-};
-
-// ...
-
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 text-white px-6 py-10">
@@ -137,7 +122,7 @@ const handleSubmit = async (e) => {
         className="bg-gray-700 p-10 rounded-2xl shadow-xl w-full max-w-5xl"
       >
         <h1 className="text-3xl font-extrabold text-center mb-6 text-yellow-400">
-          Student Admission Form
+          Student Registration Form
         </h1>
 
         {/* Success/Error Messages */}
@@ -221,10 +206,8 @@ const handleSubmit = async (e) => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="col-span-2 w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-3 px-4 rounded-lg font-semibold transition-all duration-300"
-            // disabled={isSubmitting}
           >
-            {/* {isSubmitting ? "Submitting..." : "Submit Admission"} */}
-            Submit Admission
+            Register
           </motion.button>
         </form>
       </motion.div>
@@ -232,4 +215,4 @@ const handleSubmit = async (e) => {
   );
 };
 
-export default StudentRegistrationForm;
+export default SimpleRegistrationForm;

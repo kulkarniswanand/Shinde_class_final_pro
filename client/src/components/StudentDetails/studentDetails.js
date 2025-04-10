@@ -80,7 +80,7 @@ const StudentDetails = () => {
       onClose(); // Close the edit modal
       setTimeout(() => {
         alert("Student updated successfully!");
-        console.log("Student updated successfully!");
+        console.log("Student updated successfully!"); 
 
         // Send WhatsApp message to student or parent
         const studentMobile = editStudent.studentMobile;
