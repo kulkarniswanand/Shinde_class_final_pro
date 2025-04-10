@@ -8,7 +8,7 @@ const registerStudent = (req, res) => {
     !studentData.name ||
     !studentData.address ||
     !studentData.gender ||
-    !studentData.dob ||
+    !studentData.dob || 
     !studentData.parentMobile ||
     !studentData.class ||
     !studentData.branch

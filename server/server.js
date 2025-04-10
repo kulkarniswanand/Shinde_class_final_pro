@@ -9,15 +9,16 @@ const studentRoutes = require("./STUDENT/registration/routes/studentRoutes");
 const feesStructure=require("./Fees_Management/FeesStructure/Routes/FeesStructureRoutes")
 const studentsRoutes = require("./StudentDetails/Routes/studentsRoutes"); 
 const staffRoutes = require("./StaffManagement/Routes/staffRoutes");
+const attendanceRoutes = require("./StudentAttendance/Routes/studentAttendanceRoutes");
 
-const app = express();
+const app = express(); 
 const PORT = process.env.PORT || 5000;
  
 app.use(cors());
 app.use(express.json());
 
 // API Routes
-app.use("/api/auth", authRoutes); 
+app.use("/api/auth", authRoutes);
 app.use("/api/branch", branchRoute); 
 app.use("/api/updatebranch", updateBranchRoutes);
 app.use("/api/students", studentRoutes);
@@ -25,6 +26,8 @@ app.use("/api/deletebranch", deleteBranchRoute);
 app.use("/api/feesStructure",feesStructure);
 app.use("/api/students", studentsRoutes);
 app.use("/api/staff", staffRoutes);
+// app.use("/api/attendance", attendanceRoutes);
+app.use("/api/studentAttendance", attendanceRoutes); // Ensure this matches the expected route
 
 // Start Server
 app.listen(PORT, () => {
