@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { useEffect } from "react";
 
 const StudentRegistrationForm = () => {
   const [formData, setFormData] = useState({
@@ -26,6 +25,13 @@ const StudentRegistrationForm = () => {
     fetchBranches();
   }, []);
 
+  // Validate DOB dynamically when class or dob changes
+  useEffect(() => {
+    if (formData.dob && formData.class) {
+      validateField("dob", formData.dob);
+    }
+  }, [formData.dob, formData.class]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -34,32 +40,86 @@ const StudentRegistrationForm = () => {
 
   const validateField = (name, value) => {
     let message = "";
-    if (name === "parentMobile" || name === "studentMobile") {
-      if (value && !/^\d{10}$/.test(value)) {
-        message = "Mobile number must be 10 digits.";
-      }
-    } else if (name === "email") {
-      if (value && !/^\S+@\S+\.\S+$/.test(value)) {
-        message = "Invalid email address.";
-      }
+
+    switch (name) {
+      case "name":
+        if (!/^[a-zA-Z\s]+$/.test(value)) {
+          message = "Name must contain only alphabets and spaces.";
+        }
+        break;
+
+      case "address":
+        if (value.trim().length < 10) {
+          message = "Address must be at least 10 characters long.";
+        }
+        break;
+
+        case "dob":
+          const today = new Date();
+          const dob = new Date(value);
+          let age = today.getFullYear() - dob.getFullYear();
+          const monthDiff = today.getMonth() - dob.getMonth();
+          const dayDiff = today.getDate() - dob.getDate();
+        
+          // Adjust age if the birthday hasn't occurred yet this year
+          if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+            age--;
+          }
+        
+          // Validate age based on the selected class with exact age criteria
+          if (formData.class === "8th" && age !== 12) {
+            message = "For 8th class, the student must be exactly 12 years old.";
+          } else if (formData.class === "9th" && age !== 13) {
+            message = "For 9th class, the student must be exactly 13 years old.";
+          } else if (formData.class === "10th" && age !== 14) {
+            message = "For 10th class, the student must be exactly 14 years old.";
+          } else if (dob > today) {
+            message = "Date of birth cannot be in the future.";
+          }
+          break;
+        
+
+      case "parentMobile":
+      case "studentMobile":
+        if (value && !/^\d{10}$/.test(value)) {
+          message = "Mobile number must be exactly 10 digits.";
+        }
+        break;
+
+      case "email":
+        if (value && !/^\S+@\S+\.\S+$/.test(value)) {
+          message = "Invalid email address.";
+        }
+        break;
+
+      case "class":
+        if (!value) {
+          message = "Class is required.";
+        }
+        break;
+
+      case "branch":
+        if (!value) {
+          message = "Branch is required.";
+        }
+        break;
+
+      default:
+        break;
     }
+
     setErrors((prev) => ({ ...prev, [name]: message }));
   };
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = "Name is required.";
-    if (!formData.address.trim()) newErrors.address = "Address is required.";
-    if (!formData.gender) newErrors.gender = "Gender is required.";
-    if (!formData.dob) newErrors.dob = "Date of birth is required.";
-    if (!/^\d{10}$/.test(formData.parentMobile))
-      newErrors.parentMobile = "Parent's mobile must be 10 digits.";
-    if (formData.studentMobile && !/^\d{10}$/.test(formData.studentMobile))
-      newErrors.studentMobile = "Student's mobile must be 10 digits.";
-    if (formData.email && !/^\S+@\S+\.\S+$/.test(formData.email))
-      newErrors.email = "Invalid email address.";
-    if (!formData.class) newErrors.class = "Class is required.";
-    if (!formData.branch) newErrors.branch = "Branch is required.";
+
+    Object.keys(formData).forEach((key) => {
+      validateField(key, formData[key]);
+      if (!formData[key].trim() && key !== "studentMobile" && key !== "email") {
+        newErrors[key] = `${key.charAt(0).toUpperCase() + key.slice(1)} is required.`;
+      }
+    });
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -83,11 +143,12 @@ const StudentRegistrationForm = () => {
         }
       );
 
-      if (response.status === 200) {
+      if (response.status === 201) {
         setServerMessage({
           type: "success",
           text: "Student registered successfully!",
         });
+        alert("Student registered successfully!"); // Alert message on successful submission
         setFormData({
           name: "",
           address: "",
@@ -142,14 +203,7 @@ const StudentRegistrationForm = () => {
           </p>
         )}
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-6">
-          {[
-            "name",
-            "address",
-            "dob",
-            "parentMobile",
-            "studentMobile",
-            "email",
-          ].map((field) => (
+          {[ "name", "address", "dob", "parentMobile", "studentMobile", "email" ].map((field) => (
             <div key={field} className="flex flex-col">
               <label className="text-sm font-medium text-blue-300 capitalize">
                 {field.replace(/([A-Z])/g, " $1")}
@@ -198,8 +252,8 @@ const StudentRegistrationForm = () => {
               <option value="9th">9th</option>
               <option value="10th">10th</option>
             </select>
-            {errors.className && (
-              <p className="text-red-400 text-sm mt-1">{errors.className}</p>
+            {errors.class && (
+              <p className="text-red-400 text-sm mt-1">{errors.class}</p>
             )}
           </div>
 
@@ -227,10 +281,10 @@ const StudentRegistrationForm = () => {
             type="submit"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="col-span-2 w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-semibold transition-all"
+            className="col-span-2 w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-3 px-4 rounded-lg font-semibold transition-all duration-300"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Submitting..." : "Submit Admission"}
+            Submit Admission
           </motion.button>
         </form>
       </motion.div>
