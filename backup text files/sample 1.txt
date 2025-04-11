@@ -1,5 +1,6 @@
-// Everything is working fine. just problem is that date is accurate, but time is not.
-
+//1.32
+// here also everything is working fine 
+// only time is saving wrong (in UTC)
 
 import React, { useState, useEffect, useMemo } from "react";
 import {
@@ -491,24 +492,31 @@ const AttendanceDashboard = () => {
                 const recordClass = record.class || 'Unknown';
                 if (recordClass === 'Unknown') return; // Skip records without class
 
-                let recordDateStr;
-                let recordDateLabel;
+                let localDateStr; // Use local date
+                let localDateLabel;
+                let recordDate;
                 try {
-                     const recordDate = new Date(record.date);
-                     recordDateStr = recordDate.toISOString().split('T')[0];
-                     recordDateLabel = recordDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                     recordDate = new Date(record.date); // Parse the timestamp
+
+                     // --- Get LOCAL date components ---
+                     const year = recordDate.getFullYear();
+                     const month = (recordDate.getMonth() + 1).toString().padStart(2, '0'); // 0-indexed -> 1-indexed
+                     const day = recordDate.getDate().toString().padStart(2, '0');
+                     localDateStr = `${year}-${month}-${day}`; // Format as YYYY-MM-DD based on local time
+
+                     localDateLabel = recordDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); // Keep using local formatting for display label
                 } catch(e) { return; } // Skip invalid dates
 
 
-                const classKey = `${recordClass}-${recordDateStr}`;
-                const allKey = `All Classes-${recordDateStr}`;
+                const classKey = `${recordClass}-${localDateStr}`; // Use LOCAL date string in key
+                const allKey = `All Classes-${localDateStr}`;     // Use LOCAL date string in key
 
                 // Initialize summaries if they don't exist
                 if (!summaryMap[classKey]) {
                     summaryMap[classKey] = {
                         className: recordClass,
-                        date: recordDateStr,
-                        dateLabel: recordDateLabel,
+                        date: localDateStr, // Store LOCAL date string
+                        dateLabel: localDateLabel,
                         presentCount: 0,
                         absentCount: 0,
                         classId: classes.find(c => c.name === recordClass)?.id || 0,
@@ -518,8 +526,8 @@ const AttendanceDashboard = () => {
                  if (!summaryMap[allKey]) {
                     summaryMap[allKey] = {
                         className: 'All Classes',
-                        date: recordDateStr,
-                        dateLabel: recordDateLabel,
+                        date: localDateStr, // Store LOCAL date string
+                        dateLabel: localDateLabel,
                         presentCount: 0,
                         absentCount: 0,
                         classId: 0,
@@ -2034,4 +2042,6 @@ style.textContent = `
 }
 `;
 document.head.appendChild(style);
+
+
 

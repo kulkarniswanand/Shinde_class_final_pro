@@ -1,7 +1,3 @@
-//2.00
-// now everything is working fine, accurately, absolutey, as per expectation 
-// only cards are not working -> Total in Class, Present, Absent, Pending
-
 import React, { useState, useEffect, useMemo } from "react";
 import {
     LineChart,
@@ -419,21 +415,43 @@ const AttendanceDashboard = () => {
             return 'pending';
         }
 
-        const targetDate = new Date(dateToCheck); // Convert to Date object
-        const targetYear = targetDate.getFullYear();
-        const targetMonth = targetDate.getMonth(); // 0-11
-        const targetDay = targetDate.getDate();
-
+        // dateToCheck is expected to be 'YYYY-MM-DD' string from the date input.
+        // Find record for this student where the UTC date part of record.date matches dateToCheck.
         const record = recordsToCheck.find(record => {
+            // Ensure IDs match (handle potential type differences)
             const matchesStudent = String(record.id) === String(studentId);
             if (!matchesStudent) return false;
 
-            const recordDateObj = new Date(record.date);
-            const recordYear = recordDateObj.getFullYear();
-            const recordMonth = recordDateObj.getMonth(); // 0-11
-            const recordDay = recordDateObj.getDate();
+            // Robust date comparison (ignoring time, comparing UTC date parts)
+            let matchesDate = false;
+            try {
+                if (!record.date) return false; // Skip if record has no date
 
-            return recordYear === targetYear && recordMonth === targetMonth && recordDay === targetDay;
+                // 1. Create a Date object from the record's timestamp (likely ISO string)
+                const recordDateObj = new Date(record.date);
+
+                // 2. Get the UTC year, month (0-indexed), and day from the record's date
+                const recordUTCFullYear = recordDateObj.getUTCFullYear();
+                const recordUTCMonth = recordDateObj.getUTCMonth(); // 0-11
+                const recordUTCDate = recordDateObj.getUTCDate();
+
+                // 3. Parse the target date string ('YYYY-MM-DD')
+                const [targetYear, targetMonth, targetDay] = dateToCheck.split('-').map(Number);
+
+                // 4. Compare UTC components of record date with parsed target date components
+                //    (Note: targetMonth is 1-based, recordUTCMonth is 0-based)
+                matchesDate = (
+                    recordUTCFullYear === targetYear &&
+                    recordUTCMonth === (targetMonth - 1) &&
+                    recordUTCDate === targetDay
+                );
+
+            } catch (e) {
+                console.error("Error comparing dates", { recordDate: record.date, dateToCheck, error: e });
+                matchesDate = false; // Treat as non-match on error
+            }
+
+            return matchesDate; // No need for matchesStudent check here, already done
         });
 
         return record ? record.status : 'pending';
@@ -443,9 +461,6 @@ const AttendanceDashboard = () => {
     const fetchAttendanceHistoryData = async () => {
         setIsHistoryLoading(true);
         try {
-            // Fetch raw records within the date range (fetch all and filter is simpler for now)
-            // In a larger app, fetching only the needed range would be better.
-            // --- REMOVED API CALL HERE ---
             // Use the existing attendanceRecords state
             const allRecords = [...attendanceRecords];
 
@@ -470,31 +485,30 @@ const AttendanceDashboard = () => {
                 const recordClass = record.class || 'Unknown';
                 if (recordClass === 'Unknown') return; // Skip records without class
 
-                let localDateStr; // Use local date
-                let localDateLabel;
-                let recordDate;
+                let recordDateStr;
+                let recordDateLabel;
                 try {
-                     recordDate = new Date(record.date); // Parse the timestamp
-
-                     // --- Get LOCAL date components ---
+                     const recordDate = new Date(record.date);
+                     // --- MODIFICATION START ---
+                     // Use local date parts for aggregation key
                      const year = recordDate.getFullYear();
-                     const month = (recordDate.getMonth() + 1).toString().padStart(2, '0'); // 0-indexed -> 1-indexed
-                     const day = recordDate.getDate().toString().padStart(2, '0');
-                     localDateStr = `${year}-${month}-${day}`; // Format as YYYY-MM-DD based on local time
-
-                     localDateLabel = recordDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); // Keep using local formatting for display label
+                     const month = String(recordDate.getMonth() + 1).padStart(2, '0'); // Get 1-based month, pad
+                     const day = String(recordDate.getDate()).padStart(2, '0'); // Get day, pad
+                     recordDateStr = `${year}-${month}-${day}`; // Create YYYY-MM-DD based on local date
+                     // --- MODIFICATION END ---
+                     recordDateLabel = recordDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); // Keep using locale string for display label
                 } catch(e) { return; } // Skip invalid dates
 
 
-                const classKey = `${recordClass}-${localDateStr}`; // Use LOCAL date string in key
-                const allKey = `All Classes-${localDateStr}`;     // Use LOCAL date string in key
+                const classKey = `${recordClass}-${recordDateStr}`;
+                const allKey = `All Classes-${recordDateStr}`;
 
                 // Initialize summaries if they don't exist
                 if (!summaryMap[classKey]) {
                     summaryMap[classKey] = {
                         className: recordClass,
-                        date: localDateStr, // Store LOCAL date string
-                        dateLabel: localDateLabel,
+                        date: recordDateStr, // Store the local date string
+                        dateLabel: recordDateLabel,
                         presentCount: 0,
                         absentCount: 0,
                         classId: classes.find(c => c.name === recordClass)?.id || 0,
@@ -504,8 +518,8 @@ const AttendanceDashboard = () => {
                  if (!summaryMap[allKey]) {
                     summaryMap[allKey] = {
                         className: 'All Classes',
-                        date: localDateStr, // Store LOCAL date string
-                        dateLabel: localDateLabel,
+                        date: recordDateStr, // Store the local date string
+                        dateLabel: recordDateLabel,
                         presentCount: 0,
                         absentCount: 0,
                         classId: 0,
@@ -523,8 +537,7 @@ const AttendanceDashboard = () => {
                 }
 
                 // Add raw record for details modal
-                 // Add raw record for details modal, ensuring we have basic info
-                const simplifiedRecord = {
+                 const simplifiedRecord = {
                     id: record.id,
                     name: record.name || `Student ${record.id}`,
                     class: record.class,
@@ -545,7 +558,7 @@ const AttendanceDashboard = () => {
                 return summary;
             }).filter(summary => summary.presentCount > 0 || summary.absentCount > 0); // Remove days with no attendance
 
-            // Sort by date (most recent first)
+            // Sort by date (most recent first) - using the local date string for sorting now
             processedHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
 
             setAttendanceHistory(processedHistory);
@@ -558,7 +571,6 @@ const AttendanceDashboard = () => {
         }
     };
 
-
     // Handle marking attendance (for Roster view)
     const handleMarkAttendance = async (student, status) => {
         setIsMarkingAttendance(true);
@@ -569,17 +581,24 @@ const AttendanceDashboard = () => {
             const studentBranch = student.branch; // Assumes student object has 'branch'
 
             // Check if all required fields are present (including name)
-            if (!studentId || !studentName || !studentClass || !studentBranch) {
+            if (!studentId || !studentName || !studentClass || !studentBranch) { // Added !studentName check
                 console.error('Missing required student data for marking:', { studentId, studentName, studentClass, studentBranch });
                 alert('Student data (ID, Name, Class, Branch) is incomplete. Cannot mark attendance.');
                 setIsMarkingAttendance(false);
                 return;
             }
 
-            // --- Use local system time for attendance ---
-            const dateToSend = new Date().toISOString(); // This will use the local time of the system
+            // --- Construct date based on selectedDate ---
+            // selectedDate is 'YYYY-MM-DD'. We want to represent the *start* of this day in UTC.
+            const dateToSend = new Date(Date.UTC(
+                parseInt(selectedDate.substring(0, 4)), // Year
+                parseInt(selectedDate.substring(5, 7)) - 1, // Month (0-indexed)
+                parseInt(selectedDate.substring(8, 10)), // Day
+                0, 0, 0, 0 // Start of the day UTC
+            )).toISOString(); // Send as ISO string (UTC)
 
-            console.log('Marking attendance:', { studentId, studentName, studentClass, studentBranch, status, dateToSend });
+
+            console.log('Marking attendance:', { studentId, studentName, studentClass, studentBranch, status, date: selectedDate, dateToSend }); // Log selectedDate and the derived ISO date
 
             // --- Use attendanceService ---
             await attendanceService.markAttendance({
@@ -588,10 +607,11 @@ const AttendanceDashboard = () => {
                 studentClass,
                 branch: studentBranch,
                 status,
-                date: dateToSend // Send the local time as ISO string
+                date: dateToSend // Send derived UTC timestamp string
             });
 
-            // --- Optimistic UI Update ---
+             // --- Optimistic UI Update ---
+            // 1. Create the new record structure using the SAME timestamp we sent
             const newRecord = {
                 id: studentId,
                 name: studentName,
@@ -601,42 +621,57 @@ const AttendanceDashboard = () => {
                 status: status
             };
 
-            // Update the main attendanceRecords state
-            setAttendanceRecords(prev => {
+            // 2. Update the main attendanceRecords state
+             setAttendanceRecords(prev => {
+                 // Find if a record for this student on this specific date already exists
+                 // Use the SAME robust date comparison logic as getStudentAttendanceStatus
                 const existingIndex = prev.findIndex(r => {
                     const matchesStudent = String(r.id) === String(studentId);
                     if (!matchesStudent) return false;
 
-                    // Compare the DATE PART (local) of the existing record with the current date
-                    const recordDateObj = new Date(r.date);
-                    const recordYear = recordDateObj.getFullYear();
-                    const recordMonth = recordDateObj.getMonth(); // 0-11
-                    const recordDay = recordDateObj.getDate();
+                    let matchesDate = false;
+                    try {
+                        if (!r.date) return false;
+                        const recordDateObj = new Date(r.date);
+                        const recordUTCFullYear = recordDateObj.getUTCFullYear();
+                        const recordUTCMonth = recordDateObj.getUTCMonth();
+                        const recordUTCDate = recordDateObj.getUTCDate();
 
-                    const currentDate = new Date(); // Get current date
-                    const currentYear = currentDate.getFullYear();
-                    const currentMonth = currentDate.getMonth(); // 0-11
-                    const currentDay = currentDate.getDate();
+                        const [targetYear, targetMonth, targetDay] = selectedDate.split('-').map(Number);
 
-                    return recordYear === currentYear && recordMonth === currentMonth && recordDay === currentDay;
+                        matchesDate = (
+                            recordUTCFullYear === targetYear &&
+                            recordUTCMonth === (targetMonth - 1) &&
+                            recordUTCDate === targetDay
+                        );
+                    } catch (e) {
+                        matchesDate = false;
+                    }
+                    return matchesDate;
                 });
 
                 if (existingIndex >= 0) {
                     // Update existing record status
                     const updatedRecords = [...prev];
-                    updatedRecords[existingIndex] = { ...updatedRecords[existingIndex], status: status, date: dateToSend }; // Update timestamp too
+                    updatedRecords[existingIndex] = { ...updatedRecords[existingIndex], status: status };
+                    console.log("Updated existing record:", updatedRecords[existingIndex]);
                     return updatedRecords;
                 } else {
                     // Add new record
+                     console.log("Added new record:", newRecord);
                     return [...prev, newRecord];
-                }
-            });
+                 }
+             });
 
-            alert(`Attendance for ${studentName} marked as ${status}.`);
+             // No need to manually update stats here, the useEffect watching
+             // attendanceRecords and filteredRosterStudents will handle it.
+
+             alert(`Attendance for ${studentName} marked as ${status} for ${selectedDate}.`);
 
         } catch (error) {
             console.error("Error marking attendance:", error);
             alert(`Failed to mark attendance: ${error.message || 'Unknown error'}`);
+             // TODO: Optionally revert optimistic update here if needed
         } finally {
             setIsMarkingAttendance(false);
         }
@@ -1997,3 +2032,5 @@ style.textContent = `
 }
 `;
 document.head.appendChild(style);
+
+// everything is working fine. only time is saving wrong.

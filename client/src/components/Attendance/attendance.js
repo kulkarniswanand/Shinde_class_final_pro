@@ -1,3 +1,7 @@
+//1.32
+// here also everything is working fine 
+// only time is saving wrong (in UTC)
+
 import React, { useState, useEffect, useMemo } from "react";
 import {
     LineChart,
@@ -107,6 +111,7 @@ const AttendanceDashboard = () => {
         error: null,
     });
 
+    const [filteredRosterStudents, setFilteredRosterStudents] = useState([]);
 
     // --- Data Fetching Effects ---
 
@@ -290,7 +295,7 @@ const AttendanceDashboard = () => {
 
 
     // Filter students for ROSTER view based on selected class and search term
-    const filteredRosterStudents = useMemo(() => {
+     filteredRosterStudents = useMemo(() => {
         if (isStudentsLoading || isClassesLoading) return [];
 
         let result = [...allStudents];
@@ -337,7 +342,10 @@ const AttendanceDashboard = () => {
         // Filter attendance records for the selected date *only*
         const dateFilteredRecords = attendanceRecords.filter(record => {
             try {
-                return new Date(record.date).toISOString().split('T')[0] === selectedDate;
+                // Convert record date to local date string
+                const recordDateLocal = new Date(record.date).toLocaleDateString('en-IN'); // Use 'en-IN' for IST format
+                const selectedDateLocal = new Date(selectedDate).toLocaleDateString('en-IN'); // Convert selected date to local format
+                return recordDateLocal === selectedDateLocal; // Compare local date strings
             } catch (e) { return false; } // Handle invalid dates
         });
 
@@ -540,8 +548,7 @@ const AttendanceDashboard = () => {
                     summaryMap[allKey].absentCount++;
                 }
 
-                // Add raw record for details modal
-                 // Add raw record for details modal, ensuring we have basic info
+                // Add raw record for details modal, ensuring we have basic info
                 const simplifiedRecord = {
                     id: record.id,
                     name: record.name || `Student ${record.id}`,
@@ -587,24 +594,17 @@ const AttendanceDashboard = () => {
             const studentBranch = student.branch; // Assumes student object has 'branch'
 
             // Check if all required fields are present (including name)
-            if (!studentId || !studentName || !studentClass || !studentBranch) { // Added !studentName check
+            if (!studentId || !studentName || !studentClass || !studentBranch) {
                 console.error('Missing required student data for marking:', { studentId, studentName, studentClass, studentBranch });
                 alert('Student data (ID, Name, Class, Branch) is incomplete. Cannot mark attendance.');
                 setIsMarkingAttendance(false);
                 return;
             }
 
-            // --- Construct date based on selectedDate ---
-            // selectedDate is 'YYYY-MM-DD'. We want to represent the *start* of this day in UTC.
-            const dateToSend = new Date(Date.UTC(
-                parseInt(selectedDate.substring(0, 4)), // Year
-                parseInt(selectedDate.substring(5, 7)) - 1, // Month (0-indexed)
-                parseInt(selectedDate.substring(8, 10)), // Day
-                0, 0, 0, 0 // Start of the day UTC
-            )).toISOString(); // Send as ISO string (UTC)
+            // --- Use local system time for attendance ---
+            const dateToSend = new Date().toISOString(); // This will use the local time of the system
 
-
-            console.log('Marking attendance:', { studentId, studentName, studentClass, studentBranch, status, date: selectedDate, dateToSend }); // Log selectedDate and the derived ISO date
+            console.log('Marking attendance:', { studentId, studentName, studentClass, studentBranch, status, dateToSend });
 
             // --- Use attendanceService ---
             await attendanceService.markAttendance({
@@ -613,11 +613,10 @@ const AttendanceDashboard = () => {
                 studentClass,
                 branch: studentBranch,
                 status,
-                date: dateToSend // Send derived UTC timestamp string
+                date: dateToSend // Send the local time as ISO string
             });
 
-             // --- Optimistic UI Update ---
-            // 1. Create the new record structure using the SAME timestamp we sent
+            // --- Optimistic UI Update ---
             const newRecord = {
                 id: studentId,
                 name: studentName,
@@ -627,57 +626,45 @@ const AttendanceDashboard = () => {
                 status: status
             };
 
-            // 2. Update the main attendanceRecords state
-             setAttendanceRecords(prev => {
-                 // Find if a record for this student on this specific date already exists
-                 // Use the SAME robust date comparison logic as getStudentAttendanceStatus
+            // Update the main attendanceRecords state
+            setAttendanceRecords(prev => {
                 const existingIndex = prev.findIndex(r => {
                     const matchesStudent = String(r.id) === String(studentId);
                     if (!matchesStudent) return false;
 
-                    let matchesDate = false;
-                    try {
-                        if (!r.date) return false;
-                        const recordDateObj = new Date(r.date);
-                        const recordUTCFullYear = recordDateObj.getUTCFullYear();
-                        const recordUTCMonth = recordDateObj.getUTCMonth();
-                        const recordUTCDate = recordDateObj.getUTCDate();
+                    // Compare the DATE PART (local) of the existing record with the current date
+                    const recordDateObj = new Date(r.date);
+                    const recordYear = recordDateObj.getFullYear();
+                    const recordMonth = recordDateObj.getMonth(); // 0-11
+                    const recordDay = recordDateObj.getDate();
 
-                        const [targetYear, targetMonth, targetDay] = selectedDate.split('-').map(Number);
+                    const currentDate = new Date(); // Get current date
+                    const currentYear = currentDate.getFullYear();
+                    const currentMonth = currentDate.getMonth(); // 0-11
+                    const currentDay = currentDate.getDate();
 
-                        matchesDate = (
-                            recordUTCFullYear === targetYear &&
-                            recordUTCMonth === (targetMonth - 1) &&
-                            recordUTCDate === targetDay
-                        );
-                    } catch (e) {
-                        matchesDate = false;
-                    }
-                    return matchesDate;
+                    return recordYear === currentYear && recordMonth === currentMonth && recordDay === currentDay;
                 });
 
                 if (existingIndex >= 0) {
                     // Update existing record status
                     const updatedRecords = [...prev];
-                    updatedRecords[existingIndex] = { ...updatedRecords[existingIndex], status: status };
-                    console.log("Updated existing record:", updatedRecords[existingIndex]);
+                    updatedRecords[existingIndex] = { ...updatedRecords[existingIndex], status: status, date: dateToSend }; // Update timestamp too
                     return updatedRecords;
                 } else {
                     // Add new record
-                     console.log("Added new record:", newRecord);
                     return [...prev, newRecord];
-                 }
-             });
+                }
+            });
 
-             // No need to manually update stats here, the useEffect watching
-             // attendanceRecords and filteredRosterStudents will handle it.
+            // Recalculate roster stats after marking attendance
+            calculateRosterStats(); // Call the function to recalculate stats
 
-             alert(`Attendance for ${studentName} marked as ${status} for ${selectedDate}.`);
+            alert(`Attendance for ${studentName} marked as ${status}.`);
 
         } catch (error) {
             console.error("Error marking attendance:", error);
             alert(`Failed to mark attendance: ${error.message || 'Unknown error'}`);
-             // TODO: Optionally revert optimistic update here if needed
         } finally {
             setIsMarkingAttendance(false);
         }
@@ -2039,7 +2026,45 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
+// Function to recalculate roster stats
+const calculateRosterStats = () => {
+    if (selectedClass === 0 || filteredRosterStudents.length === 0) {
+        setRosterStats({ totalStudents: 0, presentCount: 0, absentCount: 0, pendingCount: 0 });
+        return;
+    }
+
+    const totalStudentsInClass = filteredRosterStudents.length;
+    let present = 0;
+    let absent = 0;
+
+    // Filter attendance records for the selected date *only*
+    const dateFilteredRecords = attendanceRecords.filter(record => {
+        try {
+            // Convert record date to local date string
+            const recordDateLocal = new Date(record.date).toLocaleDateString('en-IN'); // Use 'en-IN' for IST format
+            const selectedDateLocal = new Date(selectedDate).toLocaleDateString('en-IN'); // Convert selected date to local format
+            return recordDateLocal === selectedDateLocal; // Compare local date strings
+        } catch (e) { return false; } // Handle invalid dates
+    });
+
+    filteredRosterStudents.forEach(student => {
+        const status = getStudentAttendanceStatus(student.id, dateFilteredRecords, selectedDate); // Pass date for roster check
+        if (status === 'present') {
+            present++;
+        } else if (status === 'absent') {
+            absent++;
+        }
+    });
+
+    const pending = totalStudentsInClass - present - absent;
+
+    setRosterStats({
+        totalStudents: totalStudentsInClass,
+        presentCount: present,
+        absentCount: absent,
+        pendingCount: Math.max(0, pending), // Ensure pending is not negative
+    });
+};
 
 
-// here also everything is working fine 1.32
-// only time is saving wrong (in UTC)
+
