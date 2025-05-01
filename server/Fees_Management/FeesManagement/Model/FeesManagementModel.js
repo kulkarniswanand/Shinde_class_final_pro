@@ -17,8 +17,14 @@ const getStudentsWithFees = async () => {
           ON s.class = fs.class 
           AND s.gender = fs.gender
           AND s.branch = fs.branch 
-          AND YEAR(s.admissionDate) = fs.year;
+          AND YEAR(s.admissionDate) = fs.year
+      WHERE s.id IS NOT NULL; -- Ensure only valid student records are fetched
     `);
+
+    if (results.length === 0) {
+      console.warn("No student fees data found.");
+    }
+
     return results;
   } catch (err) {
     console.error("Database error fetching student fees:", err);

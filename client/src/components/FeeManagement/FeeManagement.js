@@ -26,6 +26,8 @@ const FeesManagement = () => {
           gender: student.gender || "N/A",
           totalFees: student.totalFees || 0,
           dueDate: student.dueDate || "N/A",
+          installments: student.installments || [], // Ensure installments are mapped
+          remainingFees: student.remainingFees || student.totalFees - student.amountGiven,
         }));
         setStudents(formattedData);
       } catch (error) {
@@ -34,6 +36,10 @@ const FeesManagement = () => {
     };
     fetchStudents();
   }, []);
+
+  useEffect(() => {
+    console.log("Fetched students data:", students); // Debugging log
+  }, [students]);
 
   const handleStatusClick = (record) => {
     setSelectedStudent(record);
@@ -50,7 +56,20 @@ const FeesManagement = () => {
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/feesManagement`);
       const data = await response.json();
-      setStudents(data);
+      const formattedData = data.map((student) => ({
+        ...student,
+        amountGiven: student.amountGiven || 0,
+        registrationId: student.studentId?.toString() || "",
+        name: student.studentname || "N/A",
+        class: student.class || "N/A",
+        year: student.year?.toString() || "N/A",
+        gender: student.gender || "N/A",
+        totalFees: student.totalFees || 0,
+        dueDate: student.dueDate || "N/A",
+        installments: student.installments || [], // Ensure installments are mapped
+        remainingFees: student.remainingFees || student.totalFees - student.amountGiven,
+      }));
+      setStudents(formattedData);
     } catch (error) {
       console.error("Error fetching students:", error);
     }
@@ -80,7 +99,7 @@ const FeesManagement = () => {
             <tr><th>Gender</th><td>${record.gender}</td></tr>
             <tr><th>Total Fees</th><td>${record.totalFees}</td></tr>
             <tr><th>Amount Given</th><td>${record.amountGiven}</td></tr>
-            <tr><th>Remaining Amount</th><td>${record.totalFees - record.amountGiven}</td></tr>
+            <tr><th>Remaining Amount</th><td>${record.remainingFees || record.totalFees - record.amountGiven}</td></tr>
           </table>
           <script>window.print();</script>
         </body>
@@ -90,41 +109,59 @@ const FeesManagement = () => {
   };
 
   const handleUpdate = async () => {
-    const finalAmount = selectedStudent.totalFees - amountGiven - discount;
+    const newTotalGiven = parseFloat(selectedStudent.amountGiven || 0) + parseFloat(amountGiven || 0); // Ensure numeric values
+    const remainingFees = parseFloat(selectedStudent.remainingFees || selectedStudent.totalFees) - parseFloat(amountGiven || 0) - parseFloat(discount || 0); // Use remainingFees if available
     const paymentDate = new Date().toISOString().split("T")[0];
+
     const updatedData = {
       studentId: selectedStudent.registrationId,
       totalFees: selectedStudent.totalFees,
-      amountGiven,
-      remainingFees: finalAmount,
+      amountGiven: newTotalGiven,
+      discount: parseFloat(discount || 0), // Ensure numeric value
+      remainingFees: Math.max(remainingFees, 0), // Ensure no negative values
       paymentDate,
+      installments: [
+        ...(selectedStudent.installments || []), // Preserve existing installments
+        {
+          amount: parseFloat(amountGiven || 0),
+          date: paymentDate,
+        },
+      ],
     };
-  
+
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/feesManagement/update`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedData)
+        body: JSON.stringify(updatedData),
       });
-  
+
       if (response.ok) {
-        await fetchStudents(); // Fetch updated data
+        console.log("Update successful:", updatedData); // Debugging log
+        const updatedStudents = students.map(student =>
+          student.registrationId === selectedStudent.registrationId
+            ? { ...student, ...updatedData }
+            : student
+        );
+        setStudents(updatedStudents); // Update state with new data
         setIsModalOpen(false);
       } else {
-        console.error("Failed to update fees");
+        console.error("Failed to update fees. Response:", await response.json());
       }
     } catch (error) {
       console.error("Error updating fees:", error);
     }
   };
-  
 
-  const filteredStudents = students.filter(student =>
-    student.name.toLowerCase().includes(filters.name?.toLowerCase() || "") &&
-    student.class.toLowerCase().includes(filters.class.toLowerCase()) &&
-    student.year.toLowerCase().includes(filters.year.toLowerCase()) &&
-    student.gender.toLowerCase().includes(filters.gender?.toLowerCase())
-  );
+  const filteredStudents = students.filter(student => {
+    console.log("Filtering student:", student); // Debugging log
+    return (
+      (student.name?.toLowerCase() || "").includes(filters.name?.toLowerCase() || "") &&
+      (student.class?.toLowerCase() || "").includes(filters.class?.toLowerCase() || "") &&
+      (student.year?.toString().toLowerCase() || "").includes(filters.year?.toLowerCase() || "") &&
+      (student.gender?.toLowerCase() || "").includes(filters.gender?.toLowerCase() || "")
+    );
+  });
 
   const columns = [
     { title: "Registration ID", dataIndex: "registrationId", key: "registrationId" },
@@ -134,7 +171,17 @@ const FeesManagement = () => {
     { title: "Gender", dataIndex: "gender", key: "gender" },
     { title: "Total Fees", dataIndex: "totalFees", key: "totalFees" },
     { title: "Amount Given", dataIndex: "amountGiven", key: "amountGiven" },
-    { title: "Remaining Amount", key: "remainingAmount", render: (_, record) => record.totalFees - record.amountGiven },
+    { title: "Remaining Amount", key: "remainingAmount", render: (_, record) => Math.max(record.remainingFees || record.totalFees - record.amountGiven, 0) },
+    { title: "Installments", key: "installments", render: (_, record) => (
+        <ul>
+          {record.installments?.map((installment, index) => (
+            <li key={index}>
+              {installment.date}: ₹{installment.amount}
+            </li>
+          )) || "No installments"}
+        </ul>
+      ),
+    },
     { title: "Fee Status", key: "status", render: (_, record) => <Button onClick={() => handleStatusClick(record)} className="bg-purple-600 hover:bg-purple-700 text-white">Check Status</Button> },
     { title: "Print", key: "print", render: (_, record) => <Button onClick={() => handlePrintReceipt(record)} className="bg-orange-500 hover:bg-orange-600 text-white">Print Receipt</Button> },
   ];
@@ -166,10 +213,10 @@ const FeesManagement = () => {
               <label className="block mb-1 text-sm font-medium text-black">Amount Given:</label>
               <Input type="number" value={amountGiven} onChange={(e) => setAmountGiven(parseFloat(e.target.value) || 0)} className="bg-white text-black rounded-md p-2" />
             </div>
-            {/* <div className="mb-4">
+            { <div className="mb-4">
               <label className="block mb-1 text-sm font-medium text-black">Additional Discount:</label>
               <Input type="number" value={discount} onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)} className="bg-white text-black rounded-md p-2" />
-            </div> */}
+            </div> }
             <p className="mb-4 text-black"><strong>Final Fees After Discount:</strong> {selectedStudent.totalFees - amountGiven - discount}</p>
             <Button type="primary" onClick={handleUpdate} className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-md px-4 py-2">Update</Button>
           </div>
