@@ -45,7 +45,17 @@ const FeesManagement = () => {
   const handleFilterChange = (e) => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
   };
-
+  
+  const fetchStudents = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/feesManagement`);
+      const data = await response.json();
+      setStudents(data);
+    } catch (error) {
+      console.error("Error fetching students:", error);
+    }
+  };
+  
   const handlePrintReceipt = (record) => {
     const printWindow = window.open("", "_blank");
     printWindow.document.write(`
@@ -89,18 +99,16 @@ const FeesManagement = () => {
       remainingFees: finalAmount,
       paymentDate,
     };
-
+  
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/feesManagement/update`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedData)
       });
-
+  
       if (response.ok) {
-        setStudents(students.map(student => student.registrationId === selectedStudent.registrationId ? { ...student, amountGiven, remainingFees: finalAmount } : student));
+        await fetchStudents(); // Fetch updated data
         setIsModalOpen(false);
       } else {
         console.error("Failed to update fees");
@@ -109,6 +117,7 @@ const FeesManagement = () => {
       console.error("Error updating fees:", error);
     }
   };
+  
 
   const filteredStudents = students.filter(student =>
     student.name.toLowerCase().includes(filters.name?.toLowerCase() || "") &&

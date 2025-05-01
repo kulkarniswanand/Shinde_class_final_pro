@@ -41,13 +41,30 @@ const StudentDetails = () => {
     return newErrors;
   };
 
+  const updateStudentDetails = async (id, formData) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/studentsDetails/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update student details");
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error updating student details:", error);
+      throw error;
+    }
+  };
+
   const handleUpdate = async (e) => {
     e.preventDefault();
     const newErrors = validate();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
-    } 
+    }
 
     const id = editStudent.id;
 
@@ -65,16 +82,7 @@ const StudentDetails = () => {
     };
 
     try {
-      const response = await fetch(`http://localhost:5000/api/studentsDetails/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
- 
-      const result = await response.json();
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to update student");
-      }
+      const result = await updateStudentDetails(id, formData);
 
       fetchStudents(); // Refresh student list after update
       onClose(); // Close the edit modal
@@ -85,10 +93,7 @@ const StudentDetails = () => {
         // Send WhatsApp message to student or parent
         const studentMobile = editStudent.studentMobile;
         const parentMobile = editStudent.parentMobile;
-        // const message = `Hello, this is to inform you that ${editStudent.studentname}'s details have been updated successfully.`;
-        // const message = `Hello, this is to inform you that ${editStudent.studentname}'s details have been updated successfully. \nThe updated details are: Name - ${editStudent.studentname}, Class - ${editStudent.class}, Branch - ${editStudent.branch}, Email - ${editStudent.email}, Mobile - ${editStudent.studentMobile}.`;
         const message = `Hello, this is to inform you that ${editStudent.studentname}'s details have been updated successfully. \n\nThe updated details are: \nName - ${editStudent.studentname}, \nClass - ${editStudent.class}, \nBranch - ${editStudent.branch}, \nEmail - ${editStudent.email}, \nMobile - ${editStudent.studentMobile}, \nDOB - ${editStudent.dob}, \nParent Mobile - ${editStudent.parentMobile}, \nAdmission Date - ${editStudent.admissionDate}.`;
-        // Use the WhatsApp link to send the message
         const country_code = "+91"; // Replace with your country code
         const your_phone_number = editStudent.studentMobile; // Replace with your phone number
         const whatsappLink = `https://wa.me/${country_code}${your_phone_number}?text=${encodeURIComponent(message)}`;
@@ -116,7 +121,6 @@ const StudentDetails = () => {
 
         fetchStudents(); // Refresh student list after deletion
         setDeleteStudentId(null); // Close the delete modal
-        // alert("Student deleted successfully!");
       } catch (error) {
         console.error("Error deleting student:", error);
         alert(`Error deleting student: ${error.message}`);
@@ -166,7 +170,6 @@ const StudentDetails = () => {
             <option value="gender">Gender</option>
             <option value="class">Class</option>
             <option value="branch">Branch</option>
-            {/* Add more options as needed */}
           </select>
           <input
             type="text"
@@ -230,8 +233,6 @@ const StudentDetails = () => {
                       Delete
                     </button>
                   </div>
-
-
                 </td>
               </tr>
             ))}

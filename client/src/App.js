@@ -36,6 +36,7 @@ import StudentDashboard from "./pages/Student_Dashboard/StudentDashboard";
 import StudentDetails from "./components/StudentDetails/studentDetails";
 import StaffManagement from "./components/StaffManagement/staffManagement";
 import StaffRegistrationForm from "./components/StaffManagement/staffRegistration";
+import AttendanceDashboard from './components/Attendance/AttendanceDashboard';
 
 // import StudentRegistration from './pages/StudentRegistration';
 
@@ -52,18 +53,19 @@ function MainApp() {
 
   // Define paths where the Navbar should not be displayed
   const pathsWithoutNavbar = [
-    "/login",
-    "/admin-dashboard",
-    "/superadmindashboard",
-    "/managebranches",
-    "/studentregistrationform",
-    "/feemanagement",
-    "/feestructure",
-    "/examsscedule",
-    "/studentdashboard",
-    "/student-details",
-    "/staff-management",
-    "/staffregistrationform",
+    '/login',
+    '/admin-dashboard',
+    '/superadmindashboard',
+    '/managebranches',
+    '/studentregistrationform',
+    '/feemanagement',
+    '/feestructure',
+    '/student-details',
+    '/staff-management',
+    '/staffregistrationform',
+    '/studentdashboard',
+    '/attendancedashboard',
+
   ];
 
   return (
@@ -73,59 +75,34 @@ function MainApp() {
       )}
 
       <Routes>
-        <Route
-          path="/"
-          element={
-            <>
-              <Element name="home">
-                <Home />
-              </Element>
-
-              <Element name="about">
-                <About />
-              </Element>
-              <Element name="features">
-                <Features />
-              </Element>
-              <Element name="achievements">
-                <Achievements />
-              </Element>
-              <Element name="gallery">
-                <Gallery />
-              </Element>
-              <Element name="footer">
-                <Footer />
-              </Element>
-            </>
-          }
-        />
-        //swanand
+        <Route path="/home" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/features" element={<Features />} />
+        <Route path="/achievements" element={<Achievements />} />
+        <Route path="/gallery" element={<Gallery />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/superadmindashboard" element={<SuperAdminDashboard />} />
-        <Route path="/ManageBranches" element={<ManageBranches />} />
-        <Route path="/UpdateBranch" element={<UpdateBranch />} />
-        <Route path="/AddBranch" element={<AddBranch />} />
-        <Route path="/NavbarMB" element={<NavbarMB />} />
-        <Route path="/DeleteBranch" element={<DeleteBranch />} />
-        <Route
-          path="/StudentRegistrationForm"
-          element={<StudentRegistrationForm />}
-        />
+        <Route path="/ManageBranches" element={< ManageBranches />} />
+        <Route path="/UpdateBranch" element={< UpdateBranch />} />
+        <Route path="/AddBranch" element={< AddBranch />} />
+        <Route path="/NavbarMB" element={< NavbarMB />} />
+        <Route path="/DeleteBranch" element={< DeleteBranch />} />
+        <Route path="/StudentRegistrationForm" element={<StudentRegistrationForm />} />
         <Route path="/FeeManagement" element={<FeeManagement />} />
         <Route path="/FeeStructure" element={<FeeStructure />} />
         <Route path="/ExamsScedule" element={<ExamsScedule />} />
         <Route path="/StudentDashboard" element={<StudentDashboard />} />
         <Route path="/student-details" element={<StudentDetails />} />
-        <Route path="/staff-management" element={<StaffManagement />} />
-        <Route
-          path="/staffRegistrationForm"
-          element={<StaffRegistrationForm />}
-        />
+        <Route path="/staff-management" element={< StaffManagement/>} />
+        <Route path="/staffRegistrationForm" element={< StaffRegistrationForm/>} />
+        <Route path="/attendance" element={<AttendanceDashboard />} />
+
         {/* <Route path="/student-registration" element={<StudentRegistration />} /> */}
       </Routes>
     </div>
-  );
+  );    
 }
 
 export default App;

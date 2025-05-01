@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const StudentRegistrationForm = () => {
   const [formData, setFormData] = useState({
@@ -13,7 +15,7 @@ const StudentRegistrationForm = () => {
     email: "",
     class: "",
     branch: "",
-  });
+  }); // Removed extra closing brace and added semicolon
 
   const [errors, setErrors] = useState({});
   const [admissionDate] = useState(new Date().toISOString().split("T")[0]);
@@ -282,7 +284,6 @@ const StudentRegistrationForm = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="col-span-2 w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-3 px-4 rounded-lg font-semibold transition-all duration-300"
-            disabled={isSubmitting}
           >
             Submit Admission
           </motion.button>

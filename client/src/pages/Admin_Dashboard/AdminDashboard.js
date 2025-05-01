@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AttendanceProvider } from "../../context/AttendanceContext"; // Import AttendanceProvider
 import StudentRegistrationForm from "../../components/student_registration/studentRegistration";
 
 const dashboardOptions = [
