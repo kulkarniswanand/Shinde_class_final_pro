@@ -1,6 +1,6 @@
 const db = require("../../../config/dbConfig");
 
-const fetchAllStudentsWithFees = async () => {
+const getStudentsWithFees = async () => {
   try {
     const [results] = await db.query(`
       SELECT 
@@ -25,8 +25,6 @@ const fetchAllStudentsWithFees = async () => {
           AND s.gender = fs.gender
           AND s.branch = fs.branch 
           AND YEAR(s.admissionDate) = fs.year
-      LEFT JOIN feesManagement fm 
-          ON s.id = fm.studentId
     `);
 
     for (let student of results) {
@@ -43,6 +41,7 @@ const fetchAllStudentsWithFees = async () => {
     throw err;
   }
 };
+
 
 
 
