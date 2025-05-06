@@ -7,15 +7,19 @@ const fetchAllStudentsWithFees = async () => {
           s.id AS studentId, 
           s.studentname, 
           s.class, 
-          YEAR(s.admissionDate) AS year, 
+          YEAR(s.admissionDate) AS year,
           s.gender, 
-          s.branch, 
-          fs.totalAmount AS totalFees,
+          s.branch,
+
+          -- Use COALESCE to prioritize data from feesManagement if it exists
+          COALESCE(fm.totalFees, fs.totalAmount) AS totalFees,
           fm.amountGiven,
-          fm.remainingFees,
           fm.discount,
+          fm.remainingFees,
           fm.paymentDate
+
       FROM students s
+      LEFT JOIN feesManagement fm ON s.id = fm.studentId
       LEFT JOIN feesstructure fs 
           ON s.class = fs.class 
           AND s.gender = fs.gender
@@ -40,40 +44,59 @@ const fetchAllStudentsWithFees = async () => {
   }
 };
 
-const updateStudentFees = async (studentId, totalFees, amountGiven, discount, remainingFees, installments) => {
+
+
+const updateFees = async (studentId, totalFees, amountGiven, paymentDate) => {
   try {
-    // Update or insert main feesManagement record
-    const [existing] = await db.query(
-      "SELECT * FROM feesManagement WHERE studentId = ?",
+    console.log("Received:", { studentId, totalFees, amountGiven, paymentDate });
+
+    // 1. Insert installment
+    const [insertResult] = await db.query(
+      "INSERT INTO feeinstallments (studentId, amount, date) VALUES (?, ?, ?)",
+      [studentId, amountGiven, paymentDate]
+    );
+    console.log("Installment inserted:", insertResult);
+
+    // 2. Get total amount paid so far
+    const [installments] = await db.query(
+      "SELECT SUM(amount) AS totalPaid FROM feeinstallments WHERE studentId = ?",
+      [studentId]
+    );
+    const totalPaid = installments[0].totalPaid || 0;
+    const remainingFees = totalFees - totalPaid;
+
+    console.log("Total Paid:", totalPaid, "Remaining:", remainingFees);
+
+    // 3. Update or insert into feesManagement
+    const [existCheck] = await db.query(
+      "SELECT COUNT(*) AS count FROM feesManagement WHERE studentId = ?",
       [studentId]
     );
 
-    if (existing.length > 0) {
-      await db.query(
-        "UPDATE feesManagement SET totalFees = ?, amountGiven = ?, discount = ?, remainingFees = ?, paymentDate = ? WHERE studentId = ?",
-        [totalFees, amountGiven, discount, remainingFees, new Date(), studentId]
+    if (existCheck[0].count > 0) {
+      const [updateRes] = await db.query(
+        `UPDATE feesManagement 
+         SET totalFees = ?, amountGiven = ?, remainingFees = ?, paymentDate = ?
+         WHERE studentId = ?`,
+        [totalFees, totalPaid, remainingFees, paymentDate, studentId]
       );
+      console.log("Updated feesManagement:", updateRes);
     } else {
-      await db.query(
-        "INSERT INTO feesManagement (studentId, totalFees, amountGiven, discount, remainingFees, paymentDate) VALUES (?, ?, ?, ?, ?, ?)",
-        [studentId, totalFees, amountGiven, discount, remainingFees, new Date()]
+      const [insertMgmtRes] = await db.query(
+        `INSERT INTO feesManagement 
+         (studentId, totalFees, amountGiven, remainingFees, paymentDate) 
+         VALUES (?, ?, ?, ?, ?)`,
+        [studentId, totalFees, totalPaid, remainingFees, paymentDate]
       );
+      console.log("Inserted feesManagement:", insertMgmtRes);
     }
 
-    // Add new installment (last one in the list)
-    const latestInstallment = installments[installments.length - 1];
-    if (latestInstallment) {
-      await db.query(
-        "INSERT INTO feeInstallments (studentId, amount, date) VALUES (?, ?, ?)",
-        [studentId, latestInstallment.amount, latestInstallment.date]
-      );
-    }
-
-    return { success: true, message: "Fees updated successfully" };
   } catch (error) {
     console.error("Error updating fees:", error);
     return { success: false, message: "Database error during update" };
   }
 };
 
-module.exports = { fetchAllStudentsWithFees, updateStudentFees };
+
+
+module.exports = { getStudentsWithFees, updateFees };

@@ -7,7 +7,7 @@ const FeesManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [amountGiven, setAmountGiven] = useState(0);
-  const [discount, setDiscount] = useState(0);
+  const [discount, setDiscount] = useState(0); // Add state for discount
   const [students, setStudents] = useState([]);
   const [filters, setFilters] = useState({ class: "", year: "", gender: "" });
 
@@ -19,6 +19,7 @@ const FeesManagement = () => {
         const formattedData = data.map((student) => ({
           ...student,
           amountGiven: student.amountGiven || 0,
+          discount: student.discount || 0, // Include discount field
           registrationId: student.studentId?.toString() || "",
           name: student.studentname || "N/A",
           class: student.class || "N/A",
@@ -44,7 +45,7 @@ const FeesManagement = () => {
   const handleStatusClick = (record) => {
     setSelectedStudent(record);
     setAmountGiven(record.amountGiven);
-    setDiscount(0);
+    setDiscount(record.discount || 0); // Set discount value
     setIsModalOpen(true);
   };
 
@@ -109,41 +110,44 @@ const FeesManagement = () => {
   };
 
   const handleUpdate = async () => {
-    const newTotalGiven = parseFloat(selectedStudent.amountGiven || 0) + parseFloat(amountGiven || 0); // Ensure numeric values
-    const remainingFees = parseFloat(selectedStudent.remainingFees || selectedStudent.totalFees) - parseFloat(amountGiven || 0) - parseFloat(discount || 0); // Use remainingFees if available
     const paymentDate = new Date().toISOString().split("T")[0];
+    const newInstallment = {
+      amount: amountGiven,
+      date: paymentDate,
+    };
+
+    const updatedInstallments = [...(selectedStudent.installments || []), newInstallment];
+    const amountGivenSum = updatedInstallments.reduce((sum, inst) => sum + parseFloat(inst.amount), 0);
+    const remainingFees = parseFloat(selectedStudent.totalFees) - discount - amountGivenSum;
 
     const updatedData = {
       studentId: selectedStudent.registrationId,
-      totalFees: selectedStudent.totalFees,
-      amountGiven: newTotalGiven,
-      discount: parseFloat(discount || 0), // Ensure numeric value
-      remainingFees: Math.max(remainingFees, 0), // Ensure no negative values
-      paymentDate,
-      installments: [
-        ...(selectedStudent.installments || []), // Preserve existing installments
-        {
-          amount: parseFloat(amountGiven || 0),
-          date: paymentDate,
-        },
-      ],
+      totalFees: parseFloat(selectedStudent.totalFees),
+      amountGiven: parseFloat(amountGiven),
+      paymentDate: paymentDate,
     };
 
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/feesManagement/update`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(updatedData),
       });
 
       if (response.ok) {
-        console.log("Update successful:", updatedData); // Debugging log
-        const updatedStudents = students.map(student =>
-          student.registrationId === selectedStudent.registrationId
-            ? { ...student, ...updatedData }
-            : student
+        setStudents(
+          students.map((student) =>
+            student.registrationId === selectedStudent.registrationId
+              ? {
+                  ...student,
+                  installments: updatedInstallments,
+                  remainingFees,
+                }
+              : student
+          )
         );
-        setStudents(updatedStudents); // Update state with new data
         setIsModalOpen(false);
       } else {
         console.error("Failed to update fees. Response:", await response.json());
@@ -170,20 +174,36 @@ const FeesManagement = () => {
     { title: "Year", dataIndex: "year", key: "year" },
     { title: "Gender", dataIndex: "gender", key: "gender" },
     { title: "Total Fees", dataIndex: "totalFees", key: "totalFees" },
-    { title: "Amount Given", dataIndex: "amountGiven", key: "amountGiven" },
-    { title: "Remaining Amount", key: "remainingAmount", render: (_, record) => Math.max(record.remainingFees || record.totalFees - record.amountGiven, 0) },
-    { title: "Installments", key: "installments", render: (_, record) => (
-        <ul>
-          {record.installments?.map((installment, index) => (
-            <li key={index}>
-              {installment.date}: ₹{installment.amount}
-            </li>
-          )) || "No installments"}
-        </ul>
+    { title: "Remaining Amount", dataIndex: "remainingFees", key: "remainingFees" },
+    { title: "Discount", dataIndex: "discount", key: "discount" }, // Add discount column
+    {
+      title: "Installments",
+      key: "installments",
+      render: (_, record) =>
+        record.installments?.map((inst, index) => (
+          <div key={index}>
+            <span>{`₹${inst.amount} on ${inst.date}`}</span>
+          </div>
+        )) || "No installments",
+    },
+    {
+      title: "Fee Status",
+      key: "status",
+      render: (_, record) => (
+        <Button onClick={() => handleStatusClick(record)} className="bg-purple-600 hover:bg-purple-700 text-white">
+          Check Status
+        </Button>
       ),
     },
-    { title: "Fee Status", key: "status", render: (_, record) => <Button onClick={() => handleStatusClick(record)} className="bg-purple-600 hover:bg-purple-700 text-white">Check Status</Button> },
-    { title: "Print", key: "print", render: (_, record) => <Button onClick={() => handlePrintReceipt(record)} className="bg-orange-500 hover:bg-orange-600 text-white">Print Receipt</Button> },
+    {
+      title: "Print",
+      key: "print",
+      render: (_, record) => (
+        <Button onClick={() => handlePrintReceipt(record)} className="bg-orange-500 hover:bg-orange-600 text-white">
+          Print Receipt
+        </Button>
+      ),
+    },
   ];
 
   return (
@@ -204,21 +224,57 @@ const FeesManagement = () => {
       
       <Table dataSource={filteredStudents} columns={columns} rowKey="id" className="bg-gray-900 text-white" />
       
-      <Modal title={<span className="text-white">Update Fee Details</span>} open={isModalOpen} onCancel={() => setIsModalOpen(false)} footer={null} className="bg-gray-900 text-white rounded-lg">
+      <Modal
+        title={<span className="text-white">Update Fee Details</span>}
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        footer={null}
+        className="bg-gray-900 text-white rounded-lg"
+      >
         {selectedStudent && (
           <div className="p-6">
-            <p className="mb-2 text-black"><strong>Name:</strong> {selectedStudent.name}</p>
-            <p className="mb-2 text-black"><strong>Total Fees:</strong> {selectedStudent.totalFees}</p>
+            <p className="mb-2 text-black">
+              <strong>Name:</strong> {selectedStudent.name}
+            </p>
+            <p className="mb-2 text-black">
+              <strong>Total Fees:</strong> {selectedStudent.totalFees}
+            </p>
+            <p className="mb-2 text-black">
+              <strong>Remaining Fees:</strong> {selectedStudent.remainingFees}
+            </p>
+            <div className="mb-4">
+              <label className="block mb-1 text-sm font-medium text-black">Discount:</label>
+              <Input
+                type="number"
+                value={discount}
+                onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)} // Update discount value
+                className="bg-white text-black rounded-md p-2"
+              />
+            </div>
             <div className="mb-4">
               <label className="block mb-1 text-sm font-medium text-black">Amount Given:</label>
-              <Input type="number" value={amountGiven} onChange={(e) => setAmountGiven(parseFloat(e.target.value) || 0)} className="bg-white text-black rounded-md p-2" />
+              <Input
+                type="number"
+                value={amountGiven}
+                onChange={(e) => setAmountGiven(parseFloat(e.target.value) || 0)}
+                className="bg-white text-black rounded-md p-2"
+              />
             </div>
-            { <div className="mb-4">
-              <label className="block mb-1 text-sm font-medium text-black">Additional Discount:</label>
-              <Input type="number" value={discount} onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)} className="bg-white text-black rounded-md p-2" />
-            </div> }
-            <p className="mb-4 text-black"><strong>Final Fees After Discount:</strong> {selectedStudent.totalFees - amountGiven - discount}</p>
-            <Button type="primary" onClick={handleUpdate} className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-md px-4 py-2">Update</Button>
+            <p className="mb-4 text-black">
+              <strong>Installments:</strong>
+            </p>
+            {selectedStudent.installments?.map((inst, index) => (
+              <p key={index} className="text-black">
+                ₹{inst.amount} on {inst.date}
+              </p>
+            ))}
+            <Button
+              type="primary"
+              onClick={handleUpdate}
+              className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-md px-4 py-2"
+            >
+              Update
+            </Button>
           </div>
         )}
       </Modal>

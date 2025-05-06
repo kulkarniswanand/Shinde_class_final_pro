@@ -1,49 +1,50 @@
 const { fetchAllStudentsWithFees, updateStudentFees } = require("../Model/FeesManagementModel");
 
-// Fetch all students with fee details
-const getAllStudentsWithFees = async (req, res) => {
-  try {
-    console.log("Fetching all students with fee details...");
-    const students = await fetchAllStudentsWithFees();
-    console.log("Students fetched successfully:", students);
-    res.status(200).json(students);
-  } catch (error) {
-    console.error("Error fetching students:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
 
-// Update student fee details
-const updateFees = async (req, res) => {
-  try {
-    console.log("Update request received with body:", req.body);
-    const { studentId, totalFees, amountGiven, discount, remainingFees, installments } = req.body;
-
-    // Validate input data
-    if (!studentId || !totalFees || !amountGiven || !remainingFees || !Array.isArray(installments)) {
-      console.error("Invalid input data:", req.body);
-      return res.status(400).json({ message: "Invalid input data" });
+const getStudentsWithFees = async (req, res) => {
+    try {
+      const results = await FeesManagementModel.getStudentsWithFees();
+      res.status(200).json(results);
+    } catch (error) {
+      console.error("Database error fetching student fees:", error);
+      res.status(500).json({ message: "Server error fetching student fees", error: error.message });
     }
+  };
 
-    if (amountGiven > totalFees) {
-      console.error("Amount given exceeds total fees:", { amountGiven, totalFees });
-      return res.status(400).json({ message: "Amount given cannot exceed total fees" });
+
+  const updateStudentFees = async (req, res) => {
+    const {
+      studentId,
+      totalFees,
+      amountGiven,
+      paymentDate,
+      discount,
+      remainingFees,
+      installments
+    } = req.body;
+    console.log("Update request body:", req.body);
+
+    if (!studentId || totalFees === undefined || amountGiven === undefined || !paymentDate) {
+      return res.status(400).json({ error: "Required fields are missing" });
     }
-
-    // Call the model function to update fees
-    const result = await updateStudentFees(studentId, totalFees, amountGiven, discount, remainingFees, installments);
-
-    if (!result.success) {
-      console.error("Update failed:", result.message);
-      return res.status(404).json({ message: result.message });
+  
+    try {
+      await FeesManagementModel.updateFees(
+        studentId,
+        totalFees,
+        amountGiven,
+        paymentDate,
+        discount,
+        remainingFees,
+        installments
+      );
+  
+      res.status(200).json({ message: "Fees updated successfully" });
+    } catch (error) {
+      console.error("Error updating fees:", error);
+      res.status(500).json({ error: "Internal Server Error" });
     }
-
-    console.log("Update successful:", result.message);
-    res.status(200).json({ message: result.message });
-  } catch (error) {
-    console.error("Error updating fee details:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
+  };
+  
 
 module.exports = { getAllStudentsWithFees, updateFees };
