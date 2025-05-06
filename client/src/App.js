@@ -90,6 +90,9 @@ function MainApp() {
               <Element name="achievements">
                 <Achievements />
               </Element>
+              <Element name="contact">
+                <Contact />
+              </Element>
               <Element name="gallery">
                 <Gallery />
               </Element>
@@ -108,6 +111,8 @@ function MainApp() {
         <Route path="/AddBranch" element={<AddBranch />} />
         <Route path="/NavbarMB" element={<NavbarMB />} />
         <Route path="/DeleteBranch" element={<DeleteBranch />} />
+        <Route path="/contact" element={<Contact />} />
+
         <Route
           path="/StudentRegistrationForm"
           element={<StudentRegistrationForm />}
@@ -122,6 +127,7 @@ function MainApp() {
           path="/staffRegistrationForm"
           element={<StaffRegistrationForm />}
         />
+        <Route path="/contact" element={<Contact />} />
         {/* <Route path="/student-registration" element={<StudentRegistration />} /> */}
       </Routes>
     </div>
