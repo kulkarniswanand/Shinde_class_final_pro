@@ -1,5 +1,5 @@
 // src/App.js
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 
 import Home from './pages/Main/Home';
@@ -26,18 +26,19 @@ import StudentDetails from './components/StudentDetails/studentDetails';
 import StaffManagement from './components/StaffManagement/staffManagement';
 import StaffRegistrationForm from './components/StaffManagement/staffRegistration';
 import AttendanceDashboard from './components/Attendance/attendance';
-
-// import StudentRegistration from './pages/StudentRegistration';
+import ExamManagement from './components/Exam/ExamManagement';
 
 function App() {
+  const [exams, setExams] = useState([]); // Define exams state here
+
   return (
     <Router>
-      <MainApp />
+      <MainApp exams={exams} setExams={setExams} />
     </Router>
   );
 }
 
-function MainApp() {
+function MainApp({ exams, setExams }) {
   const location = useLocation();
 
   // Define paths where the Navbar should not be displayed
@@ -53,6 +54,8 @@ function MainApp() {
     '/staff-management',
     '/staffregistrationform',
     '/attendance',
+    '/exam-schedule',
+
   ];
 
   return (
@@ -61,6 +64,7 @@ function MainApp() {
       {!pathsWithoutNavbar.includes(location.pathname.toLowerCase()) && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/features" element={<Features />} />
         <Route path="/achievements" element={<Achievements />} />
@@ -81,8 +85,7 @@ function MainApp() {
         <Route path="/staff-management" element={< StaffManagement/>} />
         <Route path="/staffRegistrationForm" element={< StaffRegistrationForm/>} />
         <Route path="/attendance" element={< AttendanceDashboard/>} />
-
-        {/* <Route path="/student-registration" element={<StudentRegistration />} /> */}
+        <Route path="/exam-schedule" element={< ExamManagement exams={exams} setExams={setExams} />} /> 
       </Routes>
     </div>
   );    

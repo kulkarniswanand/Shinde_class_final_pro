@@ -14,7 +14,7 @@ const dashboardOptions = [
   { id: 9, name: "Results", image: "/images/Dashboard/Results.jpg", route: "/results" },
   { id: 10, name: "Fees Structure", image: "/images/Dashboard/Fees Management.jpg", route: "/FeeStructure" },
 
-];
+]; 
 
 const AdminDashboard = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);
