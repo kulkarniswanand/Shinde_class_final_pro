@@ -1,28 +1,36 @@
 const db = require("../../../config/dbConfig");
 
-// Get student fees with filters: year, branch, class, and gender
-const getStudentsWithFees = async () => {
+const fetchAllStudentsWithFees = async () => {
   try {
     const [results] = await db.query(`
       SELECT 
           s.id AS studentId, 
           s.studentname, 
           s.class, 
-          YEAR(s.admissionDate) AS year,  -- Extracts year only
+          YEAR(s.admissionDate) AS year, 
           s.gender, 
           s.branch, 
-          fs.totalAmount AS totalFees
+          fs.totalAmount AS totalFees,
+          fm.amountGiven,
+          fm.remainingFees,
+          fm.discount,
+          fm.paymentDate
       FROM students s
       LEFT JOIN feesstructure fs 
           ON s.class = fs.class 
           AND s.gender = fs.gender
           AND s.branch = fs.branch 
           AND YEAR(s.admissionDate) = fs.year
-      WHERE s.id IS NOT NULL; -- Ensure only valid student records are fetched
+      LEFT JOIN feesManagement fm 
+          ON s.id = fm.studentId
     `);
 
-    if (results.length === 0) {
-      console.warn("No student fees data found.");
+    for (let student of results) {
+      const [installments] = await db.query(
+        "SELECT amount, date FROM feeInstallments WHERE studentId = ? ORDER BY date",
+        [student.studentId]
+      );
+      student.installments = installments;
     }
 
     return results;
@@ -32,30 +40,40 @@ const getStudentsWithFees = async () => {
   }
 };
 
-const updateFees = async (studentId, totalFees, amountGiven, paymentDate) => {
+const updateStudentFees = async (studentId, totalFees, amountGiven, discount, remainingFees, installments) => {
   try {
-    const [results] = await db.query(
-      "SELECT COUNT(*) AS count FROM feesManagement WHERE studentId = ?",
+    // Update or insert main feesManagement record
+    const [existing] = await db.query(
+      "SELECT * FROM feesManagement WHERE studentId = ?",
       [studentId]
     );
 
-    if (results[0].count > 0) {
-      // Update existing record
+    if (existing.length > 0) {
       await db.query(
-        "UPDATE feesManagement SET totalFees = ?, amountGiven = ?, paymentDate = ? WHERE studentId = ?",
-        [totalFees, amountGiven, paymentDate, studentId]
+        "UPDATE feesManagement SET totalFees = ?, amountGiven = ?, discount = ?, remainingFees = ?, paymentDate = ? WHERE studentId = ?",
+        [totalFees, amountGiven, discount, remainingFees, new Date(), studentId]
       );
     } else {
-      // Insert new record
       await db.query(
-        "INSERT INTO feesManagement (studentId, totalFees, amountGiven, paymentDate) VALUES (?, ?, ?, ?)",
-        [studentId, totalFees, amountGiven, paymentDate]
+        "INSERT INTO feesManagement (studentId, totalFees, amountGiven, discount, remainingFees, paymentDate) VALUES (?, ?, ?, ?, ?, ?)",
+        [studentId, totalFees, amountGiven, discount, remainingFees, new Date()]
       );
     }
+
+    // Add new installment (last one in the list)
+    const latestInstallment = installments[installments.length - 1];
+    if (latestInstallment) {
+      await db.query(
+        "INSERT INTO feeInstallments (studentId, amount, date) VALUES (?, ?, ?)",
+        [studentId, latestInstallment.amount, latestInstallment.date]
+      );
+    }
+
+    return { success: true, message: "Fees updated successfully" };
   } catch (error) {
     console.error("Error updating fees:", error);
-    throw error;
+    return { success: false, message: "Database error during update" };
   }
 };
 
-module.exports = { getStudentsWithFees, updateFees };
+module.exports = { fetchAllStudentsWithFees, updateStudentFees };

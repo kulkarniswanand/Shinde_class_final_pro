@@ -14,7 +14,7 @@ const FeesManagement = () => {
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/feesManagement`);
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/students`);
         const data = await response.json();
         const formattedData = data.map((student) => ({
           ...student,
