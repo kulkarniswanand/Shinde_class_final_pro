@@ -10,6 +10,7 @@ const feesStructure=require("./Fees_Management/FeesStructure/Routes/FeesStructur
 const feesManagement=require("./Fees_Management/FeesManagement/Routes/FeesManagementRoutes")
 const studentsDetails = require("./StudentDetails/Routes/studentsRoutes"); 
 const staffRoutes = require("./StaffManagement/Routes/staffRoutes");
+const superAdminRoutes = require("./superadmin/routes/DashboardRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -25,10 +26,10 @@ app.use("/api/students", studentRoutes);
 app.use("/api/deletebranch", deleteBranchRoute);
 app.use("/api/feesStructure",feesStructure);
 app.use("/api/feesManagement",feesManagement);
-
 app.use("/api/studentsDetails", studentsDetails);
 // app.use("/api/students", studentsRoutes);
 app.use("/api/staff", staffRoutes);
+app.use("/api", superAdminRoutes);
 
 // Start Server
 app.listen(PORT, () => {
