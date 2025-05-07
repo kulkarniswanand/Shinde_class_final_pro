@@ -10,6 +10,7 @@ const FeesManagement = () => {
   const [discount, setDiscount] = useState(0);
   const [students, setStudents] = useState([]);
   const [filters, setFilters] = useState({ class: "", year: "", gender: "" });
+  const [validationMessage, setValidationMessage] = useState(""); // Add state for validation message
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -72,7 +73,8 @@ const FeesManagement = () => {
             <tr><th>Gender</th><td>${record.gender}</td></tr>
             <tr><th>Total Fees</th><td>${record.totalFees}</td></tr>
             <tr><th>Amount Given</th><td>${record.amountGiven}</td></tr>
-            <tr><th>Remaining Amount</th><td>${record.totalFees - record.amountGiven}</td></tr>
+            <tr><th>Discount</th><td>${record.discount}</td></tr>
+            <tr><th>Remaining Amount</th><td>${record.totalFees - record.amountGiven - record.discount}</td></tr>
           </table>
           <script>window.print();</script>
         </body>
@@ -80,6 +82,7 @@ const FeesManagement = () => {
     `);
     printWindow.document.close();
   };
+  
 
   const handleUpdate = async () => {
     const paymentDate = new Date().toISOString().split("T")[0];
@@ -90,13 +93,22 @@ const FeesManagement = () => {
 
     const updatedInstallments = [...(selectedStudent.installments || []), newInstallment];
     const amountGivenSum = updatedInstallments.reduce((sum, inst) => sum + parseFloat(inst.amount), 0);
-    const remainingFees = parseFloat(selectedStudent.totalFees) - discount - amountGivenSum;
+    const remainingFees = parseFloat(selectedStudent.totalFees) - discount - (selectedStudent.installments?.reduce((sum, inst) => sum + parseFloat(inst.amount), 0) || 0);
+
+    // Validation: Ensure the amount given does not exceed the remaining fees
+    if (amountGiven > remainingFees || amountGiven <= 0) {
+      setValidationMessage("Amount given exceeds the remaining fees or is invalid. Please enter a valid amount.");
+      return;
+    }
+
+    setValidationMessage(""); // Clear validation message if valid
 
     const updatedData = {
       studentId: selectedStudent.registrationId,
       totalFees: parseFloat(selectedStudent.totalFees),
-      amountGiven: parseFloat(amountGiven),
+      amountGiven: amountGivenSum,
       paymentDate: paymentDate,
+      discount: discount,
     };
 
     try {
@@ -115,7 +127,8 @@ const FeesManagement = () => {
               ? {
                   ...student,
                   installments: updatedInstallments,
-                  remainingFees,
+                  remainingFees: remainingFees - amountGiven,
+                  discount: discount,
                 }
               : student
           )
@@ -128,6 +141,7 @@ const FeesManagement = () => {
       console.error("Error updating fees:", error);
     }
   };
+  
 
   const filteredStudents = students.filter((student) =>
     student.name.toLowerCase().includes(filters.name?.toLowerCase() || "") &&
@@ -212,6 +226,15 @@ const FeesManagement = () => {
               <strong>Remaining Fees:</strong> {selectedStudent.remainingFees}
             </p>
             <div className="mb-4">
+              <label className="block mb-1 text-sm font-medium text-black">Discount:</label>
+              <Input
+                type="number"
+                value={discount}
+                onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                className="bg-white text-black rounded-md p-2"
+              />
+            </div>
+            <div className="mb-4">
               <label className="block mb-1 text-sm font-medium text-black">Amount Given:</label>
               <Input
                 type="number"
@@ -220,6 +243,9 @@ const FeesManagement = () => {
                 className="bg-white text-black rounded-md p-2"
               />
             </div>
+            {validationMessage && (
+              <p className="text-red-500 text-sm mb-4">{validationMessage}</p> // Display validation message
+            )}
             <Button
               type="primary"
               onClick={handleUpdate}
