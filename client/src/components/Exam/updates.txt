@@ -21,6 +21,7 @@ const ExamManagement = () => {
   const [timeLeft, setTimeLeft] = useState(0);
   const [examStarted, setExamStarted] = useState(false);
   const [examPortalOpen, setExamPortalOpen] = useState(false); // State to toggle exam portal
+  const [editExamData, setEditExamData] = useState(null); // State to hold the exam being edited
 
   useEffect(() => {
     let timer;
@@ -171,8 +172,23 @@ const ExamManagement = () => {
 
     setExams(updatedExams);
     setExamPortalOpen(false);
+    setCurrentExam(null);
     // alert(`Exam submitted! You scored ${score}/${currentExam.totalMarks}.`);
     alert(`Exam submitted! Thank You for your participation.`);
+  };
+
+  const handleEditExamClick = (exam) => {
+    setEditExamData(exam); // Set the exam to be edited
+  };
+
+  const handleEditExamChange = (e) => {
+    const { name, value } = e.target;
+    setEditExamData({ ...editExamData, [name]: value }); // Update the exam data
+  };
+
+  const handleSaveEditedExam = () => {
+    setExams(exams.map((exam) => (exam.id === editExamData.id ? editExamData : exam))); // Save changes
+    setEditExamData(null); // Clear the edit state
   };
 
   return (
@@ -205,16 +221,31 @@ const ExamManagement = () => {
             >
               Teacher Mode
             </button>
+            <button
+              onClick={() => navigate("/admin-dashboard")}
+              className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-all"
+            >
+              Go to Dashboard
+            </button>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-6 py-8 space-y-8">
+        {/* Go to Dashboard Button */}
+        {/* <div className="flex justify-end">
+          <button
+            onClick={() => navigate("/admin-dashboard")}
+            className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-all"
+          >
+            Go to Dashboard
+          </button>
+        </div> */}
         {/* Student Mode */}
         {activeTab === "student" && !examPortalOpen && (
-          <div className="space-y-8">
-            <h2 className="text-2xl font-bold text-gray-800">Welcome, Student Name</h2>
+          <div className="space-y-3">
+            <h1 className="text-2xl font-bold text-gray-800">Welcome, Student Name</h1>
             <p className="text-gray-600">Class 8</p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -222,52 +253,51 @@ const ExamManagement = () => {
               <div className="bg-white p-8 rounded-lg shadow-md">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">Upcoming Exams</h3>
                 <p className="text-gray-600 mb-6">Exams scheduled in the near future</p>
-                {exams.length > 0 ? (
-                  exams.map((exam) => (
-                    <div key={exam.id} className="mb-6 p-4 border rounded-lg shadow-sm flex justify-between items-center">
-                      {/* Exam Details */}
-                      <div>
-                        <h4 className="text-lg font-semibold text-gray-700">{exam.name}</h4>
-                        <p className="text-gray-600">Subject: {exam.subject}</p>
-                        <p className="text-gray-600">Standard: {exam.standard}</p>
-                        <p className="text-gray-600">
-                          Due: {exam.date ? new Date(exam.date).toLocaleString() : "Not Set"}
-                        </p>
-                        <p className="text-gray-600">Duration: {exam.duration} minutes</p>
-                      </div>
+                {exams.filter((exam) => exam.status === "upcoming").length > 0 ? (
+                  exams
+                    .filter((exam) => exam.status === "upcoming")
+                    .map((exam) => (
+                      <div key={exam.id} className="mb-6 p-4 border rounded-lg shadow-sm flex justify-between items-center">
+                        {/* Exam Details */}
+                        <div>
+                          <h4 className="text-lg font-semibold text-gray-700">{exam.name}</h4>
+                          <p className="text-gray-600">Subject: {exam.subject}</p>
+                          <p className="text-gray-600">Standard: {exam.standard}</p>
+                          <p className="text-gray-600">
+                            Due: {exam.date ? new Date(exam.date).toLocaleString() : "Not Set"}
+                          </p>
+                          <p className="text-gray-600">Duration: {exam.duration} minutes</p>
+                        </div>
 
-                      {/* Buttons */}
-                      <div className="flex gap-4">
-                        {activeTab === "student" && (
-                          <button
-                            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-all"
-                            onClick={() => startExam(exam)} // Open exam portal
-                          >
-                            Start Exam
-                          </button>
-                        )}
-                        {activeTab === "teacher" && (
-                          <>
+                        {/* Buttons */}
+                        <div className="flex gap-4">
+                          {activeTab === "student" && (
                             <button
-                              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
-                              onClick={() => {
-                                const updatedExam = prompt("Edit exam details (JSON format)", JSON.stringify(exam));
-                                if (updatedExam) handleEditExam(exam.id, JSON.parse(updatedExam));
-                              }}
+                              className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-all"
+                              onClick={() => startExam(exam)} // Open exam portal
                             >
-                              Edit
+                              Start Exam
                             </button>
-                            <button
-                              className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all"
-                              onClick={() => handleDeleteExam(exam.id)}
-                            >
-                              Delete
-                            </button>
-                          </>
-                        )}
+                          )}
+                          {activeTab === "teacher" && (
+                            <>
+                              <button
+                                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
+                                onClick={() => handleEditExamClick(exam)}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all"
+                                onClick={() => handleDeleteExam(exam.id)}
+                              >
+                                Delete
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    ))
                 ) : (
                   <p className="text-gray-500">No upcoming exams available.</p>
                 )}
@@ -277,17 +307,34 @@ const ExamManagement = () => {
               <div className="bg-white p-8 rounded-lg shadow-md">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">Completed Exams</h3>
                 <p className="text-gray-600 mb-6">View your past exam results</p>
-                <div className="p-4 border rounded-lg shadow-sm">
-                  <h4 className="text-lg font-semibold text-gray-700">English Literature Quiz</h4>
-                  <p className="text-gray-600">Standard: Class 10th</p>
-                  <p className="text-gray-600">Score: 28/30</p>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5 mt-4">
-                    <div className="bg-green-500 h-2.5 rounded-full" style={{ width: "93%" }}></div>
-                  </div>
-                  <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all">
-                    View Results
-                  </button>
-                </div>
+                {exams.filter((exam) => exam.status === "completed").length > 0 ? (
+                  <ul className="space-y-6">
+                    {exams
+                      .filter((exam) => exam.status === "completed")
+                      .map((exam) => (
+                        <li key={exam.id} className="p-4 border rounded-lg shadow-sm flex justify-between items-center">
+                          <div>
+                            <h4 className="text-lg font-semibold text-gray-700">{exam.name}</h4>
+                            <p className="text-gray-600">Subject: {exam.subject}</p>
+                            <p className="text-gray-600">Class: {exam.standard}</p>
+                            {activeTab === "teacher" && (
+                              <p className="text-gray-600">Score: {exam.score}/{exam.totalMarks}</p>
+                            )}
+                          </div>
+                          <button
+                            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
+                            onClick={() => {
+                              alert("View results functionality not implemented yet.");
+                            }}
+                          >
+                            View Results
+                          </button>
+                        </li>
+                      ))}
+                  </ul>
+                ) : (
+                  <p className="text-gray-500">No completed exams available.</p>
+                )}
               </div>
             </div>
           </div>
@@ -341,8 +388,8 @@ const ExamManagement = () => {
                   onClick={goToNextQuestion}
                   disabled={currentQuestionIndex === currentExam.questions.length - 1}
                   className={`px-4 py-2 rounded-lg ${currentQuestionIndex === currentExam.questions.length - 1
-                      ? "bg-gray-300 text-gray-500"
-                      : "bg-blue-500 text-white hover:bg-blue-600"
+                    ? "bg-gray-300 text-gray-500"
+                    : "bg-blue-500 text-white hover:bg-blue-600"
                     } transition-all`}
                 >
                   Next
@@ -359,8 +406,8 @@ const ExamManagement = () => {
                     <label
                       key={idx}
                       className={`block p-3 border rounded-lg cursor-pointer ${examAnswers[currentExam.questions[currentQuestionIndex].id] === option
-                          ? "bg-blue-100 border-blue-500"
-                          : "bg-gray-50 border-gray-300 hover:bg-gray-100"
+                        ? "bg-blue-100 border-blue-500"
+                        : "bg-gray-50 border-gray-300 hover:bg-gray-100"
                         }`}
                     >
                       <input
@@ -380,8 +427,8 @@ const ExamManagement = () => {
                 <div className="mt-4 space-y-2">
                   <label
                     className={`block p-3 border rounded-lg cursor-pointer ${examAnswers[currentExam.questions[currentQuestionIndex].id] === "true"
-                        ? "bg-blue-100 border-blue-500"
-                        : "bg-gray-50 border-gray-300 hover:bg-gray-100"
+                      ? "bg-blue-100 border-blue-500"
+                      : "bg-gray-50 border-gray-300 hover:bg-gray-100"
                       }`}
                   >
                     <input
@@ -396,8 +443,8 @@ const ExamManagement = () => {
                   </label>
                   <label
                     className={`block p-3 border rounded-lg cursor-pointer ${examAnswers[currentExam.questions[currentQuestionIndex].id] === "false"
-                        ? "bg-blue-100 border-blue-500"
-                        : "bg-gray-50 border-gray-300 hover:bg-gray-100"
+                      ? "bg-blue-100 border-blue-500"
+                      : "bg-gray-50 border-gray-300 hover:bg-gray-100"
                       }`}
                   >
                     <input
@@ -444,10 +491,10 @@ const ExamManagement = () => {
                       key={index}
                       onClick={() => setCurrentQuestionIndex(index)}
                       className={`w-10 h-10 flex items-center justify-center rounded-lg border ${currentQuestionIndex === index
-                          ? "border-black bg-gray-300" // Current question
-                          : examAnswers[currentExam.questions[index].id]
-                            ? "bg-green-100 border-green-500" // Answered question
-                            : "bg-white border-gray-300" // Unanswered question
+                        ? "border-black bg-gray-300" // Current question
+                        : examAnswers[currentExam.questions[index].id]
+                          ? "bg-green-100 border-green-500" // Answered question
+                          : "bg-white border-gray-300" // Unanswered question
                         }`}
                     >
                       {index + 1}
@@ -475,8 +522,8 @@ const ExamManagement = () => {
               <button
                 onClick={currentQuestionIndex === currentExam.questions.length - 1 ? handleSubmitExam : goToNextQuestion}
                 className={`px-4 py-2 rounded-lg ${currentQuestionIndex === currentExam.questions.length - 1
-                    ? "bg-green-500 text-white hover:bg-green-600"
-                    : "bg-blue-500 text-white hover:bg-blue-600"
+                  ? "bg-green-500 text-white hover:bg-green-600"
+                  : "bg-blue-500 text-white hover:bg-blue-600"
                   } transition-all`}
               >
                 {currentQuestionIndex === currentExam.questions.length - 1 ? "Submit Exam" : "Save & Continue"}
@@ -487,17 +534,25 @@ const ExamManagement = () => {
 
         {/* Teacher Mode */}
         {activeTab === "teacher" && (
-          <div className="space-y-8">
+          <div className="space-y-3">
+            <h1 className="text-2xl font-bold text-gray-800">Welcome</h1>
+
             {!showCreateExam ? (
               <div>
+                {/* Buttons Row */}
                 <div className="flex justify-between items-center mb-8">
-                  <h2 className="text-2xl font-bold text-gray-800">Welcome, Teacher</h2>
                   <button
                     onClick={() => setShowCreateExam(true)}
-                    className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-all"
+                    className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-all" style={{ marginLeft: "auto" }}
                   >
                     Create New Exam
                   </button>
+                  {/* <button
+                    onClick={() => navigate("/admin-dashboard")}
+                    className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-all"
+                  >
+                    Go to Dashboard
+                  </button> */}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -523,10 +578,7 @@ const ExamManagement = () => {
                               <div className="flex gap-4">
                                 <button
                                   className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
-                                  onClick={() => {
-                                    const updatedExam = prompt("Edit exam details (JSON format)", JSON.stringify(exam));
-                                    if (updatedExam) handleEditExam(exam.id, JSON.parse(updatedExam));
-                                  }}
+                                  onClick={() => handleEditExamClick(exam)}
                                 >
                                   Edit
                                 </button>
@@ -861,13 +913,87 @@ const ExamManagement = () => {
             )}
           </div>
         )}
+        {/* Edit Exam Form */}
+        {editExamData && (
+          <div className="bg-white p-8 rounded-lg shadow-md mt-8">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">Edit Exam</h3>
+            <form>
+              <div className="mb-4">
+                <label className="block text-gray-700 font-medium mb-2">Exam Title</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={editExamData.name}
+                  onChange={handleEditExamChange}
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">Subject</label>
+                  <input
+                    type="text"
+                    name="subject"
+                    value={editExamData.subject}
+                    onChange={handleEditExamChange}
+                    className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">Class</label>
+                  <input
+                    type="text"
+                    name="standard"
+                    value={editExamData.standard}
+                    onChange={handleEditExamChange}
+                    className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">Duration (minutes)</label>
+                  <input
+                    type="number"
+                    name="duration"
+                    value={editExamData.duration}
+                    onChange={handleEditExamChange}
+                    className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">Due Date</label>
+                  <input
+                    type="datetime-local"
+                    name="date"
+                    value={editExamData.date}
+                    onChange={handleEditExamChange}
+                    className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-4">
+                <button
+                  type="button"
+                  onClick={() => setEditExamData(null)}
+                  className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveEditedExam}
+                  className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-all"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
       </main>
     </div>
   );
 };
 
 export default ExamManagement;
-
-
-
-// when exam completed, in teacher mode it goes to completed exams and in student mode it does not goes to completed exams.
