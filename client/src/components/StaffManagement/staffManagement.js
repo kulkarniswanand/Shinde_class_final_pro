@@ -148,25 +148,27 @@ const StaffManagement = () => {
 
   const handleDashboard = () => {
     navigate("/admin-dashboard");
-  };
+  }; 
 
   return (
-    <div className="container mx-auto p-6 bg-black min-h-screen text-white relative">
+    <div className="container mx-auto p-6 bg-gradient-to-r from-gray-900 via-gray-800 to-black min-h-screen text-white relative">
       <button
         onClick={handleDashboard}
-        className="bg-purple-600 hover:bg-blue-600 text-white px-2 py-1 rounded border border-white absolute top-4 right-4"
+        className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-blue-600 hover:to-purple-600 text-white px-4 py-2 rounded-lg shadow-lg border border-white absolute top-4 right-4 transition duration-300"
       >
         Go to Dashboard
       </button>
-      <h1 className="text-3xl font-bold text-center mb-6 text-violet-600">Staff Management</h1>
+      <h1 className="text-4xl font-extrabold text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-indigo-500">
+        Staff Management
+      </h1>
 
       {/* Search Bars and New Staff Button */}
-      <div className="flex justify-between mb-6">
-        <div className="flex">
+      <div className="flex justify-between items-center mb-8">
+        <div className="flex items-center space-x-4">
           <select
             value={searchCriteria}
             onChange={(e) => setSearchCriteria(e.target.value)}
-            className="p-2 border rounded bg-gray text-black mr-2"
+            className="p-3 border rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-violet-500"
           >
             <option value="name">Name</option>
             <option value="designation">Designation</option>
@@ -177,59 +179,58 @@ const StaffManagement = () => {
             placeholder="Search..."
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            className="p-2 border rounded bg-gray text-black"
+            className="p-3 border rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-violet-500"
           />
         </div>
         <button
           onClick={handleNewStaff}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+          className="bg-gradient-to-r from-blue-500 to-green-500 hover:from-green-500 hover:to-blue-500 text-white px-6 py-3 rounded-lg shadow-lg transition duration-300"
         >
           New Staff
         </button>
-
-        {/* <Button className="bg-violet-600 text-white">Go to Dashboard</Button> */}
-
       </div>
 
       {/* Success Message */}
       {successMessage && (
-        <div className="bg-green-500 text-white p-2 rounded mb-4 text-center">
+        <div className="bg-green-600 text-white p-3 rounded-lg mb-6 text-center shadow-md">
           {successMessage}
         </div>
       )}
 
       {/* Staff Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse border border-gray-300 shadow-lg bg-white">
-          <thead className="bg-gray-800 text-violet-300 text-center">
+      <div className="overflow-x-auto shadow-lg rounded-lg">
+        <table className="w-full border-collapse border border-gray-700 bg-gray-800 text-white">
+          <thead className="bg-gradient-to-r from-gray-700 to-gray-900 text-violet-300 text-center">
             <tr>
               {["ID", "Name", "Contact", "Designation", "Join Date", "Email", "Address", "Branch", "Action"].map((heading) => (
-                <th key={heading} className="p-3 text-left border border-gray-300 text-center">{heading}</th>
+                <th key={heading} className="p-4 text-left border border-gray-700 text-center">
+                  {heading}
+                </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {filteredStaff.map((staff) => (
-              <tr key={staff.id} className="bg-black hover:bg-gray-900">
-                <td className="p-3 border text-center">{staff.id}</td>
-                <td className="p-3 border text-center">{staff.name}</td>
-                <td className="p-3 border text-center">{staff.contact}</td>
-                <td className="p-3 border text-center">{staff.designation}</td>
-                <td className="p-3 border text-center">{staff.join_date}</td>
-                <td className="p-3 border text-center">{staff.email}</td>
-                <td className="p-3 border text-center">{staff.address}</td>
-                <td className="p-3 border text-center">{staff.branch}</td>
-                <td className="p-3 border">
+              <tr key={staff.id} className="bg-gray-800 hover:bg-gray-700 transition duration-300">
+                <td className="p-4 border text-center">{staff.id}</td>
+                <td className="p-4 border text-center">{staff.name}</td>
+                <td className="p-4 border text-center">{staff.contact}</td>
+                <td className="p-4 border text-center">{staff.designation}</td>
+                <td className="p-4 border text-center">{staff.join_date}</td>
+                <td className="p-4 border text-center">{staff.email}</td>
+                <td className="p-4 border text-center">{staff.address}</td>
+                <td className="p-4 border text-center">{staff.branch}</td>
+                <td className="p-4 border">
                   <div className="flex flex-col space-y-2">
                     <button
                       onClick={() => handleEdit(staff)}
-                      className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition duration-300 ease-in-out transform hover:scale-105"
+                      className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-teal-500 hover:to-green-500 text-white px-4 py-2 rounded-lg shadow-md transition duration-300"
                     >
                       Update
                     </button>
                     <button
                       onClick={() => setDeleteStaffId(staff.id)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition duration-300 ease-in-out transform hover:scale-105"
+                      className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-pink-500 hover:to-red-500 text-white px-4 py-2 rounded-lg shadow-md transition duration-300"
                     >
                       Delete
                     </button>

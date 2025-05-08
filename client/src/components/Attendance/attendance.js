@@ -8,7 +8,7 @@ import {
     Line,
     XAxis,
     YAxis,
-    CartesianGrid,
+    CartesianGrid, 
     Tooltip,
     Legend,
     ResponsiveContainer,
@@ -47,7 +47,7 @@ const Icons = {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
     )
-};
+}; 
 
 const AttendanceDashboard = () => {
     // --- State ---
@@ -110,8 +110,6 @@ const AttendanceDashboard = () => {
         loading: false,
         error: null,
     });
-
-    const [filteredRosterStudents, setFilteredRosterStudents] = useState([]);
 
     // --- Data Fetching Effects ---
 
@@ -295,7 +293,7 @@ const AttendanceDashboard = () => {
 
 
     // Filter students for ROSTER view based on selected class and search term
-     filteredRosterStudents = useMemo(() => {
+    const filteredRosterStudents = useMemo(() => {
         if (isStudentsLoading || isClassesLoading) return [];
 
         let result = [...allStudents];
@@ -304,15 +302,12 @@ const AttendanceDashboard = () => {
         if (selectedClass !== 0) {
             const selectedClassName = classes.find(c => c.id === selectedClass)?.name;
             if (selectedClassName) {
-                 // Assuming student object has a 'class' property matching the name
                 result = result.filter(student => student.class === selectedClassName);
             } else {
-                 result = []; // No students if class not found
+                result = []; // No students if class not found
             }
         } else {
-             // If "All Classes" is selected for roster, show nothing or handle differently?
-             // For now, let's assume roster requires a specific class selection.
-             return [];
+            return []; // If "All Classes" is selected for roster, show nothing or handle differently?
         }
 
         // Filter by search term
@@ -1216,6 +1211,46 @@ const AttendanceDashboard = () => {
         historyPage * historyRecordsPerPage
     );
 
+    // Function to recalculate roster stats
+    const calculateRosterStats = () => {
+        if (selectedClass === 0 || filteredRosterStudents.length === 0) {
+            setRosterStats({ totalStudents: 0, presentCount: 0, absentCount: 0, pendingCount: 0 });
+            return;
+        }
+
+        const totalStudentsInClass = filteredRosterStudents.length;
+        let present = 0;
+        let absent = 0;
+
+        // Filter attendance records for the selected date *only*
+        const dateFilteredRecords = attendanceRecords.filter(record => {
+            try {
+                // Convert record date to local date string
+                const recordDateLocal = new Date(record.date).toLocaleDateString('en-IN'); // Use 'en-IN' for IST format
+                const selectedDateLocal = new Date(selectedDate).toLocaleDateString('en-IN'); // Convert selected date to local format
+                return recordDateLocal === selectedDateLocal; // Compare local date strings
+            } catch (e) { return false; } // Handle invalid dates
+        });
+
+        filteredRosterStudents.forEach(student => {
+            const status = getStudentAttendanceStatus(student.id, dateFilteredRecords, selectedDate); // Pass date for roster check
+            if (status === 'present') {
+                present++;
+            } else if (status === 'absent') {
+                absent++;
+            }
+        });
+
+        const pending = totalStudentsInClass - present - absent;
+
+        setRosterStats({
+            totalStudents: totalStudentsInClass,
+            presentCount: present,
+            absentCount: absent,
+            pendingCount: Math.max(0, pending), // Ensure pending is not negative
+        });
+    };
+
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
             {/* Header */}
@@ -1229,7 +1264,7 @@ const AttendanceDashboard = () => {
                             let label;
                             switch (view) {
                                 case 'dashboard': Icon = Icons.ChartBarIcon; label = 'Dashboard'; break;
-                                case 'roster': Icon = Icons.UserIcon; label = 'Class Roster'; break;
+                                case 'roster': Icon = Icons.UserIcon; label = 'Class Attendance'; break;
                                 case 'history': Icon = Icons.CalendarIcon; label = 'Attendance History'; break;
                                 default: Icon = () => null; label = '';
                             }
@@ -2025,46 +2060,6 @@ style.textContent = `
 }
 `;
 document.head.appendChild(style);
-
-// Function to recalculate roster stats
-const calculateRosterStats = () => {
-    if (selectedClass === 0 || filteredRosterStudents.length === 0) {
-        setRosterStats({ totalStudents: 0, presentCount: 0, absentCount: 0, pendingCount: 0 });
-        return;
-    }
-
-    const totalStudentsInClass = filteredRosterStudents.length;
-    let present = 0;
-    let absent = 0;
-
-    // Filter attendance records for the selected date *only*
-    const dateFilteredRecords = attendanceRecords.filter(record => {
-        try {
-            // Convert record date to local date string
-            const recordDateLocal = new Date(record.date).toLocaleDateString('en-IN'); // Use 'en-IN' for IST format
-            const selectedDateLocal = new Date(selectedDate).toLocaleDateString('en-IN'); // Convert selected date to local format
-            return recordDateLocal === selectedDateLocal; // Compare local date strings
-        } catch (e) { return false; } // Handle invalid dates
-    });
-
-    filteredRosterStudents.forEach(student => {
-        const status = getStudentAttendanceStatus(student.id, dateFilteredRecords, selectedDate); // Pass date for roster check
-        if (status === 'present') {
-            present++;
-        } else if (status === 'absent') {
-            absent++;
-        }
-    });
-
-    const pending = totalStudentsInClass - present - absent;
-
-    setRosterStats({
-        totalStudents: totalStudentsInClass,
-        presentCount: present,
-        absentCount: absent,
-        pendingCount: Math.max(0, pending), // Ensure pending is not negative
-    });
-};
 
 
 

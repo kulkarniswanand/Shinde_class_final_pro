@@ -144,41 +144,42 @@ const StudentDetails = () => {
     navigate("/admin-dashboard");
   };
 
-  return (
-    <div className="container mx-auto p-6 bg-black min-h-screen text-white relative">
+  return ( 
+    <div className="container mx-auto p-6 bg-gradient-to-r from-gray-900 via-gray-800 to-black min-h-screen text-white relative">
       <button
         onClick={handleDashboard}
-        className="bg-purple-600 hover:bg-blue-600 text-white px-2 py-1 rounded border border-white absolute top-4 right-4"
+        className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-blue-600 hover:to-purple-600 text-white px-4 py-2 rounded-lg shadow-lg border border-white absolute top-4 right-4 transition duration-300"
       >
         Go to Dashboard
       </button>
-      <h1 className="text-3xl font-bold text-center mb-6 text-violet-600">Student Details</h1>
+      <h1 className="text-4xl font-extrabold text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-indigo-500">
+        Student Details
+      </h1>
 
       {/* Search Bars and New Student Button */}
-      <div className="flex justify-between mb-6">
-        <div className="flex">
+      <div className="flex justify-between items-center mb-8">
+        <div className="flex items-center space-x-4">
           <select
             value={searchCriteria}
             onChange={(e) => setSearchCriteria(e.target.value)}
-            className="p-2 border rounded bg-gray text-black mr-2"
+            className="p-3 border rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-violet-500"
           >
             <option value="studentname">Name</option>
             <option value="gender">Gender</option>
             <option value="class">Class</option>
             <option value="branch">Branch</option>
-            {/* Add more options as needed */}
           </select>
           <input
             type="text"
             placeholder="Search..."
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            className="p-2 border rounded bg-gray text-black"
+            className="p-3 border rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-violet-500"
           />
         </div>
         <button
           onClick={handleNewStudent}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+          className="bg-gradient-to-r from-blue-500 to-green-500 hover:from-green-500 hover:to-blue-500 text-white px-6 py-3 rounded-lg shadow-lg transition duration-300"
         >
           New Student
         </button>
@@ -186,52 +187,52 @@ const StudentDetails = () => {
 
       {/* Success Message */}
       {successMessage && (
-        <div className="bg-green-500 text-white p-2 rounded mb-4 text-center">
+        <div className="bg-green-600 text-white p-3 rounded-lg mb-6 text-center shadow-md">
           {successMessage}
         </div>
       )}
 
       {/* Student Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse border border-gray-300 shadow-lg bg-white">
-          <thead className="bg-gray-800 text-violet-300 text-center">
+      <div className="overflow-x-auto shadow-lg rounded-lg">
+        <table className="w-full border-collapse border border-gray-700 bg-gray-800 text-white">
+          <thead className="bg-gradient-to-r from-gray-700 to-gray-900 text-violet-300 text-center">
             <tr>
               {["ID", "Name", "Address", "Gender", "DOB", "Parent Mobile", "Student Mobile", "Email", "Class", "Branch", "Admission Date", "Action"].map((heading) => (
-                <th key={heading} className="p-3 text-left border border-gray-300 text-center">{heading}</th>
+                <th key={heading} className="p-4 text-left border border-gray-700 text-center">
+                  {heading}
+                </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {filteredStudents.map((student) => (
-              <tr key={student.id} className="bg-black hover:bg-gray-900">
-                <td className="p-3 border text-center">{student.id}</td>
-                <td className="p-3 border text-center">{student.studentname}</td>
-                <td className="p-3 border text-center">{student.address}</td>
-                <td className="p-3 border text-center">{student.gender}</td>
-                <td className="p-3 border text-center">{student.dob}</td>
-                <td className="p-3 border text-center">{student.parentMobile}</td>
-                <td className="p-3 border text-center">{student.studentMobile}</td>
-                <td className="p-3 border text-center">{student.email}</td>
-                <td className="p-3 border text-center">{student.class}</td>
-                <td className="p-3 border text-center">{student.branch}</td>
-                <td className="p-3 border text-center">{student.admissionDate}</td>
-                <td className="p-3 border">
+              <tr key={student.id} className="bg-gray-800 hover:bg-gray-700 transition duration-300">
+                <td className="p-4 border text-center">{student.id}</td>
+                <td className="p-4 border text-center">{student.studentname}</td>
+                <td className="p-4 border text-center">{student.address}</td>
+                <td className="p-4 border text-center">{student.gender}</td>
+                <td className="p-4 border text-center">{student.dob}</td>
+                <td className="p-4 border text-center">{student.parentMobile}</td>
+                <td className="p-4 border text-center">{student.studentMobile}</td>
+                <td className="p-4 border text-center">{student.email}</td>
+                <td className="p-4 border text-center">{student.class}</td>
+                <td className="p-4 border text-center">{student.branch}</td>
+                <td className="p-4 border text-center">{student.admissionDate}</td>
+                <td className="p-4 border">
                   <div className="flex flex-col space-y-2">
                     <button
                       onClick={() => handleEdit(student)}
-                      className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition duration-300 ease-in-out transform hover:scale-105"
+                      className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-teal-500 hover:to-green-500 text-white px-4 py-2 rounded-lg shadow-md transition duration-300"
                     >
                       Update
                     </button>
                     <button
                       onClick={() => setDeleteStudentId(student.id)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition duration-300 ease-in-out transform hover:scale-105"
+                      className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-pink-500 hover:to-red-500 text-white px-4 py-2 rounded-lg shadow-md transition duration-300"
                     >
                       Delete
                     </button>
                   </div>
-
-
                 </td>
               </tr>
             ))}

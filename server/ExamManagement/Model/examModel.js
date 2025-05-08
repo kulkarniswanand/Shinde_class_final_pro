@@ -38,7 +38,7 @@ exports.updateExam = async (id, examData) => {
 // Get all exams with their questions
 exports.getAllExams = async () => {
     const query = `
-        SELECT e.id, e.name, e.subject, e.standard, e.date, e.duration, e.status, e.total_marks,
+        SELECT e.id, e.name, e.subject, e.standard, e.date, e.duration, e.status, e.total_marks AS totalMarks, e.score,
                JSON_ARRAYAGG(
                    JSON_OBJECT(
                        'id', q.id,
@@ -82,6 +82,40 @@ exports.getExamById = async (id) => {
     return results[0];
 };
 
+// Get exam by ID with answers
+exports.getExamByIdWithAnswers = async (id) => {
+    const query = `
+        SELECT e.*, 
+               JSON_ARRAYAGG(
+                   JSON_OBJECT(
+                       'id', q.id,
+                       'type', q.type,
+                       'question', q.question,
+                       'options', q.options,
+                       'correctAnswer', q.correct_answer,
+                       'marks', q.marks
+                   )
+               ) AS questions,
+               JSON_ARRAYAGG(
+                   JSON_OBJECT(
+                       'questionId', a.question_id,
+                       'studentId', a.student_id,
+                       'answer', a.answer,
+                       'is_correct', a.is_correct,
+                       'marks_obtained', a.marks_obtained
+                   )
+               ) AS answers
+        FROM exams e
+        LEFT JOIN questions q ON e.id = q.exam_id
+        LEFT JOIN exam_answers a ON q.id = a.question_id
+        WHERE e.id = ?
+        GROUP BY e.id
+    `;
+
+    const [results] = await pool.query(query, [id]);
+    return results[0];
+};
+
 // Delete exam and its questions
 exports.deleteExam = async (id) => {
     const deleteQuestionsQuery = `DELETE FROM questions WHERE exam_id = ?`;
@@ -104,6 +138,8 @@ exports.saveExamAnswers = async (answersData) => {
         answer.marksObtained,
     ]);
 
+    console.log("Saving answers to database:", values); // Debugging log
+
     const [result] = await pool.query(query, [values]);
     return result;
 };
@@ -112,6 +148,17 @@ exports.saveExamAnswers = async (answersData) => {
 exports.updateExamStatus = async (id, status) => {
     const query = `UPDATE exams SET status = ? WHERE id = ?`;
     const values = [status, id];
+    const [result] = await pool.query(query, values);
+    return result;
+};
+
+// Update exam status and score
+exports.updateExamStatusAndScore = async (id, status, score) => {
+    const query = `UPDATE exams SET status = ?, score = ? WHERE id = ?`;
+    const values = [status, score, id];
+
+    console.log("Updating exam status and score:", values); // Debugging log
+
     const [result] = await pool.query(query, values);
     return result;
 };

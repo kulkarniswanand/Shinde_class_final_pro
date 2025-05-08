@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAttendance } from '../../context/AttendanceContext';
+import { useAttendance } from '../../context/AttendanceContext'; 
 
 const AttendanceDashboard = () => {
     const { state } = useAttendance();
@@ -28,6 +28,6 @@ const AttendanceDashboard = () => {
             </div>
         </div>
     );
-};
+}; 
 
 export default AttendanceDashboard; 

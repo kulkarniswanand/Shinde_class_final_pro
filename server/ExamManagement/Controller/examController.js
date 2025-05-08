@@ -36,7 +36,7 @@ exports.getAllExams = async (req, res) => {
 exports.getExamById = async (req, res) => {
     try {
         const examId = req.params.id;
-        const exam = await Exam.getExamById(examId);
+        const exam = await Exam.getExamByIdWithAnswers(examId); // Use the updated model method
         if (!exam) return res.status(404).json({ error: 'Exam not found.' });
         res.json(exam);
     } catch (err) {
@@ -61,18 +61,38 @@ exports.submitExamAnswers = async (req, res) => {
         const answersData = req.body; // Expect an array of answers
         const examId = answersData[0]?.examId; // Get the exam ID from the first answer
 
-        // Save the answers
-        await Exam.saveExamAnswers(answersData);
-
-        // Update the exam status to "completed"
-        if (examId) {
-            await Exam.updateExamStatus(examId, "completed");
+        if (!examId || answersData.length === 0) {
+            console.error("Invalid answers data:", answersData); // Debugging log
+            return res.status(400).json({ error: "Invalid answers data" });
         }
 
-        res.status(201).json({ message: 'Exam answers submitted successfully and exam marked as completed' });
+        console.log("Received answers data:", answersData); // Debugging log
+
+        // Calculate marks_obtained for each answer
+        const updatedAnswers = answersData.map((answer) => ({
+            ...answer,
+            marksObtained: answer.isCorrect ? answer.marks : 0, // Assign marks if correct, else 0
+        }));
+
+        console.log("Updated answers with marks:", updatedAnswers); // Debugging log
+
+        // Save the answers
+        await Exam.saveExamAnswers(updatedAnswers);
+
+        // Calculate total score for the exam
+        const totalScore = updatedAnswers.reduce((sum, answer) => sum + answer.marksObtained, 0);
+
+        console.log("Total score calculated:", totalScore); // Debugging log
+
+        // Update the exam status to "completed" and save the total score
+        if (examId) {
+            await Exam.updateExamStatusAndScore(examId, "completed", totalScore);
+        }
+
+        res.status(201).json({ message: "Exam answers submitted successfully and exam marked as completed" });
     } catch (err) {
         console.error("Error submitting exam answers:", err);
-        res.status(500).json({ error: 'Failed to save exam answers.' });
+        res.status(500).json({ error: "Failed to save exam answers." });
     }
 };
 
