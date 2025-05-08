@@ -14,6 +14,7 @@ const dashboardOptions = [
   { id: 8, name: "Exam Marks", image: "/images/Dashboard/Exam_Marks.jpg", route: "/exam-marks" },
   { id: 9, name: "Results", image: "/images/Dashboard/Results.jpg", route: "/results" },
   { id: 10, name: "Fees Structure", image: "/images/Dashboard/Fees_Management.jpg", route: "/FeeStructure" },
+  { id: 10, name: "Class Management", image: "/images/Dashboard/classmanage.png", route: "/classmanagement" },
 
 ];
 

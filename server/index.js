@@ -1,5 +1,14 @@
 const express = require('express');
 const app = express();
+const classRoutes = require('./Class_Management/classRoutes');
+const branchRoutes = require('./Class_Management/branchRoutes');
+
+app.use(express.json());
+
+// Register routes
+app.use('/api', classRoutes);
+app.use('/api', branchRoutes);
+
 const port = 5000;
 
 // ...existing code...
@@ -26,8 +35,6 @@ app.get('/api/staff/branch/:branch', async (req, res) => {
     res.status(500).json({ message: "Error fetching staff data by branch" });
   }
 });
-
-// ...existing code...
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);

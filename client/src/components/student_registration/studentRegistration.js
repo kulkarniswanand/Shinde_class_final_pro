@@ -56,30 +56,29 @@ const StudentRegistrationForm = () => {
         }
         break;
 
-        case "dob":
-          const today = new Date();
-          const dob = new Date(value);
-          let age = today.getFullYear() - dob.getFullYear();
-          const monthDiff = today.getMonth() - dob.getMonth();
-          const dayDiff = today.getDate() - dob.getDate();
-        
-          // Adjust age if the birthday hasn't occurred yet this year
-          if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-            age--;
-          }
-        
-          // Validate age based on the selected class with exact age criteria
-          if (formData.class === "8th" && age !== 12) {
-            message = "For 8th class, the student must be exactly 12 years old.";
-          } else if (formData.class === "9th" && age !== 13) {
-            message = "For 9th class, the student must be exactly 13 years old.";
-          } else if (formData.class === "10th" && age !== 14) {
-            message = "For 10th class, the student must be exactly 14 years old.";
-          } else if (dob > today) {
-            message = "Date of birth cannot be in the future.";
-          }
-          break;
-        
+      case "dob":
+        const today = new Date();
+        const dob = new Date(value);
+        let age = today.getFullYear() - dob.getFullYear();
+        const monthDiff = today.getMonth() - dob.getMonth();
+        const dayDiff = today.getDate() - dob.getDate();
+
+        // Adjust age if the birthday hasn't occurred yet this year
+        if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+          age--;
+        }
+
+        // Validate age based on the selected class with exact age criteria
+        if (formData.class === "8th" && age !== 12) {
+          message = "For 8th class, the student must be exactly 12 years old.";
+        } else if (formData.class === "9th" && age !== 13) {
+          message = "For 9th class, the student must be exactly 13 years old.";
+        } else if (formData.class === "10th" && age !== 14) {
+          message = "For 10th class, the student must be exactly 14 years old.";
+        } else if (dob > today) {
+          message = "Date of birth cannot be in the future.";
+        }
+        break;
 
       case "parentMobile":
       case "studentMobile":
@@ -119,7 +118,9 @@ const StudentRegistrationForm = () => {
     Object.keys(formData).forEach((key) => {
       validateField(key, formData[key]);
       if (!formData[key].trim() && key !== "studentMobile" && key !== "email") {
-        newErrors[key] = `${key.charAt(0).toUpperCase() + key.slice(1)} is required.`;
+        newErrors[key] = `${
+          key.charAt(0).toUpperCase() + key.slice(1)
+        } is required.`;
       }
     });
 
@@ -205,7 +206,14 @@ const StudentRegistrationForm = () => {
           </p>
         )}
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-6">
-          {[ "name", "address", "dob", "parentMobile", "studentMobile", "email" ].map((field) => (
+          {[
+            "name",
+            "address",
+            "dob",
+            "parentMobile",
+            "studentMobile",
+            "email",
+          ].map((field) => (
             <div key={field} className="flex flex-col">
               <label className="text-sm font-medium text-blue-300 capitalize">
                 {field.replace(/([A-Z])/g, " $1")}

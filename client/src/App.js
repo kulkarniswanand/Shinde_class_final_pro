@@ -36,6 +36,7 @@ import StudentDashboard from "./pages/Student_Dashboard/StudentDashboard";
 import StudentDetails from "./components/StudentDetails/studentDetails";
 import StaffManagement from "./components/StaffManagement/staffManagement";
 import StaffRegistrationForm from "./components/StaffManagement/staffRegistration";
+import ClassManagement from "./components/Class_Management/ClassManagement";
 
 // import StudentRegistration from './pages/StudentRegistration';
 
@@ -64,6 +65,7 @@ function MainApp() {
     '/staffregistrationform',
     '/studentdashboard',
     '/attendancedashboard',
+    '/classmanagement',
 
   ];
 
@@ -124,6 +126,7 @@ function MainApp() {
         <Route path="/StudentDashboard" element={<StudentDashboard />} />
         <Route path="/student-details" element={<StudentDetails />} />
         <Route path="/staff-management" element={<StaffManagement />} />
+        <Route path="/classmanagement" element={<ClassManagement />} />
         <Route
           path="/staffRegistrationForm"
           element={<StaffRegistrationForm />}
