@@ -10,6 +10,7 @@ const feesStructure=require("./Fees_Management/FeesStructure/Routes/FeesStructur
 const studentsRoutes = require("./StudentDetails/Routes/studentsRoutes"); 
 const staffRoutes = require("./StaffManagement/Routes/staffRoutes");
 const attendanceRoutes = require("./StudentAttendance/Routes/studentAttendanceRoutes");
+const examRoutes = require("./ExamManagement/Routes/examRoutes"); // Import exam routes
 
 const app = express(); 
 const PORT = process.env.PORT || 5000;
@@ -28,6 +29,7 @@ app.use("/api/students", studentsRoutes);
 app.use("/api/staff", staffRoutes);
 // app.use("/api/attendance", attendanceRoutes);
 app.use("/api/studentAttendance", attendanceRoutes); // Ensure this matches the expected route
+app.use("/api/exams", examRoutes); // Use exam routes
 
 // Start Server
 app.listen(PORT, () => {

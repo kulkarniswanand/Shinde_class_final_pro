@@ -23,6 +23,24 @@ const ExamManagement = () => {
   const [examPortalOpen, setExamPortalOpen] = useState(false); // State to toggle exam portal
   const [editExamData, setEditExamData] = useState(null); // State to hold the exam being edited
 
+  // Fetch exams from the database
+  const fetchExams = async () => {
+    try {
+        const response = await fetch("/api/exams");
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        console.log("Fetched exams:", data);
+        setExams(data); // Update the exams state
+    } catch (error) {
+        console.error("Error fetching exams:", error);
+    }
+};
+
+// Call fetchExams on component mount
+useEffect(() => {
+    fetchExams();
+}, []);
+
   useEffect(() => {
     let timer;
     if (examStarted && timeLeft > 0) {
@@ -44,105 +62,134 @@ const ExamManagement = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleAddExam = (e) => {
+  const handleAddExam = async (e) => {
     e.preventDefault();
 
-    // Validate form data
-    // if (!formData.name || !formData.date || !formData.duration || !formData.standard) {
-    //   alert("Please fill all the required fields for the exam.");
-    //   return;
-    // }
-
-    // Validate questions
     if (newExamQuestions.length === 0) {
-      alert("Please add at least one question to the exam.");
-      return;
+        alert("Please add at least one question to the exam.");
+        return;
     }
 
-    // Add the exam to the list
-    setExams([
-      ...exams,
-      {
-        ...formData,
-        id: Date.now(),
-        status: "upcoming",
-        subject: formData.subject || "General",
-        questions: newExamQuestions,
+    const examData = {
+        name: formData.name,
+        subject: formData.subject,
+        standard: formData.standard,
+        date: formData.date,
+        duration: formData.duration,
         totalMarks: newExamQuestions.reduce((total, q) => total + q.marks, 0),
-      },
-    ]);
+        questions: newExamQuestions.map((q) => ({
+            type: q.type,
+            question: q.question,
+            options: q.options.filter((opt) => opt.trim() !== ""), // Remove empty options
+            correctAnswer: q.correctAnswer,
+            marks: q.marks,
+        })),
+    };
 
-    // Reset form and questions
-    setFormData({ name: "", date: "", duration: "", standard: "", subject: "" });
-    setNewExamQuestions([]);
-    setShowCreateExam(false);
+    try {
+        const response = await fetch("/api/exams", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(examData),
+        });
 
-    alert("Exam created successfully!");
-  };
+        if (!response.ok) throw new Error("Failed to create exam");
 
-  const handleEditExam = (id, updatedExam) => {
-    setExams(exams.map((exam) => (exam.id === id ? { ...exam, ...updatedExam } : exam)));
-  };
+        const data = await response.json();
+        console.log("Exam created successfully:", data);
 
-  const handleDeleteExam = (id) => {
-    setExams(exams.filter((exam) => exam.id !== id));
-  };
+        // Reset form and questions
+        setFormData({ name: "", date: "", duration: "", standard: "", subject: "" });
+        setNewExamQuestions([]);
 
-  const handleAddQuestion = () => {
+        // Fetch updated exams and switch to student mode
+        fetchExams(); // Refresh exams data
+        setActiveTab("student"); // Switch to student mode
+        setShowCreateExam(false); // Close create exam module
+        alert("Exam created successfully!");
+    } catch (error) {
+        console.error("Error creating exam:", error);
+    }
+};
+
+const handleDeleteExam = async (id) => {
+    try {
+        const response = await fetch(`/api/exams/${id}`, {
+            method: "DELETE",
+        });
+
+        if (!response.ok) throw new Error("Failed to delete exam");
+
+        setExams(exams.filter((exam) => exam.id !== id));
+        alert("Exam deleted successfully!");
+    } catch (error) {
+        console.error("Error deleting exam:", error);
+    }
+};
+
+const handleAddQuestion = () => {
     console.log("Current formData:", formData); // Debugging log to verify formData values
 
     if (
-      !newQuestion.question ||
-      (newQuestion.type === "multiple-choice" && newQuestion.options.some((opt) => !opt)) ||
-      !newQuestion.correctAnswer
+        !newQuestion.question ||
+        (newQuestion.type === "multiple-choice" && newQuestion.options.some((opt) => !opt)) ||
+        !newQuestion.correctAnswer
     ) {
-      alert("Please fill all required fields for the question.");
-      return;
+        alert("Please fill all required fields for the question.");
+        return;
     }
 
     // Validate "Due Date & Time" and "Duration (minutes)"
     if (!formData.date || !formData.duration) {
-      alert("Please fill in 'Due Date & Time' and 'Duration (minutes)' in the 'Exam Details' section.");
-      return;
+        alert("Please fill in 'Due Date & Time' and 'Duration (minutes)' in the 'Exam Details' section.");
+        return;
     }
 
     const questionToAdd = {
-      ...newQuestion,
-      id: newExamQuestions.length + 1,
-      duration: formData.duration, // Include duration
-      dueDate: formData.date, // Include due date
+        ...newQuestion,
+        id: newExamQuestions.length + 1,
+        duration: formData.duration, // Include duration
+        dueDate: formData.date, // Include due date
     };
 
     setNewExamQuestions([...newExamQuestions, questionToAdd]);
 
     setNewQuestion({
-      type: "multiple-choice",
-      question: "",
-      options: ["", "", "", ""],
-      correctAnswer: "",
-      marks: 5,
+        type: "multiple-choice",
+        question: "",
+        options: ["", "", "", ""],
+        correctAnswer: "",
+        marks: 5,
     });
-  };
+};
 
-  const handleDeleteQuestion = (id) => {
-    setNewExamQuestions(newExamQuestions.filter((q) => q.id !== id));
+  const handleEditExam = (id, updatedExam) => {
+    setExams(exams.map((exam) => (exam.id === id ? { ...exam, ...updatedExam } : exam)));
   };
 
   const startExam = (exam) => {
-    setCurrentExam(exam);
+    // Ensure questions are parsed correctly
+    const questions = Array.isArray(exam.questions) ? exam.questions : JSON.parse(exam.questions || "[]");
+
+    if (!questions || questions.length === 0) {
+        alert("This exam has no questions. Please contact your teacher.");
+        return;
+    }
+
+    setCurrentExam({ ...exam, questions });
     setCurrentQuestionIndex(0);
     setExamAnswers({});
     setTimeLeft(exam.duration * 60); // Set timeLeft in seconds based on exam duration
     setExamStarted(true); // Ensure the timer starts
     setExamPortalOpen(true);
-  };
+};
 
-  const answerQuestion = (value) => {
+const answerQuestion = (value) => {
     setExamAnswers({
-      ...examAnswers,
-      [currentExam.questions[currentQuestionIndex].id]: value,
+        ...examAnswers,
+        [currentExam.questions[currentQuestionIndex].id]: value,
     });
-  };
+};
 
   const goToNextQuestion = () => {
     if (currentQuestionIndex < currentExam.questions.length - 1) {
@@ -156,26 +203,34 @@ const ExamManagement = () => {
     }
   };
 
-  const handleSubmitExam = () => {
-    let score = 0;
-    currentExam.questions.forEach((question) => {
-      if (examAnswers[question.id] === question.correctAnswer) {
-        score += question.marks;
-      }
-    });
+  const handleSubmitExam = async () => {
+    const answersData = currentExam.questions.map((question) => ({
+        examId: currentExam.id,
+        questionId: question.id,
+        studentId: 1, // Replace with the actual student ID
+        answer: examAnswers[question.id] || "",
+        isCorrect: examAnswers[question.id] === question.correctAnswer,
+        marksObtained: examAnswers[question.id] === question.correctAnswer ? question.marks : 0,
+    }));
 
-    const updatedExams = exams.map((exam) =>
-      exam.id === currentExam.id
-        ? { ...exam, status: "completed", score, totalMarks: currentExam.totalMarks }
-        : exam
-    );
+    try {
+        const response = await fetch("/api/exams/submit-answers", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(answersData),
+        });
 
-    setExams(updatedExams);
-    setExamPortalOpen(false);
-    setCurrentExam(null);
-    // alert(`Exam submitted! You scored ${score}/${currentExam.totalMarks}.`);
-    alert(`Exam submitted! Thank You for your participation.`);
-  };
+        if (!response.ok) throw new Error("Failed to submit exam answers");
+
+        const data = await response.json();
+        console.log("Exam answers submitted successfully:", data);
+        alert("Exam submitted successfully!");
+        setExamPortalOpen(false);
+        setCurrentExam(null);
+    } catch (error) {
+        console.error("Error submitting exam answers:", error);
+    }
+};
 
   const handleEditExamClick = (exam) => {
     setEditExamData(exam); // Set the exam to be edited
@@ -186,10 +241,23 @@ const ExamManagement = () => {
     setEditExamData({ ...editExamData, [name]: value }); // Update the exam data
   };
 
-  const handleSaveEditedExam = () => {
-    setExams(exams.map((exam) => (exam.id === editExamData.id ? editExamData : exam))); // Save changes
-    setEditExamData(null); // Clear the edit state
-  };
+  const handleSaveEditedExam = async () => {
+    try {
+        const response = await fetch(`/api/exams/${editExamData.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(editExamData),
+        });
+
+        if (!response.ok) throw new Error("Failed to update exam");
+
+        setExams(exams.map((exam) => (exam.id === editExamData.id ? editExamData : exam)));
+        setEditExamData(null);
+        alert("Exam updated successfully!");
+    } catch (error) {
+        console.error("Error updating exam:", error);
+    }
+};
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -230,7 +298,6 @@ const ExamManagement = () => {
           </div>
         </div>
       </header>
-
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-6 py-8 space-y-8">
         {/* Go to Dashboard Button */}
@@ -247,7 +314,6 @@ const ExamManagement = () => {
           <div className="space-y-3">
             <h1 className="text-2xl font-bold text-gray-800">Welcome, Student Name</h1>
             <p className="text-gray-600">Class 8</p>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               {/* Upcoming Exams */}
               <div className="bg-white p-8 rounded-lg shadow-md">
@@ -268,7 +334,6 @@ const ExamManagement = () => {
                           </p>
                           <p className="text-gray-600">Duration: {exam.duration} minutes</p>
                         </div>
-
                         {/* Buttons */}
                         <div className="flex gap-4">
                           {activeTab === "student" && (
@@ -279,22 +344,6 @@ const ExamManagement = () => {
                               Start Exam
                             </button>
                           )}
-                          {activeTab === "teacher" && (
-                            <>
-                              <button
-                                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
-                                onClick={() => handleEditExamClick(exam)}
-                              >
-                                Edit
-                              </button>
-                              <button
-                                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all"
-                                onClick={() => handleDeleteExam(exam.id)}
-                              >
-                                Delete
-                              </button>
-                            </>
-                          )}
                         </div>
                       </div>
                     ))
@@ -302,7 +351,6 @@ const ExamManagement = () => {
                   <p className="text-gray-500">No upcoming exams available.</p>
                 )}
               </div>
-
               {/* Completed Exams */}
               <div className="bg-white p-8 rounded-lg shadow-md">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">Completed Exams</h3>
@@ -339,7 +387,6 @@ const ExamManagement = () => {
             </div>
           </div>
         )}
-
         {/* Exam Portal */}
         {examPortalOpen && currentExam && (
           <div className="space-y-5 mx-auto" style={{ width: "100%" }}>
@@ -354,7 +401,6 @@ const ExamManagement = () => {
                 <p className="text-sm text-gray-500">Time remaining</p>
               </div>
             </div>
-
             {/* Full-Width Progress Bar */}
             <div className="w-full bg-gray-200 rounded-full h-2.5">
               <div
@@ -364,7 +410,6 @@ const ExamManagement = () => {
                 }}
               ></div>
             </div>
-
             {/* Question Progress */}
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-4">
@@ -396,7 +441,6 @@ const ExamManagement = () => {
                 </button>
               </div>
             </div>
-
             {/* Question Card */}
             <div className="bg-white p-8 rounded-lg shadow-md">
               <p className="text-lg font-semibold text-gray-800">{currentExam.questions[currentQuestionIndex].question}</p>
@@ -468,7 +512,6 @@ const ExamManagement = () => {
                 />
               )}
             </div>
-
             {/* Footer Section */}
             <div className="flex justify-between items-center">
               <button
@@ -482,7 +525,6 @@ const ExamManagement = () => {
               >
                 Exit Exam
               </button>
-
               {/* Question Navigation */}
               <div className="flex flex-col items-center gap-2">
                 <div className="flex items-center gap-2">
@@ -501,7 +543,6 @@ const ExamManagement = () => {
                     </button>
                   ))}
                 </div>
-
                 {/* Legend */}
                 <div className="flex items-center gap-4 text-sm">
                   <div className="flex items-center gap-1">
@@ -518,7 +559,6 @@ const ExamManagement = () => {
                   </div>
                 </div>
               </div>
-
               <button
                 onClick={currentQuestionIndex === currentExam.questions.length - 1 ? handleSubmitExam : goToNextQuestion}
                 className={`px-4 py-2 rounded-lg ${currentQuestionIndex === currentExam.questions.length - 1
@@ -531,12 +571,10 @@ const ExamManagement = () => {
             </div>
           </div>
         )}
-
         {/* Teacher Mode */}
         {activeTab === "teacher" && (
           <div className="space-y-3">
             <h1 className="text-2xl font-bold text-gray-800">Welcome</h1>
-
             {!showCreateExam ? (
               <div>
                 {/* Buttons Row */}
@@ -554,7 +592,6 @@ const ExamManagement = () => {
                     Go to Dashboard
                   </button> */}
                 </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                   {/* Upcoming Exams */}
                   <div className="bg-white p-8 rounded-lg shadow-md">
@@ -596,7 +633,6 @@ const ExamManagement = () => {
                       <p className="text-gray-500">No upcoming exams available.</p>
                     )}
                   </div>
-
                   {/* Completed Exams */}
                   <div className="bg-white p-8 rounded-lg shadow-md">
                     <h3 className="text-xl font-semibold text-gray-800 mb-4">Completed Exams</h3>
@@ -632,9 +668,9 @@ const ExamManagement = () => {
               </div>
             ) : (
               <div>
+                <h2 className="text-2xl font-bold text-gray-800">Create New Exam</h2>
                 {/* Create Exam Module */}
                 <div className="flex justify-between items-center mb-8">
-                  <h2 className="text-2xl font-bold text-gray-800">Create New Exam</h2>
                   <button
                     onClick={() => setShowCreateExam(false)}
                     className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-all"
@@ -724,7 +760,6 @@ const ExamManagement = () => {
                       </div>
                     </form>
                   </div>
-
                   {/* Add Questions Section */}
                   <div className="bg-white p-8 rounded-lg shadow-md">
                     <h3 className="text-xl font-semibold text-gray-800 mb-4">Add Questions</h3>
@@ -733,14 +768,14 @@ const ExamManagement = () => {
                         <label className="block text-gray-700 font-medium mb-2">Question Type</label>
                         <select
                           value={newQuestion.type}
-                          onChange={(e) =>
+                          onChange={(e) => {
                             setNewQuestion({
                               ...newQuestion,
                               type: e.target.value,
                               options: e.target.value === "multiple-choice" ? ["", "", "", ""] : [],
                               correctAnswer: "",
-                            })
-                          }
+                            });
+                          }}
                           className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                           <option value="multiple-choice">Multiple Choice</option>
@@ -842,7 +877,6 @@ const ExamManagement = () => {
                     </form>
                   </div>
                 </div>
-
                 {/* Questions Added Section */}
                 <div className="bg-white p-8 rounded-lg shadow-md mt-8">
                   <h3 className="text-xl font-semibold text-gray-800 mb-4">Questions Added ({newExamQuestions.length})</h3>
@@ -851,7 +885,6 @@ const ExamManagement = () => {
                     Due Date & Time: {formData.date ? new Date(formData.date).toLocaleString() : "Not Set"}<br />
                     Duration (minutes): {formData.duration || "Not Set"}
                   </p>
-
                   {newExamQuestions.length > 0 ? (
                     <ul className="space-y-6 divide-y">
                       {newExamQuestions.map((q, idx) => (
@@ -898,7 +931,6 @@ const ExamManagement = () => {
                   ) : (
                     <p className="text-center text-gray-500 py-8">No questions added yet</p>
                   )}
-
                   {/* Create Exam Button */}
                   <div className="flex justify-end mt-6">
                     <button
