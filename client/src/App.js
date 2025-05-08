@@ -27,6 +27,7 @@ import StaffManagement from './components/StaffManagement/staffManagement';
 import StaffRegistrationForm from './components/StaffManagement/staffRegistration';
 import AttendanceDashboard from './components/Attendance/attendance';
 import ExamManagement from './components/Exam/ExamManagement';
+import Result from './components/Exam/Result';
 
 function App() {
   const [exams, setExams] = useState([]); // Define exams state here
@@ -55,6 +56,7 @@ function MainApp({ exams, setExams }) {
     '/staffregistrationform',
     '/attendance',
     '/exam-schedule',
+    '/results', // Add the result path here
 
   ];
 
@@ -86,6 +88,8 @@ function MainApp({ exams, setExams }) {
         <Route path="/staffRegistrationForm" element={< StaffRegistrationForm/>} />
         <Route path="/attendance" element={< AttendanceDashboard/>} />
         <Route path="/exam-schedule" element={< ExamManagement exams={exams} setExams={setExams} />} /> 
+        <Route path="/results" element={<Result />} />
+        {/* Add other routes here */}
       </Routes>
     </div>
   );    

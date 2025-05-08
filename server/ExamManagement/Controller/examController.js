@@ -59,10 +59,31 @@ exports.deleteExam = async (req, res) => {
 exports.submitExamAnswers = async (req, res) => {
     try {
         const answersData = req.body; // Expect an array of answers
+        const examId = answersData[0]?.examId; // Get the exam ID from the first answer
+
+        // Save the answers
         await Exam.saveExamAnswers(answersData);
-        res.status(201).json({ message: 'Exam answers submitted successfully' });
+
+        // Update the exam status to "completed"
+        if (examId) {
+            await Exam.updateExamStatus(examId, "completed");
+        }
+
+        res.status(201).json({ message: 'Exam answers submitted successfully and exam marked as completed' });
     } catch (err) {
         console.error("Error submitting exam answers:", err);
         res.status(500).json({ error: 'Failed to save exam answers.' });
+    }
+};
+
+exports.updateExamStatus = async (req, res) => {
+    try {
+        const examId = req.params.id;
+        const { status } = req.body; // Expect status in the request body
+        await Exam.updateExamStatus(examId, status);
+        res.json({ message: 'Exam status updated successfully' });
+    } catch (err) {
+        console.error("Error updating exam status:", err);
+        res.status(500).json({ error: 'Failed to update exam status.' });
     }
 };

@@ -107,3 +107,11 @@ exports.saveExamAnswers = async (answersData) => {
     const [result] = await pool.query(query, [values]);
     return result;
 };
+
+// Update exam status
+exports.updateExamStatus = async (id, status) => {
+    const query = `UPDATE exams SET status = ? WHERE id = ?`;
+    const values = [status, id];
+    const [result] = await pool.query(query, values);
+    return result;
+};

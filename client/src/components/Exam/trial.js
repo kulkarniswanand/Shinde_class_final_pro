@@ -1036,7 +1036,7 @@ const Index = () => {
           <div className="flex items-center gap-4">
             <Tabs 
               value={userRole} 
-              onValueChange={setUserRole} 
+              onValueChange={setUserRole}  
               className="w-[300px]"
             >
               <TabsList className="grid w-full grid-cols-2">

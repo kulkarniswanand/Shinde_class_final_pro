@@ -392,7 +392,9 @@ const handleUpdateExamStatus = async (id, status) => {
                           </div>
                           <button
                             className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
-                            onClick={() => navigate("/results", { state: { exam } })} // Pass exam data to /results
+                            onClick={() => {
+                              alert("View results functionality not implemented yet.");
+                            }}
                           >
                             View Results
                           </button>
@@ -676,7 +678,9 @@ const handleUpdateExamStatus = async (id, status) => {
                               </div>
                               <button
                                 className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
-                                onClick={() => navigate("/results", { state: { exam } })} // Pass exam data to /results
+                                onClick={() => {
+                                  alert("View results functionality not implemented yet.");
+                                }}
                               >
                                 View Results
                               </button>
