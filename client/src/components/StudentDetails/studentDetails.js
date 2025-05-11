@@ -40,6 +40,21 @@ const StudentDetails = () => {
     setEditStudent({ ...editStudent, dob: dateString });
   };
 
+  const generateWhatsAppMessage = (student) => {
+    const message = `Hello, here are the updated details for your child:
+    - Name: ${student.studentname}
+    - Address: ${student.address || "N/A"}
+    - Gender: ${student.gender || "N/A"}
+    - DOB: ${student.dob || "N/A"}
+    - Parent Mobile: ${student.parentMobile || "N/A"}
+    - Student Mobile: ${student.studentMobile || "N/A"}
+    - Email: ${student.email || "N/A"}
+    - Class: ${student.class || "N/A"}
+    - Branch: ${student.branch || "N/A"}
+    - Admission Date: ${student.admissionDate || "N/A"}`;
+    return encodeURIComponent(message);
+  };
+
   const validate = () => {
     const newErrors = {};
     if (!editStudent.studentname) newErrors.studentname = "Name is required.";
@@ -177,16 +192,24 @@ const StudentDetails = () => {
           >
             Delete
           </button>
+          <a
+            href={`https://wa.me/${record.parentMobile}?text=${generateWhatsAppMessage(record)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-center"
+          >
+            WhatsApp
+          </a>
         </div>
       ),
     },
   ];
 
   return (
-    <div className="p-5 bg-gray-900 text-white min-h-screen">
+    <div className="p-5 bg-black text-white min-h-screen">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-3xl font-semibold text-purple-400">Student Details</h2>
-        <Button onClick={() => navigate("/admin-dashboard")} className="bg-blue-600 hover:bg-blue-700 text-white">
+        <h2 className="text-3xl font-semibold text-violet-600">Student Details</h2>
+        <Button onClick={() => navigate("/admin-dashboard")} className="bg-purple-600 hover:bg-blue-600 text-white">
           Go to Dashboard
         </Button>
       </div>
@@ -214,7 +237,7 @@ const StudentDetails = () => {
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
           placeholder="Enter value"
-          className="bg-gray-800 text-white rounded-md p-2"
+          className="bg-gray-800 text-black rounded-md p-2"
         />
         <Button onClick={() => navigate("/studentRegistrationForm")} className="bg-blue-500 hover:bg-blue-600 text-white">
           New Student

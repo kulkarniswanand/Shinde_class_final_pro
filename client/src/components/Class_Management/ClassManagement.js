@@ -1,53 +1,33 @@
 import React, { useEffect, useState } from "react";
+import useBranches from "../../hooks/useBranches"; // adjust path as needed
 
 export default function ClassManagement() {
   const [classes, setClasses] = useState([]);
-  const [branches, setBranches] = useState([]);
   const [form, setForm] = useState({ className: "", branchId: "", year: "" });
   const [editId, setEditId] = useState(null);
 
-  const fetchData = async () => {
+  const { branches, loading: branchesLoading } = useBranches(); // ✅ Use custom hook here
+
+  const fetchClasses = async () => {
     try {
-      // Fetch classes
-      const resClasses = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/getclass`);
+      console.log("Fetching classes..."); // Debug log
+      const resClasses = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/getclass`); // Ensure this endpoint fetches all classes
       if (resClasses.ok) {
         const dataClasses = await resClasses.json();
-        console.log("Fetched classes:", dataClasses); // Debug fetched classes
-        if (Array.isArray(dataClasses)) {
-          setClasses(dataClasses); // Ensure classes is an array
-        } else {
-          console.error("Unexpected classes data format:", dataClasses);
-          setClasses([]);
-        }
+        console.log("Fetched classes:", dataClasses); // Debug log
+        setClasses(Array.isArray(dataClasses.data) ? dataClasses.data : []); // Update the state with fetched classes
       } else {
-        console.error("Failed to fetch classes");
-        setClasses([]);
-      }
-
-      // Fetch branches
-      const resBranches = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/updatebranch`);
-      if (resBranches.ok) {
-        const dataBranches = await resBranches.json();
-        console.log("Fetched branches:", dataBranches); // Debug fetched branches
-        if (Array.isArray(dataBranches)) {
-          setBranches(dataBranches); // Ensure branches is an array
-        } else {
-          console.error("Unexpected branches data format:", dataBranches);
-          setBranches([]);
-        }
-      } else {
-        console.error("Failed to fetch branches");
-        setBranches([]);
+        console.error("Failed to fetch classes. Status:", resClasses.status);
+        setClasses([]); // Clear the state if fetching fails
       }
     } catch (error) {
-      console.error("Error fetching data:", error);
-      setClasses([]);
-      setBranches([]);
+      console.error("Error fetching classes:", error); // Log network errors
+      setClasses([]); // Clear the state in case of an error
     }
   };
 
   useEffect(() => {
-    fetchData(); // Switch back to fetching data from the backend
+    fetchClasses(); // Fetch classes when the component mounts
   }, []);
 
   const handleChange = (e) => {
@@ -60,16 +40,32 @@ export default function ClassManagement() {
     const method = editId ? "PUT" : "POST";
     const url = `${process.env.REACT_APP_BACKEND_URL}/api/classes${editId ? `/${editId}` : ""}`;
 
-    const res = await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+    console.log(`Submitting form to ${url} with method ${method}`); // Debug log
+    console.log("Form data:", form); // Debug log
 
-    if (res.ok) {
-      setForm({ className: "", branchId: "", year: "" });
-      setEditId(null);
-      fetchData();
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      console.log("Server response status:", res.status); // Debug log for response status
+
+      if (res.ok) {
+        const responseData = await res.json(); // Parse the response
+        console.log("Server response data:", responseData); // Debug log for response data
+        alert(editId ? "Class updated successfully!" : "Class added successfully!"); // Alert message
+        setForm({ className: "", branchId: "", year: "" });
+        setEditId(null);
+        fetchClasses(); // Ensure classes are fetched after submission
+      } else {
+        console.error("Failed to submit form. Status:", res.status);
+        const errorData = await res.json();
+        console.error("Error details:", errorData); // Debug log for error details
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error); // Log network errors
     }
   };
 
@@ -79,9 +75,18 @@ export default function ClassManagement() {
   };
 
   const handleDelete = async (id) => {
-    const url = `${process.env.REACT_APP_BACKEND_URL}/api/classes/${id}`;
-    await fetch(url, { method: "DELETE" });
-    fetchData();
+    try {
+      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/classes/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        fetchClasses();
+      } else {
+        console.error("Failed to delete class");
+      }
+    } catch (error) {
+      console.error("Error deleting class:", error);
+    }
   };
 
   return (
@@ -106,10 +111,12 @@ export default function ClassManagement() {
           required
         >
           <option value="">Select Branch</option>
-          {branches.length > 0 ? (
+          {branchesLoading ? (
+            <option disabled>Loading branches...</option>
+          ) : branches.length > 0 ? (
             branches.map((branch) => (
               <option key={branch.id} value={branch.id}>
-                {branch.name ?? `Branch ${branch.id}`}
+                {branch.name}
               </option>
             ))
           ) : (
@@ -128,38 +135,40 @@ export default function ClassManagement() {
 
         <button
           type="submit"
-          className="md:col-span-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded"
+          className="md:col-span-3 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded"
         >
           {editId ? "Update Class" : "Add Class"}
         </button>
       </form>
 
-      <table className="min-w-full bg-white dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-700">
+      <table className="w-full text-left border-collapse">
         <thead>
-          <tr className="bg-gray-200 dark:bg-gray-700">
-            <th className="py-2 px-4 border">Class</th>
-            <th className="py-2 px-4 border">Branch</th>
-            <th className="py-2 px-4 border">Year</th>
-            <th className="py-2 px-4 border">Actions</th>
+          <tr className="bg-indigo-800 text-white">
+            <th className="p-3">ID</th>
+            <th className="p-3">Class</th>
+            <th className="p-3">Branch</th>
+            <th className="p-3">Year</th>
+            <th className="p-3">Actions</th>
           </tr>
         </thead>
         <tbody>
           {classes.length > 0 ? (
             classes.map((cls) => (
-              <tr key={cls.id} className="text-center">
-                <td className="py-2 px-4 border">{cls.className}</td>
-                <td className="py-2 px-4 border">{cls.branchName || "N/A"}</td>
-                <td className="py-2 px-4 border">{cls.year}</td>
-                <td className="py-2 px-4 border">
+              <tr key={cls.id} className="border-b border-gray-700 hover:bg-gray-900">
+                <td className="p-3">{cls.id}</td>
+                <td className="p-3">{cls.className}</td>
+                <td className="p-3">{cls.branchName || cls.branchId}</td>
+                <td className="p-3">{cls.year}</td>
+                <td className="p-3 flex gap-2">
                   <button
                     onClick={() => handleEdit(cls)}
-                    className="mr-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                    className="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDelete(cls.id)}
-                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+                    className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded"
                   >
                     Delete
                   </button>
@@ -168,7 +177,7 @@ export default function ClassManagement() {
             ))
           ) : (
             <tr>
-              <td colSpan="4" className="py-2 px-4 border text-center">
+              <td colSpan="5" className="p-3 text-center">
                 No classes available
               </td>
             </tr>

@@ -6,35 +6,43 @@ exports.getAllClasses = (req, res) => {
       console.error("Error fetching all classes:", err);
       return res.status(500).json({ success: false, message: "Failed to fetch classes", error: err });
     }
-    res.json({ success: true, data: results });
-  });
-};
-
-exports.getClassesByBranch = (req, res) => {
-  const { branchId } = req.params;
-  if (!branchId) {
-    return res.status(400).json({ success: false, message: "Branch ID is required" });
-  }
-  Class.getByBranch(branchId, (err, results) => {
-    if (err) {
-      console.error(`Error fetching classes for branch ${branchId}:`, err);
-      return res.status(500).json({ success: false, message: "Failed to fetch classes by branch", error: err });
-    }
-    res.json({ success: true, data: results });
+    res.status(200).json({ success: true, data: results });
   });
 };
 
 exports.createClass = (req, res) => {
+  console.log("Received request body:", req.body); // Debug log to inspect the request body
+
   const { className, branchId, year } = req.body;
+
   if (!className || !branchId || !year) {
-    return res.status(400).json({ success: false, message: "All fields (className, branchId, year) are required" });
+    return res  .status(400).json({ success: false, message: "All fields (className, branchId, year) are required" });
   }
-  Class.create(req.body, (err, result) => {
+
+  // Convert branchId to a number
+  const parsedBranchId = parseInt(branchId, 10);
+
+  // Validate input types
+  if (typeof className !== "string" || isNaN(parsedBranchId) || typeof year !== "string") {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid input types: className must be a string, branchId must be a number, and year must be a string.",
+    });
+  }
+
+  // Call the model's create function with the corrected parameters
+  Class.create(className, parsedBranchId, year, (err, result) => {
     if (err) {
       console.error("Error creating class:", err);
       return res.status(500).json({ success: false, message: "Failed to create class", error: err });
     }
-    res.json({ success: true, message: "Class created successfully", data: { id: result.insertId, ...req.body } });
+
+    // Send a proper response after successful insertion
+    res.status(200).json({
+      success: true,
+      message: "Class created successfully",
+      data: { id: result.insertId, className, branchId: parsedBranchId, year },
+    });
   });
 };
 

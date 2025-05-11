@@ -6,7 +6,7 @@ const ClassController = require("../Controller/ClassmanagementController");
 router.get("/getclass", ClassController.getAllClasses);
 
 // Route to create a new class
-router.post("/", ClassController.createClass);
+router.post("/classes", ClassController.createClass);
 
 // Route to update a class
 router.put("/:id", ClassController.updateClass);
