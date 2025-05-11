@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
-import io from "socket.io-client"; // Import socket.io-client
-
-const socket = io("http://localhost:5000"); // Connect to WebSocket server
 
 const ExamManagement = () => {
   const [exams, setExams] = useState([]);
@@ -100,11 +97,6 @@ useEffect(() => {
 
         const data = await response.json();
         console.log("Exam created successfully:", data);
-
-        // Emit a notification for the new exam
-        socket.emit("notification", {
-          message: `New exam created: ${examData.name} for ${examData.standard}`,
-        });
 
         // WhatsApp logic for exam details
         const whatsappMessage = `Exam Details:\nName: ${examData.name}\nSubject: ${examData.subject}\nClass: ${examData.standard}\nDate & Time: ${new Date(examData.date).toLocaleString()}\nDuration: ${examData.duration} minutes\nTotal Marks: ${examData.totalMarks}`;
