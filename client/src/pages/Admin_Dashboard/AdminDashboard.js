@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react"; // Removed useEffect and io imports
 import { useNavigate } from "react-router-dom";
-import io from "socket.io-client"; // For WebSocket integration
 import { FaBell } from "react-icons/fa"; // Import Font Awesome bell icon
 import StudentRegistrationForm from "../../components/student_registration/studentRegistration";
 
@@ -20,30 +19,16 @@ const dashboardOptions = [
 
 const AdminDashboard = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState([]); // State for notifications
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false); // Removed notifications state
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Connect to WebSocket server
-    const socket = io("http://localhost:5000"); // Replace with your backend WebSocket URL
-
-    // Listen for notifications
-    socket.on("notification", (notification) => {
-      setNotifications((prev) => [notification, ...prev]);
-    });
-
-    return () => {
-      socket.disconnect(); // Cleanup on component unmount
-    };
-  }, []);
+  // Removed useEffect for WebSocket connection
 
   // Toggle theme handler
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
   // Handle Logout
   const handleLogout = () => {
-    // Add logout logic here (e.g., clear auth tokens, redirect to login)
     navigate("/login");
   };
 
@@ -64,35 +49,7 @@ const AdminDashboard = () => {
         </h1>
 
         <div className="flex items-center space-x-4">
-          {/* Notification Bell */}
-          <div className="relative">
-            <button
-              className={`relative w-10 h-10 flex items-center justify-center rounded-full ${isDarkMode ? "bg-gray-800" : "bg-gray-200"
-                }`}
-            >
-              <FaBell className={`text-xl ${isDarkMode ? "text-gray-300" : "text-gray-700"}`} />
-              {notifications.length > 0 && (
-                <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {notifications.length}
-                </span>
-              )}
-            </button>
-
-            {/* Notification Dropdown */}
-            {notifications.length > 0 && (
-              <div
-                className={`absolute right-0 mt-2 w-64 rounded-md shadow-lg py-2 ${isDarkMode ? "bg-gray-800 text-gray-200" : "bg-white text-gray-800"
-                  }`}
-              >
-                {notifications.map((notif, index) => (
-                  <p key={index} className="px-4 py-2 border-b hover:bg-gray-600 hover:text-white">
-                    {notif.message}
-                  </p>
-                ))}
-              </div>
-            )}
-          </div>
-
+          {/* Removed Notification Bell */}
           {/* User Profile */}
           <div className="relative">
             <div
@@ -100,7 +57,7 @@ const AdminDashboard = () => {
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
             >
               <img
-                src="/images/shindesir.jpg" // Replace with dynamic user profile image URL
+                src="/images/shindesir.jpg"
                 alt="User Profile"
                 className="w-10 h-10 rounded-full border-2 border-gray-500"
               />
@@ -112,7 +69,6 @@ const AdminDashboard = () => {
               </p>
             </div>
 
-            {/* Profile Dropdown */}
             {isProfileMenuOpen && (
               <div
                 className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg py-2 ${isDarkMode ? "bg-gray-800 text-gray-200" : "bg-white text-gray-800"
@@ -176,4 +132,3 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
- 
