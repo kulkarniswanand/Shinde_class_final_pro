@@ -1,8 +1,28 @@
-const express = require('express');
-const app = express();
-const port = 5000;
+const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
 
-// ...existing code...
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000", // Replace with your frontend URL
+    methods: ["GET", "POST"],
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log("A user connected");
+
+  // Example: Send a notification
+  setInterval(() => {
+    socket.emit("notification", { message: "New update available!" });
+  }, 10000);
+
+  socket.on("disconnect", () => {
+    console.log("A user disconnected");
+  });
+});
 
 app.get('/api/staff', async (req, res) => {
   try {
@@ -27,8 +47,6 @@ app.get('/api/staff/branch/:branch', async (req, res) => {
   }
 });
 
-// ...existing code...
-
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+server.listen(5000, () => {
+  console.log("Server is running on port 5000");
 });

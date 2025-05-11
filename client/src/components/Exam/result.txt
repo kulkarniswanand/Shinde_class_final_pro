@@ -61,11 +61,10 @@ const Result = () => {
   }
 
   // Ensure score and totalMarks are valid numbers
+  const totalMarks = exam.questions.reduce((sum, question) => sum + (question.marks || 0), 0); // Sum up all question marks
   const score = exam.questions.reduce((sum, question) => {
-    const answerData = exam.answers.find((answer) => answer.questionId === question.id);
-    return sum + (answerData?.marks_obtained || 0); // Sum up marks_obtained
+    return sum + (question.isCorrect ? question.marks : 0); // Add marks only for correct answers
   }, 0);
-  const totalMarks = exam.totalMarks || 1; // Avoid division by zero
   const percentage = Math.round((score / totalMarks) * 100);
 
   return (
@@ -109,7 +108,7 @@ const Result = () => {
             Back to Dashboard
           </button>
         </div>
-      </div>
+      </div> 
     </div>
   );
 };

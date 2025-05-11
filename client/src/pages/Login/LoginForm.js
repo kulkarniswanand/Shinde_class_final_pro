@@ -5,7 +5,7 @@ const LoginForm = () => {
   const [role, setRole] = useState("user");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate(); // React Router navigation hook
+  const navigate = useNavigate(); // React Router navigation hook 
 
  const handleLogin = async (e) => {
   e.preventDefault();
@@ -22,7 +22,7 @@ const LoginForm = () => {
     if (response.ok) {
       console.log(`Login successful as ${data.role}`);
       switch (data.role) {
-        case "superadmin":
+        case "superAdmin":
           navigate("/superadmindashboard");
           break;
         case "admin":
@@ -32,7 +32,8 @@ const LoginForm = () => {
           navigate("/user-dashboard");
           break;
         case "student":
-          navigate("/student-dashboard");
+          // navigate("/student-dashboard");
+          navigate("/admin-dashboard");
           break;
         default:
           alert("Unknown role received.");
@@ -64,7 +65,7 @@ const LoginForm = () => {
             >
               <option value="superadmin">Super Admin</option>
               <option value="admin">Admin</option>
-              <option value="user">User</option>
+              {/* <option value="user">User</option> */}
               <option value="student">Student</option>
 
             </select>

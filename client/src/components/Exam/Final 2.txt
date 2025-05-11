@@ -1097,9 +1097,9 @@ const handleUpdateExamStatus = async (id, status) => {
                 </form>
             </div>
         )}
-      </main>
+      </main> 
     </div>
   );
 };
 
-export default ExamManagement;
+export default ExamManagement; 

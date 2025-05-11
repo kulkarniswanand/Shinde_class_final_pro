@@ -36,6 +36,7 @@
     "recharts": "^2.15.2",
     "shinde_class_final_pro": "file:",
     "slick-carousel": "^1.8.1",
+    "socket.io-client": "^4.8.1",
     "tailwindcss": "^4.1.5",
     "web-vitals": "^4.2.4",
     "webpack": "4.29.6"

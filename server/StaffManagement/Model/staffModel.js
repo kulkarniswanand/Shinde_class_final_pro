@@ -14,13 +14,18 @@ const getStaffById = async (id) => {
 
 // Create new staff
 const createStaff = async (staff) => {
-    const { id, name, address, contact, designation, join_date, email, branch } = staff;
-    const formattedJoinDate = new Date(join_date).toISOString().split('T')[0];
-    const [result] = await pool.query(
-        "INSERT INTO staff (id, name, address, contact, designation, join_date, email, branch) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        [id, name, address, contact, designation, formattedJoinDate, email, branch]
-    );
-    return result.insertId;
+    const { id, name, contact, designation, join_date, email, address, branch } = staff;
+
+    try {
+        const [result] = await pool.query(
+            "INSERT INTO staff (id, name, contact, designation, join_date, email, address, branch) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            [id, name, contact, designation, join_date, email, address, branch]
+        );
+        return result.insertId;
+    } catch (error) {
+        console.error("Database error while adding staff:", error);
+        throw error;
+    }
 };
 
 // Update staff details
@@ -31,7 +36,7 @@ const updateStaff = async (id, staff) => {
         "UPDATE staff SET name=?, address=?, contact=?, designation=?, join_date=?, email=?, branch=? WHERE id=?",
         [name, address, contact, designation, formattedJoinDate, email, branch, id]
     );
-    return result.affectedRows;
+    return result.affectedRows; 
 };
 
 // Delete staff 

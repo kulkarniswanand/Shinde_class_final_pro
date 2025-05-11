@@ -62,11 +62,6 @@ const StaffRegistrationForm = () => {
       }
 
       setServerMessage("Staff registered successfully!");
-
-      // WhatsApp logic
-      const whatsappMessage = `New staff registered successfully:\nName: ${formData.name}\nDesignation: ${formData.designation}\nBranch: ${formData.branch}\nContact: ${formData.contact}\nEmail: ${formData.email}}\nJoin Date: ${formData.join_date}\nAddress: ${formData.address}`;
-      window.open(`https://wa.me/?text=${encodeURIComponent(whatsappMessage)}`, "_blank");
-
       setFormData({
         name: "",
         contact: "",
