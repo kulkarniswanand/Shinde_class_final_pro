@@ -31,12 +31,14 @@ import DeleteBranch from "./components/Super_Admin/ManageBranches/DeleteBranch";
 import StudentRegistrationForm from "./components/student_registration/studentRegistration";
 import FeeManagement from "./components/FeeManagement/FeeManagement";
 import FeeStructure from "./components/FeeStructure/feeStructure";
-import ExamsScedule from "./pages/Exams_Scedule/ExamsScedule";
+import ExamsScedule from "./components/Exam/ExamManagement";
 import StudentDashboard from "./pages/Student_Dashboard/StudentDashboard";
 import StudentDetails from "./components/StudentDetails/studentDetails";
 import StaffManagement from "./components/StaffManagement/staffManagement";
 import StaffRegistrationForm from "./components/StaffManagement/staffRegistration";
 import ClassManagement from "./components/Class_Management/ClassManagement";
+// import attendance from "./components/Attendance/AttendanceDashboard";
+import AttendanceDashboard from "./components/Attendance/AttendanceDashboard";
 
 // import StudentRegistration from './pages/StudentRegistration';
 
@@ -66,6 +68,7 @@ function MainApp() {
     '/studentdashboard',
     '/attendancedashboard',
     '/classmanagement',
+    '/examsscedule',
 
   ];
 
@@ -127,6 +130,7 @@ function MainApp() {
         <Route path="/student-details" element={<StudentDetails />} />
         <Route path="/staff-management" element={<StaffManagement />} />
         <Route path="/classmanagement" element={<ClassManagement />} />
+        <Route path="/AttendanceDashboard" element={<AttendanceDashboard />} />
         <Route
           path="/staffRegistrationForm"
           element={<StaffRegistrationForm />}

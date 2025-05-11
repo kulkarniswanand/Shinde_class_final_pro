@@ -12,6 +12,7 @@ const studentsDetails = require("./StudentDetails/Routes/studentsRoutes");
 const staffRoutes = require("./StaffManagement/Routes/staffRoutes");
 const superAdminRoutes = require("./superadmin/routes/DashboardRoutes");
 const classRoutes = require("./Class_Management/Routes/ClassmanagementRoutes");
+const attendanceRoutes = require("./StudentAttendance/Routes/studentAttendanceRoutes");
 
 const app = express(); 
 const PORT = process.env.PORT || 5000;
@@ -32,6 +33,8 @@ app.use("/api/studentsDetails", studentsDetails);
 app.use("/api/staff", staffRoutes);
 app.use("/api", superAdminRoutes);
 app.use("/api", classRoutes);
+// app.use("/api/attendance", attendanceRoutes);
+app.use("/api/studentAttendance", attendanceRoutes); // Ensure this matches the expected route
 
 // Start Server
 app.listen(PORT, () => {

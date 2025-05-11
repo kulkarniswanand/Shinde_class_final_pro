@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Table, Button, Modal, Input } from "antd";
+import { Table, Button, Modal, Input, Select } from "antd"; // Import Select
 import { Link } from "react-router-dom";
 import "tailwindcss/tailwind.css";
 
@@ -9,7 +9,8 @@ const FeesManagement = () => {
   const [amountGiven, setAmountGiven] = useState(0);
   const [discount, setDiscount] = useState(0);
   const [students, setStudents] = useState([]);
-  const [filters, setFilters] = useState({ class: "", year: "", gender: "" });
+  const [filterType, setFilterType] = useState("name"); // State for selected filter type
+  const [filterValue, setFilterValue] = useState(""); // State for filter value
   const [validationMessage, setValidationMessage] = useState(""); // Add state for validation message
 
   useEffect(() => {
@@ -46,9 +47,25 @@ const FeesManagement = () => {
     setIsModalOpen(true);
   };
 
-  const handleFilterChange = (e) => {
-    setFilters({ ...filters, [e.target.name]: e.target.value });
+  const handleFilterTypeChange = (value) => {
+    setFilterType(value);
+    setFilterValue(""); // Reset filter value when filter type changes
+    setValidationMessage(""); // Clear validation message
   };
+
+  const handleFilterValueChange = (e) => {
+    const value = e.target.value;
+
+    // Validate input if "Discount" is selected
+    if (filterType === "discount" && value && isNaN(value)) {
+      setValidationMessage("Please enter a valid number for Discount.");
+      return;
+    }
+
+    setValidationMessage(""); // Clear validation message if valid
+    setFilterValue(value);
+  };
+
   const handlePrintReceipt = (record) => {
     const printWindow = window.open("", "_blank");
     printWindow.document.write(`
@@ -106,9 +123,9 @@ const FeesManagement = () => {
     const updatedData = {
       studentId: selectedStudent.registrationId,
       totalFees: parseFloat(selectedStudent.totalFees),
-      amountGiven: amountGivenSum,
+      amountGiven: amountGiven,
       paymentDate: paymentDate,
-      discount: discount,
+      discount: discount, // Include discount in the API call
     };
 
     try {
@@ -128,7 +145,7 @@ const FeesManagement = () => {
                   ...student,
                   installments: updatedInstallments,
                   remainingFees: remainingFees - amountGiven,
-                  discount: discount,
+                  discount: discount, // Update discount in the frontend state
                 }
               : student
           )
@@ -143,12 +160,23 @@ const FeesManagement = () => {
   };
   
 
-  const filteredStudents = students.filter((student) =>
-    student.name.toLowerCase().includes(filters.name?.toLowerCase() || "") &&
-    student.class.toLowerCase().includes(filters.class.toLowerCase()) &&
-    student.year.toLowerCase().includes(filters.year.toLowerCase()) &&
-    student.gender.toLowerCase().includes(filters.gender?.toLowerCase())
-  );
+  const filteredStudents = students.filter((student) => {
+    if (!filterValue) return true; // If no filter value, show all students
+    const fieldValue = student[filterType]?.toString().toLowerCase() || "";
+
+    // Handle exact match for numeric fields
+    if (["totalFees", "remainingFees", "discount", "registrationId"].includes(filterType)) {
+      return parseFloat(fieldValue) === parseFloat(filterValue);
+    }
+
+    // Handle exact match for gender
+    if (filterType === "gender") {
+      return fieldValue === filterValue.toLowerCase();
+    }
+
+    // Handle partial match for other fields
+    return fieldValue.includes(filterValue.toLowerCase());
+  });
 
   const columns = [
     { title: "Registration ID", dataIndex: "registrationId", key: "registrationId" },
@@ -198,14 +226,38 @@ const FeesManagement = () => {
         </Link>
       </div>
 
-      <div className="grid grid-cols-4 gap-4 my-4">
-        <Input name="name" placeholder="Filter by Name" className="bg-white text-black placeholder-black p-2 rounded-md" onChange={handleFilterChange} />
-        <Input name="class" placeholder="Filter by Class" className="bg-white text-black placeholder-black p-2 rounded-md" onChange={handleFilterChange} />
-        <Input name="year" placeholder="Filter by Year" className="bg-white text-black placeholder-black p-2 rounded-md" onChange={handleFilterChange} />
-        <Input name="gender" placeholder="Filter by Gender" className="bg-white text-black placeholder-black p-2 rounded-md" onChange={handleFilterChange} />
+      <div className="flex items-center gap-4 my-4">
+        <Select
+          value={filterType}
+          onChange={handleFilterTypeChange}
+          className="bg-white text-black rounded-md"
+          style={{ width: 200 }}
+        >
+          <Select.Option value="registrationId">ID</Select.Option>
+          <Select.Option value="name">Name</Select.Option>
+          <Select.Option value="class">Class</Select.Option>
+          <Select.Option value="year">Year</Select.Option>
+          <Select.Option value="gender">Gender</Select.Option>
+          <Select.Option value="totalFees">Total Fees</Select.Option>
+          <Select.Option value="remainingFees">Remaining Amount</Select.Option>
+          <Select.Option value="discount">Discount</Select.Option>
+        </Select>
+        <Input
+          value={filterValue}
+          onChange={handleFilterValueChange}
+          placeholder="Enter value"
+          className="bg-white text-black rounded-md p-2"
+        />
       </div>
+      {validationMessage && <p className="text-red-500 text-sm mb-4">{validationMessage}</p>}
 
-      <Table dataSource={filteredStudents} columns={columns} rowKey="registrationId" className="bg-gray-900 text-white" />
+      <Table
+        dataSource={filteredStudents} // Pass filtered data
+        columns={columns}
+        rowKey="registrationId"
+        className="bg-gray-900 text-white"
+        pagination={{ pageSize: 10 }} // Ensure pagination is applied
+      />
 
       <Modal
         title={<span className="text-white">Update Fee Details</span>}

@@ -13,7 +13,7 @@ const SuperAdminDashboard = () => {
   const handleLogout = () => {
     // Add logout logic here (e.g., clear auth tokens)
     alert("Logged out!");
-    navigate("/home"); // Redirect to login page
+    navigate("/"); // Redirect to login page
   };
 
   return (

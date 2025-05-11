@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Table, Input, Select, Button, DatePicker } from "antd"; // Import DatePicker
+import moment from "moment"; // Import moment for date formatting
 
 const StudentDetails = () => {
   const [students, setStudents] = useState([]);
@@ -18,15 +20,24 @@ const StudentDetails = () => {
   const fetchStudents = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/studentsDetails");
+      if (!response.ok) {
+        throw new Error("Failed to fetch students data");
+      }
       const data = await response.json();
       setStudents(data);
     } catch (error) {
       console.error("Error fetching students data:", error);
+      alert("Error fetching students data. Please try again later.");
     }
   };
 
   const handleEdit = (student) => {
     setEditStudent(student);
+    setErrors({});
+  };
+
+  const handleDateChange = (date, dateString) => {
+    setEditStudent({ ...editStudent, dob: dateString });
   };
 
   const validate = () => {
@@ -64,7 +75,7 @@ const StudentDetails = () => {
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
-    }
+    } 
 
     const id = editStudent.id;
 
@@ -82,25 +93,10 @@ const StudentDetails = () => {
     };
 
     try {
-      const result = await updateStudentDetails(id, formData);
-
+      await updateStudentDetails(id, formData);
       fetchStudents(); // Refresh student list after update
       onClose(); // Close the edit modal
-      setTimeout(() => {
-        alert("Student updated successfully!");
-        console.log("Student updated successfully!");
-
-        // Send WhatsApp message to student or parent
-        const studentMobile = editStudent.studentMobile;
-        const parentMobile = editStudent.parentMobile;
-        const message = `Hello, this is to inform you that ${editStudent.studentname}'s details have been updated successfully. \n\nThe updated details are: \nName - ${editStudent.studentname}, \nClass - ${editStudent.class}, \nBranch - ${editStudent.branch}, \nEmail - ${editStudent.email}, \nMobile - ${editStudent.studentMobile}, \nDOB - ${editStudent.dob}, \nParent Mobile - ${editStudent.parentMobile}, \nAdmission Date - ${editStudent.admissionDate}.`;
-        const country_code = "+91"; // Replace with your country code
-        const your_phone_number = editStudent.studentMobile; // Replace with your phone number
-        const whatsappLink = `https://wa.me/${country_code}${your_phone_number}?text=${encodeURIComponent(message)}`;
-
-        // Open the WhatsApp link in a new tab
-        window.open(whatsappLink, '_blank');
-      }, 100); // Alert appears with a small delay
+      alert("Student updated successfully!");
     } catch (error) {
       console.error("Error updating student:", error);
       alert(`Error updating student: ${error.message}`);
@@ -114,13 +110,13 @@ const StudentDetails = () => {
           method: "DELETE",
         });
 
-        const result = await response.json();
         if (!response.ok) {
-          throw new Error(result.message || "Failed to delete student");
+          throw new Error("Failed to delete student");
         }
 
         fetchStudents(); // Refresh student list after deletion
         setDeleteStudentId(null); // Close the delete modal
+        alert("Student deleted successfully!");
       } catch (error) {
         console.error("Error deleting student:", error);
         alert(`Error deleting student: ${error.message}`);
@@ -131,167 +127,165 @@ const StudentDetails = () => {
   const onClose = () => {
     setEditStudent(null);
     setDeleteStudentId(null);
+    setErrors({});
   };
 
   const filteredStudents = students.filter((student) => {
-    if (searchCriteria === "gender") {
-      return student[searchCriteria].toLowerCase() === searchValue.toLowerCase();
+    if (!searchValue) return true; // If no filter value, show all students
+    const fieldValue = student[searchCriteria]?.toString().toLowerCase() || "";
+
+    // Handle exact match for specific fields
+    if (["gender", "class", "branch"].includes(searchCriteria)) {
+      return fieldValue === searchValue.toLowerCase();
     }
-    return student[searchCriteria].toString().toLowerCase().includes(searchValue.toLowerCase());
+
+    // Handle partial match for other fields
+    return fieldValue.includes(searchValue.toLowerCase());
   });
 
-  const handleNewStudent = () => {
-    navigate("/studentRegistrationForm");
-  };
-
-  const handleDashboard = () => {
-    navigate("/admin-dashboard");
-  };
+  const columns = [
+    { title: "ID", dataIndex: "id", key: "id" },
+    { title: "Name", dataIndex: "studentname", key: "studentname" },
+    { title: "Address", dataIndex: "address", key: "address" },
+    { title: "Gender", dataIndex: "gender", key: "gender" },
+    {
+      title: "DOB",
+      dataIndex: "dob",
+      key: "dob",
+      render: (dob) => (dob ? moment(dob).format("YYYY-MM-DD") : "N/A"), // Format DOB in table
+    },
+    { title: "Parent Mobile", dataIndex: "parentMobile", key: "parentMobile" },
+    { title: "Student Mobile", dataIndex: "studentMobile", key: "studentMobile" },
+    { title: "Email", dataIndex: "email", key: "email" },
+    { title: "Class", dataIndex: "class", key: "class" },
+    { title: "Branch", dataIndex: "branch", key: "branch" },
+    { title: "Admission Date", dataIndex: "admissionDate", key: "admissionDate" },
+    {
+      title: "Action",
+      key: "action",
+      render: (_, record) => (
+        <div className="flex flex-col space-y-2">
+          <button
+            onClick={() => handleEdit(record)}
+            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+          >
+            Update
+          </button>
+          <button
+            onClick={() => setDeleteStudentId(record.id)}
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+          >
+            Delete
+          </button>
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <div className="container mx-auto p-6 bg-black min-h-screen text-white relative">
-      <button
-        onClick={handleDashboard}
-        className="bg-purple-600 hover:bg-blue-600 text-white px-2 py-1 rounded border border-white absolute top-4 right-4"
-      >
-        Go to Dashboard
-      </button>
-      <h1 className="text-3xl font-bold text-center mb-6 text-violet-600">Student Details</h1>
+    <div className="p-5 bg-gray-900 text-white min-h-screen">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-3xl font-semibold text-purple-400">Student Details</h2>
+        <Button onClick={() => navigate("/admin-dashboard")} className="bg-blue-600 hover:bg-blue-700 text-white">
+          Go to Dashboard
+        </Button>
+      </div>
 
-      {/* Search Bars and New Student Button */}
-      <div className="flex justify-between mb-6">
-        <div className="flex">
-          <select
-            value={searchCriteria}
-            onChange={(e) => setSearchCriteria(e.target.value)}
-            className="p-2 border rounded bg-gray text-black mr-2"
-          >
-            <option value="studentname">Name</option>
-            <option value="gender">Gender</option>
-            <option value="class">Class</option>
-            <option value="branch">Branch</option>
-          </select>
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            className="p-2 border rounded bg-gray text-black"
-          />
-        </div>
-        <button
-          onClick={handleNewStudent}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+      <div className="flex items-center gap-4 my-4">
+        <Select
+          value={searchCriteria}
+          onChange={(value) => setSearchCriteria(value)}
+          className="bg-gray-800 text-white rounded-md"
+          style={{ width: 200 }}
         >
+          <Select.Option value="id">ID</Select.Option>
+          <Select.Option value="studentname">Name</Select.Option>
+          <Select.Option value="address">Address</Select.Option>
+          <Select.Option value="gender">Gender</Select.Option>
+          <Select.Option value="dob">DOB</Select.Option>
+          <Select.Option value="parentMobile">Parent Mobile</Select.Option>
+          <Select.Option value="studentMobile">Student Mobile</Select.Option>
+          <Select.Option value="email">Email</Select.Option>
+          <Select.Option value="class">Class</Select.Option>
+          <Select.Option value="branch">Branch</Select.Option>
+          <Select.Option value="admissionDate">Admission Date</Select.Option>
+        </Select>
+        <Input
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+          placeholder="Enter value"
+          className="bg-gray-800 text-white rounded-md p-2"
+        />
+        <Button onClick={() => navigate("/studentRegistrationForm")} className="bg-blue-500 hover:bg-blue-600 text-white">
           New Student
-        </button>
+        </Button>
       </div>
 
-      {/* Success Message */}
-      {successMessage && (
-        <div className="bg-green-500 text-white p-2 rounded mb-4 text-center">
-          {successMessage}
-        </div>
-      )}
-
-      {/* Student Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse border border-gray-300 shadow-lg bg-white">
-          <thead className="bg-gray-800 text-violet-300 text-center">
-            <tr>
-              {["ID", "Name", "Address", "Gender", "DOB", "Parent Mobile", "Student Mobile", "Email", "Class", "Branch", "Admission Date", "Action"].map((heading) => (
-                <th key={heading} className="p-3 text-left border border-gray-300 text-center">{heading}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filteredStudents.map((student) => (
-              <tr key={student.id} className="bg-black hover:bg-gray-900">
-                <td className="p-3 border text-center">{student.id}</td>
-                <td className="p-3 border text-center">{student.studentname}</td>
-                <td className="p-3 border text-center">{student.address}</td>
-                <td className="p-3 border text-center">{student.gender}</td>
-                <td className="p-3 border text-center">{student.dob}</td>
-                <td className="p-3 border text-center">{student.parentMobile}</td>
-                <td className="p-3 border text-center">{student.studentMobile}</td>
-                <td className="p-3 border text-center">{student.email}</td>
-                <td className="p-3 border text-center">{student.class}</td>
-                <td className="p-3 border text-center">{student.branch}</td>
-                <td className="p-3 border text-center">{student.admissionDate}</td>
-                <td className="p-3 border">
-                  <div className="flex flex-col space-y-2">
-                    <button
-                      onClick={() => handleEdit(student)}
-                      className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition duration-300 ease-in-out transform hover:scale-105"
-                    >
-                      Update
-                    </button>
-                    <button
-                      onClick={() => setDeleteStudentId(student.id)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition duration-300 ease-in-out transform hover:scale-105"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Table
+        dataSource={filteredStudents}
+        columns={columns}
+        rowKey="id"
+        className="bg-gray-800 text-white"
+        pagination={{ pageSize: 10 }}
+      />
 
       {/* Edit Student Modal */}
       {editStudent && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
           <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-1/2">
-            <h2 className="text-2xl font-semibold mb-4 text-violet-600">Edit Student</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-purple-400">Edit Student</h2>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-white mb-1">Name</label>
-                <input type="text" placeholder="Name" value={editStudent.studentname} onChange={(e) => setEditStudent({ ...editStudent, studentname: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" required />
+                <input type="text" placeholder="Name" value={editStudent.studentname} onChange={(e) => setEditStudent({ ...editStudent, studentname: e.target.value })} className="p-2 border rounded bg-gray-700 text-white w-full" required />
                 {errors.studentname && <p className="text-red-500 text-sm">{errors.studentname}</p>}
               </div>
               <div>
                 <label className="block text-white mb-1">Address</label>
-                <input type="text" placeholder="Address" value={editStudent.address} onChange={(e) => setEditStudent({ ...editStudent, address: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" />
+                <input type="text" placeholder="Address" value={editStudent.address} onChange={(e) => setEditStudent({ ...editStudent, address: e.target.value })} className="p-2 border rounded bg-gray-700 text-white w-full" />
               </div>
               <div>
                 <label className="block text-white mb-1">Gender</label>
-                <input type="text" placeholder="Gender" value={editStudent.gender} onChange={(e) => setEditStudent({ ...editStudent, gender: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" />
+                <input type="text" placeholder="Gender" value={editStudent.gender} onChange={(e) => setEditStudent({ ...editStudent, gender: e.target.value })} className="p-2 border rounded bg-gray-700 text-white w-full" />
               </div>
               <div>
                 <label className="block text-white mb-1">DOB</label>
-                <input type="date" value={editStudent.dob} onChange={(e) => setEditStudent({ ...editStudent, dob: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" />
+                <DatePicker
+                  value={editStudent.dob ? moment(editStudent.dob, "YYYY-MM-DD") : null}
+                  onChange={handleDateChange}
+                  format="YYYY-MM-DD"
+                  className="w-full bg-gray-700 text-white"
+                />
               </div>
               <div>
                 <label className="block text-white mb-1">Parent Mobile</label>
-                <input type="text" placeholder="Parent Mobile" value={editStudent.parentMobile} onChange={(e) => setEditStudent({ ...editStudent, parentMobile: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" />
+                <input type="text" placeholder="Parent Mobile" value={editStudent.parentMobile} onChange={(e) => setEditStudent({ ...editStudent, parentMobile: e.target.value })} className="p-2 border rounded bg-gray-700 text-white w-full" />
                 {errors.parentMobile && <p className="text-red-500 text-sm">{errors.parentMobile}</p>}
               </div>
               <div>
                 <label className="block text-white mb-1">Student Mobile</label>
-                <input type="text" placeholder="Student Mobile" value={editStudent.studentMobile} onChange={(e) => setEditStudent({ ...editStudent, studentMobile: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" />
+                <input type="text" placeholder="Student Mobile" value={editStudent.studentMobile} onChange={(e) => setEditStudent({ ...editStudent, studentMobile: e.target.value })} className="p-2 border rounded bg-gray-700 text-white w-full" />
                 {errors.studentMobile && <p className="text-red-500 text-sm">{errors.studentMobile}</p>}
               </div>
               <div>
                 <label className="block text-white mb-1">Email</label>
-                <input type="email" placeholder="Email" value={editStudent.email} onChange={(e) => setEditStudent({ ...editStudent, email: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" required />
+                <input type="email" placeholder="Email" value={editStudent.email} onChange={(e) => setEditStudent({ ...editStudent, email: e.target.value })} className="p-2 border rounded bg-gray-700 text-white w-full" required />
                 {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
               </div>
               <div>
                 <label className="block text-white mb-1">Class</label>
-                <input type="text" placeholder="Class" value={editStudent.class} onChange={(e) => setEditStudent({ ...editStudent, class: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" required />
+                <input type="text" placeholder="Class" value={editStudent.class} onChange={(e) => setEditStudent({ ...editStudent, class: e.target.value })} className="p-2 border rounded bg-gray-700 text-white w-full" required />
                 {errors.class && <p className="text-red-500 text-sm">{errors.class}</p>}
               </div>
               <div>
                 <label className="block text-white mb-1">Branch</label>
-                <input type="text" placeholder="Branch" value={editStudent.branch} onChange={(e) => setEditStudent({ ...editStudent, branch: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" required />
+                <input type="text" placeholder="Branch" value={editStudent.branch} onChange={(e) => setEditStudent({ ...editStudent, branch: e.target.value })} className="p-2 border rounded bg-gray-700 text-white w-full" required />
                 {errors.branch && <p className="text-red-500 text-sm">{errors.branch}</p>}
               </div>
               <div>
                 <label className="block text-white mb-1">Admission Date</label>
-                <input type="date" value={editStudent.admissionDate} onChange={(e) => setEditStudent({ ...editStudent, admissionDate: e.target.value })} className="p-2 border rounded bg-gray text-black w-full" />
+                <input type="date" value={editStudent.admissionDate} onChange={(e) => setEditStudent({ ...editStudent, admissionDate: e.target.value })} className="p-2 border rounded bg-gray-700 text-white w-full" />
               </div>
             </div>
 
@@ -317,7 +311,7 @@ const StudentDetails = () => {
       {deleteStudentId && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
           <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-1/3">
-            <h2 className="text-2xl font-semibold mb-4 text-violet-600">Confirm Delete</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-purple-400">Confirm Delete</h2>
             <p className="mb-4 text-white">Are you sure you want to delete this student?</p>
             <div className="flex justify-end">
               <button

@@ -41,7 +41,7 @@ const Footer = () => {
           Unlock Your Potential with Shinde Classes!
         </h3>
         <Link
-          to="/admissions"
+          to="/StudentRegistrationForm"
           className="px-6 py-3 bg-yellow-500 text-black rounded-full font-medium hover:bg-yellow-400 hover:text-black transition-all duration-300 shadow-md transform hover:scale-105"
         >
           Enroll Now

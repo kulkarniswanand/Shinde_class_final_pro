@@ -42,4 +42,18 @@ const updateFees = async (req, res) => {
   }
 };
 
-module.exports = { getStudentsWithFees, updateFees };
+const { updateFees: updateFeesModel } = require("../Model/FeesManagementModel");
+
+const updateFeesHandler = async (req, res) => {
+  const { studentId, totalFees, amountGiven, paymentDate, discount } = req.body;
+
+  try {
+    await updateFeesModel(studentId, totalFees, amountGiven, paymentDate, discount);
+    res.status(200).json({ success: true, message: "Fees updated successfully" });
+  } catch (error) {
+    console.error("Error in updateFeesHandler:", error);
+    res.status(500).json({ success: false, message: "Failed to update fees" });
+  }
+};
+
+module.exports = { getStudentsWithFees, updateFees, updateFeesHandler };

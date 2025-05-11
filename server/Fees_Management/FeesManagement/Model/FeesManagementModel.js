@@ -11,11 +11,9 @@ const getStudentsWithFees = async () => {
           s.gender, 
           s.branch,
 
-          -- Use COALESCE to prioritize data from feesManagement if it exists
+          -- Fetch total fees from feesstructure or feesManagement
           COALESCE(fm.totalFees, fs.totalAmount) AS totalFees,
-          fm.amountGiven,
           fm.discount,
-          fm.remainingFees,
           fm.paymentDate
 
       FROM students s
@@ -33,6 +31,10 @@ const getStudentsWithFees = async () => {
         [student.studentId]
       );
       student.installments = installments;
+
+      // Calculate total paid and remaining fees dynamically
+      const totalPaid = installments.reduce((sum, inst) => sum + inst.amount, 0);
+      student.remainingFees = student.totalFees - totalPaid;
     }
 
     return results;
@@ -42,12 +44,9 @@ const getStudentsWithFees = async () => {
   }
 };
 
-
-
-
-const updateFees = async (studentId, totalFees, amountGiven, paymentDate) => {
+const updateFees = async (studentId, totalFees, amountGiven, paymentDate, discount) => {
   try {
-    console.log("Received:", { studentId, totalFees, amountGiven, paymentDate });
+    console.log("Received:", { studentId, totalFees, amountGiven, paymentDate, discount });
 
     // 1. Insert installment
     const [insertResult] = await db.query(
@@ -62,7 +61,7 @@ const updateFees = async (studentId, totalFees, amountGiven, paymentDate) => {
       [studentId]
     );
     const totalPaid = installments[0].totalPaid || 0;
-    const remainingFees = totalFees - totalPaid;
+    const remainingFees = totalFees - totalPaid - discount;
 
     console.log("Total Paid:", totalPaid, "Remaining:", remainingFees);
 
@@ -75,27 +74,25 @@ const updateFees = async (studentId, totalFees, amountGiven, paymentDate) => {
     if (existCheck[0].count > 0) {
       const [updateRes] = await db.query(
         `UPDATE feesManagement 
-         SET totalFees = ?, amountGiven = ?, remainingFees = ?, paymentDate = ?
+         SET totalFees = ?, amountGiven = ?, remainingFees = ?, paymentDate = ?, discount = ?
          WHERE studentId = ?`,
-        [totalFees, totalPaid, remainingFees, paymentDate, studentId]
+        [totalFees, totalPaid, remainingFees, paymentDate, discount, studentId]
       );
       console.log("Updated feesManagement:", updateRes);
     } else {
       const [insertMgmtRes] = await db.query(
         `INSERT INTO feesManagement 
-         (studentId, totalFees, amountGiven, remainingFees, paymentDate) 
-         VALUES (?, ?, ?, ?, ?)`,
-        [studentId, totalFees, totalPaid, remainingFees, paymentDate]
+         (studentId, totalFees, amountGiven, remainingFees, paymentDate, discount) 
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [studentId, totalFees, totalPaid, remainingFees, paymentDate, discount]
       );
       console.log("Inserted feesManagement:", insertMgmtRes);
     }
 
   } catch (error) {
     console.error("Error updating fees:", error);
-    return { success: false, message: "Database error during update" };
+    throw error;
   }
 };
-
-
 
 module.exports = { getStudentsWithFees, updateFees };

@@ -10,13 +10,13 @@ const dashboardOptions = [
   { id: 4, name: "Attendance", image: "/images/Dashboard/Attendance.jpg", route: "/attendance" },
   { id: 5, name: "Exam Schedule", image: "/images/Dashboard/Exam_Schedule.jpg", route: "/ExamsScedule" },
   { id: 6, name: "Staff Management", image: "/images/Dashboard/Staff_Management.jpg", route: "/staff-management" },
-  { id: 7, name: "Certificates", image: "/images/Dashboard/Certificates.jpg", route: "/certificates" },
-  { id: 8, name: "Exam Marks", image: "/images/Dashboard/Exam_Marks.jpg", route: "/exam-marks" },
-  { id: 9, name: "Results", image: "/images/Dashboard/Results.jpg", route: "/results" },
+  // { id: 7, name: "Certificates", image: "/images/Dashboard/Certificates.jpg", route: "/certificates" },
+  // { id: 8, name: "Exam Marks", image: "/images/Dashboard/Exam_Marks.jpg", route: "/exam-marks" },
+  // { id: 9, name: "Results", image: "/images/Dashboard/Results.jpg", route: "/results" },
   { id: 10, name: "Fees Structure", image: "/images/Dashboard/Fees_Management.jpg", route: "/FeeStructure" },
   { id: 10, name: "Class Management", image: "/images/Dashboard/classmanage.png", route: "/classmanagement" },
 
-];
+]; 
 
 const AdminDashboard = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);

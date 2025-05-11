@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const StudentRegistrationForm = () => {
+const SimpleRegistrationForm = () => {
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -301,4 +301,4 @@ const StudentRegistrationForm = () => {
   );
 };
 
-export default StudentRegistrationForm;
+export default SimpleRegistrationForm;
