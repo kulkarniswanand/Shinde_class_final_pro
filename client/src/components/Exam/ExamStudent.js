@@ -255,7 +255,7 @@ const ExamStudent = () => {
             <h1 className="text-xl font-bold text-gray-800">Shinde Classes</h1>
           </div>
           <button
-            onClick={() => navigate("/admin-dashboard")}
+            onClick={() => navigate("/StudentDashboard")}
             className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-all"
           >
             Go to Dashboard
