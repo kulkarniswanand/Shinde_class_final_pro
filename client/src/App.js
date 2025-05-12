@@ -44,6 +44,7 @@ import TermsOfService from "./pages/TermsOfService";
 import Admissions from "./pages/Admissions";
 import Careers from "./pages/Careers";
 import Results from "./components/Exam/Result";
+import ExamStudent from "./components/Exam/ExamStudent";
 
 // import StudentRegistration from './pages/StudentRegistration';
 
@@ -79,6 +80,7 @@ function MainApp() {
     '/admissions',
     '/careers',
     '/results',
+    '/examstudent',
   ];
 
   return (
@@ -150,6 +152,8 @@ function MainApp() {
         <Route path="/admissions" element={<Admissions />} />
         <Route path="/careers" element={<Careers />} />
         <Route path="/results" element={<Results />} />
+        <Route path="/examstudent" element={<ExamStudent />} />
+        
         {/* <Route path="/student-registration" element={<StudentRegistration />} /> */}
       </Routes>
     </div>
