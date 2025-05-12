@@ -43,6 +43,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Admissions from "./pages/Admissions";
 import Careers from "./pages/Careers";
+import Results from "./components/Exam/Result";
 
 // import StudentRegistration from './pages/StudentRegistration';
 
@@ -77,6 +78,7 @@ function MainApp() {
     '/terms-of-service',
     '/admissions',
     '/careers',
+    '/results',
   ];
 
   return (
@@ -147,6 +149,7 @@ function MainApp() {
         <Route path="/terms-of-service" element={<TermsOfService />} />
         <Route path="/admissions" element={<Admissions />} />
         <Route path="/careers" element={<Careers />} />
+        <Route path="/results" element={<Results />} />
         {/* <Route path="/student-registration" element={<StudentRegistration />} /> */}
       </Routes>
     </div>
