@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom"; // Import Link from React Router
+import { Link as ScrollLink } from "react-scroll"; // Import Link from react-scroll
+import { Link } from "react-router-dom";
 import {
   FaFacebook,
   FaTwitter,
@@ -108,27 +109,30 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Navigation Links (Updated with React Router Links) */}
+          {/* Navigation Links with Smooth Scrolling */}
           <div>
             <h3 className="text-xl font-semibold mb-4 border-b-2 border-primary inline-block">
               Navigation
             </h3>
             <ul className="space-y-3">
               {[
-                { name: "Home", path: "/" },
-                { name: "About Us", path: "/about-us" },
-                { name: "Our Facilities", path: "/our-facilities" },
-                { name: "Achievements", path: "/achievements" },
-                { name: "Gallery", path: "/gallery" },
-                { name: "Contact Us", path: "/contact-us" },
-              ].map(({ name, path }, index) => (
+                { name: "Home", to: "home" },
+                { name: "About Us", to: "about" },
+                { name: "Our Facilities", to: "features" },
+                { name: "Achievements", to: "achievements" },
+                { name: "Gallery", to: "gallery" },
+                { name: "Contact Us", to: "contact" },
+              ].map(({ name, to }, index) => (
                 <li key={index}>
-                  <Link
-                    to={path}
-                    className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105"
+                  <ScrollLink
+                    to={to}
+                    smooth={true}
+                    duration={500}
+                    offset={-70} // Adjust offset for fixed navbar
+                    className="text-gray-400 hover:text-primary hover:underline transition transform hover:scale-105 cursor-pointer"
                   >
                     {name}
-                  </Link>
+                  </ScrollLink>
                 </li>
               ))}
             </ul>

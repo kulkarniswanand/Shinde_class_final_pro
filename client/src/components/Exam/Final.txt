@@ -98,10 +98,6 @@ useEffect(() => {
         const data = await response.json();
         console.log("Exam created successfully:", data);
 
-        // WhatsApp logic for exam details
-        const whatsappMessage = `Exam Details:\nName: ${examData.name}\nSubject: ${examData.subject}\nClass: ${examData.standard}\nDate & Time: ${new Date(examData.date).toLocaleString()}\nDuration: ${examData.duration} minutes\nTotal Marks: ${examData.totalMarks}`;
-        window.open(`https://wa.me/?text=${encodeURIComponent(whatsappMessage)}`, "_blank");
-
         // Reset form and questions
         setFormData({ name: "", date: "", duration: "", standard: "", subject: "" });
         setNewExamQuestions([]);
@@ -208,34 +204,23 @@ const answerQuestion = (value) => {
   };
 
   const handleSubmitExam = async () => {
-    if (!currentExam) return;
+    const answersData = currentExam.questions.map((question) => ({
+        examId: currentExam.id,
+        questionId: question.id,
+        studentId: 1, // Replace with the actual student ID
+        answer: examAnswers[question.id] || "",
+        isCorrect: examAnswers[question.id] === question.correctAnswer,
+        marksObtained: examAnswers[question.id] === question.correctAnswer ? question.marks : 0,
+    }));
 
     try {
-        // Prepare answers data
-        const answersData = currentExam.questions.map((question) => ({
-            examId: currentExam.id,
-            questionId: question.id,
-            studentId: 1, // Replace with the actual student ID
-            answer: examAnswers[question.id] || "",
-            isCorrect: examAnswers[question.id] === question.correctAnswer,
-            marks: question.marks,
-        }));
-
-        console.log("Submitting answers:", answersData); // Debugging log
-
-        // Make API call to submit answers
         const response = await fetch("/api/exams/submit-answers", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(answersData),
         });
 
-        console.log("Response Status:", response.status); // Debugging log
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error("Error Response:", errorData); // Log error response from the backend
-            throw new Error("Failed to submit exam answers");
-        }
+        if (!response.ok) throw new Error("Failed to submit exam answers");
 
         const data = await response.json();
         console.log("Exam answers submitted successfully:", data);
@@ -248,7 +233,6 @@ const answerQuestion = (value) => {
         setCurrentExam(null);
     } catch (error) {
         console.error("Error submitting exam answers:", error);
-        alert("Failed to submit the exam. Please try again.");
     }
 };
 
@@ -300,7 +284,7 @@ const handleUpdateExamStatus = async (id, status) => {
     <div className="min-h-screen bg-gray-100">
       {/* Navbar */}
       <header className="bg-white border-b shadow-sm sticky top-0 z-10">
-        <div className="max-w-[90%] mx-auto px-6 py-4 flex justify-between items-center"> {/* Changed max-w-6xl to max-w-[90%] and added mx-auto */}
+        <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <div className="bg-emerald-600 text-white font-bold rounded-lg p-2 text-xl">SC</div>
             <h1 className="text-xl font-bold text-gray-800">Shinde Classes</h1>
@@ -336,7 +320,7 @@ const handleUpdateExamStatus = async (id, status) => {
         </div>
       </header>
       {/* Main Content */}
-      <main className="max-w-[90%] mx-auto px-6 py-8 space-y-8"> {/* Changed w-full to max-w-[90%] and added mx-auto */}
+      <main className="max-w-6xl mx-auto px-6 py-8 space-y-8">
         {/* Go to Dashboard Button */}
         {/* <div className="flex justify-end">
           <button
@@ -349,8 +333,8 @@ const handleUpdateExamStatus = async (id, status) => {
         {/* Student Mode */}
         {activeTab === "student" && !examPortalOpen && (
           <div className="space-y-3">
-            <h1 className="text-2xl font-bold text-gray-800">Welcome</h1>
-            {/* <p className="text-gray-600">Class 8</p> */}
+            <h1 className="text-2xl font-bold text-gray-800">Welcome, Student Name</h1>
+            <p className="text-gray-600">Class 8</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               {/* Upcoming Exams */}
               <div className="bg-white p-8 rounded-lg shadow-md">
@@ -408,7 +392,9 @@ const handleUpdateExamStatus = async (id, status) => {
                           </div>
                           <button
                             className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
-                            onClick={() => navigate("/results", { state: { exam } })} // Pass exam data to /results
+                            onClick={() => {
+                              alert("View results functionality not implemented yet.");
+                            }}
                           >
                             View Results
                           </button>
@@ -660,6 +646,12 @@ const handleUpdateExamStatus = async (id, status) => {
                                 >
                                   Delete
                                 </button>
+                                <button
+                                    onClick={() => handleUpdateExamStatus(exam.id, "completed")}
+                                    className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-all"
+                                >
+                                    Mark as Completed
+                                </button>
                               </div>
                             </li>
                           ))}
@@ -676,55 +668,24 @@ const handleUpdateExamStatus = async (id, status) => {
                       <ul className="space-y-6">
                         {exams
                           .filter((exam) => exam.status === "completed")
-                          .map((exam) => {
-                            const score = exam.score || 0; // Default to 0 if score is missing
-                            const totalMarks = exam.totalMarks || 1; // Default to 1 to avoid division by zero
-                            const percentage = Math.round((score / totalMarks) * 100);
-                        
-                            return (
-                              <li key={exam.id} className="p-4 border rounded-lg shadow-sm flex justify-between items-center">
-                                  <div>
-                                      <h4 className="text-lg font-semibold text-gray-700">{exam.name}</h4>
-                                      <p className="text-gray-600">Subject: {exam.subject}</p>
-                                      <p className="text-gray-600">Class: {exam.standard}</p>
-                                      <div className="mt-2">
-                                          <div className="flex items-center gap-2">
-                                              <span className="text-sm font-medium">Score: {score}/{totalMarks}</span>
-                                              <span className={`text-xs px-2 py-1 rounded-full ${
-                                                  percentage >= 80
-                                                      ? "bg-green-100 text-green-800"
-                                                      : percentage >= 60
-                                                          ? "bg-yellow-100 text-yellow-800"
-                                                          : "bg-red-100 text-red-800"
-                                              }`}>
-                                                  {percentage}%
-                                              </span>
-                                          </div>
-                                          <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
-                                              <div
-                                                  className={`h-2.5 rounded-full ${
-                                                      percentage >= 80
-                                                          ? "bg-green-500"
-                                                          : percentage >= 60
-                                                              ? "bg-yellow-500"
-                                                              : "bg-red-500"
-                                                  }`}
-                                                  style={{
-                                                      width: `${percentage}%`,
-                                                  }}
-                                              ></div>
-                                          </div>
-                                      </div>
-                                  </div>
-                                  <button
-                                      className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
-                                      onClick={() => navigate("/results", { state: { exam } })}
-                                  >
-                                      View Results
-                                  </button>
-                              </li>
-                            );
-                          })}
+                          .map((exam) => (
+                            <li key={exam.id} className="p-4 border rounded-lg shadow-sm flex justify-between items-center">
+                              <div>
+                                <h4 className="text-lg font-semibold text-gray-700">{exam.name}</h4>
+                                <p className="text-gray-600">Subject: {exam.subject}</p>
+                                <p className="text-gray-600">Class: {exam.standard}</p>
+                                <p className="text-gray-600">Score: {exam.score}/{exam.totalMarks}</p>
+                              </div>
+                              <button
+                                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
+                                onClick={() => {
+                                  alert("View results functionality not implemented yet.");
+                                }}
+                              >
+                                View Results
+                              </button>
+                            </li>
+                          ))}
                       </ul>
                     ) : (
                       <p className="text-gray-500">No completed exams available.</p>

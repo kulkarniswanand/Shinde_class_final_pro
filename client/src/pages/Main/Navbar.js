@@ -5,9 +5,16 @@ import { FaHome, FaInfoCircle, FaCogs, FaTrophy, FaImages, FaPhone, FaSignInAlt 
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isDarkMode] = useState(true); // Add isDarkMode state
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false); // Add profile menu state
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
+  };
+
+  const handleLogout = () => {
+    // Add logout logic here
+    console.log("User logged out");
   };
 
   return (
@@ -29,7 +36,7 @@ const Navbar = () => {
 
             <RouterLink
               to="/login"
-              className="text-white px-4 py-2 rounded-full font-medium bg-black border-2 border-white hover:bg-white hover:text-black transition-all duration-300 ease-in-out"
+              className="text-white px-4 py-2 rounded-full font-medium bg-black border-2 border-white hover:bg-white hover:text-black transition-all duration-300 ease-in-out shadow-md flex items-center space-x-2"
             >
               <FaSignInAlt className="inline-block mr-2" />
               Login

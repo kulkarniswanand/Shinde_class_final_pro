@@ -5,7 +5,7 @@ const LoginForm = () => {
   const [role, setRole] = useState("user");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate(); // React Router navigation hook
+  const navigate = useNavigate(); // React Router navigation hook 
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -67,7 +67,7 @@ const LoginForm = () => {
             >
               <option value="superadmin">Super Admin</option>
               <option value="admin">Admin</option>
-              <option value="user">User</option>
+              {/* <option value="user">User</option> */}
               <option value="student">Student</option>
             </select>
           </div>

@@ -3,7 +3,7 @@ const Staff = require("../Model/staffModel");
 // Get all staff
 exports.getAllStaff = async (req, res) => {
     try {
-        const staff = await Staff.getAllStaff();
+        const staff = await Staff.getAllStaff(); 
         res.status(200).json(staff);
     } catch (error) {
         res.status(500).json({ message: "Error retrieving staff details", error });
@@ -24,20 +24,24 @@ exports.getStaffById = async (req, res) => {
 // Create new staff
 exports.createStaff = async (req, res) => {
     try {
-        const { id: staffId, name, address, contact, designation, join_date, email, branch } = req.body;
+        const { id, name, contact, designation, join_date, email, address, branch } = req.body;
 
-        // Validate branch
-        const validBranches = ["Pune", "Chinchani", "Palus"];
-        if (!validBranches.includes(branch)) {
+        // Validate required fields
+        if (!name || !contact || !designation || !join_date || !email || !address || !branch) {
+            return res.status(400).json({ message: "All fields are required." });
+        }
+
+        // Case-insensitive branch validation
+        const validBranches = ["pune", "chinchani", "palus"];
+        if (!validBranches.includes(branch.trim().toLowerCase())) {
             return res.status(400).json({ message: "Invalid branch. Allowed branches: Pune, Chinchani, Palus" });
         }
 
-        // Format join_date to YYYY-MM-DD
-        const formattedJoinDate = new Date(join_date).toISOString().split('T')[0];
-
-        const id = await Staff.createStaff({ id: staffId, name, address, contact, designation, join_date: formattedJoinDate, email, branch });
-        res.status(201).json({ message: "Staff added successfully", id });
+        const newId = id || null; // Provide a default value for `id` if not supplied
+        const staffId = await Staff.createStaff({ id: newId, name, contact, designation, join_date, email, address, branch });
+        res.status(201).json({ message: "Staff added successfully", id: staffId });
     } catch (error) {
+        console.error("Error adding staff:", error);
         res.status(500).json({ message: "Error adding staff", error });
     }
 };

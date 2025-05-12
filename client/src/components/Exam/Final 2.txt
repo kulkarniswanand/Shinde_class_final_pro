@@ -98,10 +98,6 @@ useEffect(() => {
         const data = await response.json();
         console.log("Exam created successfully:", data);
 
-        // WhatsApp logic for exam details
-        const whatsappMessage = `Exam Details:\nName: ${examData.name}\nSubject: ${examData.subject}\nClass: ${examData.standard}\nDate & Time: ${new Date(examData.date).toLocaleString()}\nDuration: ${examData.duration} minutes\nTotal Marks: ${examData.totalMarks}`;
-        window.open(`https://wa.me/?text=${encodeURIComponent(whatsappMessage)}`, "_blank");
-
         // Reset form and questions
         setFormData({ name: "", date: "", duration: "", standard: "", subject: "" });
         setNewExamQuestions([]);
@@ -300,7 +296,7 @@ const handleUpdateExamStatus = async (id, status) => {
     <div className="min-h-screen bg-gray-100">
       {/* Navbar */}
       <header className="bg-white border-b shadow-sm sticky top-0 z-10">
-        <div className="max-w-[90%] mx-auto px-6 py-4 flex justify-between items-center"> {/* Changed max-w-6xl to max-w-[90%] and added mx-auto */}
+        <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <div className="bg-emerald-600 text-white font-bold rounded-lg p-2 text-xl">SC</div>
             <h1 className="text-xl font-bold text-gray-800">Shinde Classes</h1>
@@ -336,7 +332,7 @@ const handleUpdateExamStatus = async (id, status) => {
         </div>
       </header>
       {/* Main Content */}
-      <main className="max-w-[90%] mx-auto px-6 py-8 space-y-8"> {/* Changed w-full to max-w-[90%] and added mx-auto */}
+      <main className="max-w-6xl mx-auto px-6 py-8 space-y-8">
         {/* Go to Dashboard Button */}
         {/* <div className="flex justify-end">
           <button
@@ -349,8 +345,8 @@ const handleUpdateExamStatus = async (id, status) => {
         {/* Student Mode */}
         {activeTab === "student" && !examPortalOpen && (
           <div className="space-y-3">
-            <h1 className="text-2xl font-bold text-gray-800">Welcome</h1>
-            {/* <p className="text-gray-600">Class 8</p> */}
+            <h1 className="text-2xl font-bold text-gray-800">Welcome, Student Name</h1>
+            <p className="text-gray-600">Class 8</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               {/* Upcoming Exams */}
               <div className="bg-white p-8 rounded-lg shadow-md">
@@ -1101,9 +1097,9 @@ const handleUpdateExamStatus = async (id, status) => {
                 </form>
             </div>
         )}
-      </main>
+      </main> 
     </div>
   );
 };
 
-export default ExamManagement;
+export default ExamManagement; 

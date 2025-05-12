@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 const dashboardOptions = [
   { id: 1, name: "Student Registration", image: "/images/Dashboard/student_registration.jpeg", route: "/StudentRegistrationForm" },
-  // { id: 4, name: "Attendance", image: "/images/Dashboard/Attendance.jpg", route: "/attendance" },
-  { id: 5, name: "Exam Schedule", image: "/images/Dashboard/Exam Schedule.jpg", route: "/ExamsSchedule" },
+  { id: 5, name: "Exam Schedule", image: "/images/Dashboard/Exam Schedule.jpg", route: "/ExamsScedule" }, // Corrected route
   { id: 7, name: "Certificates", image: "/images/Dashboard/Certificates.jpg", route: "/certificates" },
   { id: 9, name: "Results", image: "/images/Dashboard/Results.jpg", route: "/results" },
 ];
@@ -81,7 +80,7 @@ const StudentDashboard = () => {
         {dashboardOptions.map((option) => (
           <div
             key={option.id}
-            onClick={() => navigate(option.route)}
+            onClick={() => navigate(option.route)} // Navigate to the correct route
             className={`flex flex-col items-center justify-center ${isDarkMode ? "bg-gray-800" : "bg-white"} shadow-lg rounded-xl p-6 hover:scale-105 transition-transform hover:shadow-xl cursor-pointer`}
           >
             <img

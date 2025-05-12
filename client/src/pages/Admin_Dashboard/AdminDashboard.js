@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from "react"; // Removed useEffect and io imports
 import { useNavigate } from "react-router-dom";
 import { AttendanceProvider } from "../../context/AttendanceContext"; // Import AttendanceProvider
 import StudentRegistrationForm from "../../components/student_registration/studentRegistration";
@@ -16,78 +16,77 @@ const dashboardOptions = [
   { id: 10, name: "Fees Structure", image: "/images/Dashboard/Fees_Management.jpg", route: "/FeeStructure" },
   { id: 10, name: "Class Management", image: "/images/Dashboard/classmanage.png", route: "/classmanagement" },
 
-]; 
+];
 
 const AdminDashboard = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false); // Removed notifications state
   const navigate = useNavigate();
+
+  // Removed useEffect for WebSocket connection
 
   // Toggle theme handler
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
   // Handle Logout
   const handleLogout = () => {
-    // Add logout logic here (e.g., clear auth tokens, redirect to login)
     navigate("/login");
   };
 
   return (
     <div
-      className={`min-h-screen ${
-        isDarkMode
+      className={`min-h-screen ${isDarkMode
           ? "bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700"
           : "bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300"
-      } py-10 transition-colors duration-300`}
+        } py-10 transition-colors duration-300`}
     >
       {/* Header with Profile Section */}
       <div className="flex justify-between items-center px-10">
         <h1
-          className={`text-4xl font-extrabold tracking-wide ${
-            isDarkMode ? "text-gray-100" : "text-gray-900"
-          }`}
+          className={`text-4xl font-extrabold tracking-wide ${isDarkMode ? "text-gray-100" : "text-gray-900"
+            }`}
         >
           Admin Dashboard
         </h1>
 
-        {/* User Profile */}
-        <div className="relative">
-          <div
-            className="flex items-center cursor-pointer"
-            onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-          >
-            <img
-              src="/images/shindesir.jpg" // Replace with dynamic user profile image URL
-              alt="User Profile"
-              className="w-10 h-10 rounded-full border-2 border-gray-500"
-            />
-            <p
-              className={`ml-2 font-semibold ${
-                isDarkMode ? "text-gray-200" : "text-gray-800"
-              }`}
-            >
-              Shinde class
-            </p>
-          </div>
-
-          {/* Profile Dropdown */}
-          {isProfileMenuOpen && (
+        <div className="flex items-center space-x-4">
+          {/* Removed Notification Bell */}
+          {/* User Profile */}
+          <div className="relative">
             <div
-              className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg py-2 ${
-                isDarkMode ? "bg-gray-800 text-gray-200" : "bg-white text-gray-800"
-              }`}
+              className="flex items-center cursor-pointer"
+              onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
             >
-              <p className="px-4 py-2 hover:bg-gray-600 hover:text-white cursor-pointer">
-                View Profile
-              </p>
+              <img
+                src="/images/shindesir.jpg"
+                alt="User Profile"
+                className="w-10 h-10 rounded-full border-2 border-gray-500"
+              />
               <p
-                className="px-4 py-2 hover:bg-gray-600 hover:text-white cursor-pointer"
-                onClick={handleLogout}
+                className={`ml-2 font-semibold ${isDarkMode ? "text-gray-200" : "text-gray-800"
+                  }`}
               >
-                Logout
+                Shinde class
               </p>
             </div>
-          )}
+
+            {isProfileMenuOpen && (
+              <div
+                className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg py-2 ${isDarkMode ? "bg-gray-800 text-gray-200" : "bg-white text-gray-800"
+                  }`}
+              >
+                <p className="px-4 py-2 hover:bg-gray-600 hover:text-white cursor-pointer">
+                  View Profile
+                </p>
+                <p
+                  className="px-4 py-2 hover:bg-gray-600 hover:text-white cursor-pointer"
+                  onClick={handleLogout}
+                >
+                  Logout
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -95,11 +94,10 @@ const AdminDashboard = () => {
       <div className="text-right px-10 mt-5">
         <button
           onClick={toggleTheme}
-          className={`px-4 py-2 rounded-full font-semibold ${
-            isDarkMode
+          className={`px-4 py-2 rounded-full font-semibold ${isDarkMode
               ? "bg-gray-100 text-gray-900 hover:bg-gray-200"
               : "bg-gray-800 text-gray-100 hover:bg-gray-900"
-          } transition-all duration-300`}
+            } transition-all duration-300`}
         >
           {isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
         </button>
@@ -111,9 +109,8 @@ const AdminDashboard = () => {
           <div
             key={option.id}
             onClick={() => navigate(option.route)}
-            className={`flex flex-col items-center justify-center ${
-              isDarkMode ? "bg-gray-800" : "bg-white"
-            } shadow-lg rounded-xl p-6 hover:scale-105 transition-transform hover:shadow-xl cursor-pointer`}
+            className={`flex flex-col items-center justify-center ${isDarkMode ? "bg-gray-800" : "bg-white"
+              } shadow-lg rounded-xl p-6 hover:scale-105 transition-transform hover:shadow-xl cursor-pointer`}
           >
             <img
               src={option.image}
@@ -121,11 +118,10 @@ const AdminDashboard = () => {
               className="w-20 h-20 object-contain mb-5 rounded-full border-4 border-gray-600"
             />
             <p
-              className={`text-center text-lg font-semibold ${
-                isDarkMode
+              className={`text-center text-lg font-semibold ${isDarkMode
                   ? "text-gray-300 hover:text-gray-100"
                   : "text-gray-800 hover:text-gray-600"
-              }`}
+                }`}
             >
               {option.name}
             </p>

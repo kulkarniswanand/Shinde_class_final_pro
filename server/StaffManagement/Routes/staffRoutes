@@ -11,4 +11,3 @@ router.put("/:id", staffController.updateStaff);
 router.delete("/:id", staffController.deleteStaff);
  
 module.exports = router;
- 

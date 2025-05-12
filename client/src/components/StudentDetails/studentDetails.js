@@ -254,7 +254,7 @@ const StudentDetails = () => {
 
       {/* Edit Student Modal */}
       {editStudent && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75">
           <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-1/2">
             <h2 className="text-2xl font-semibold mb-4 text-purple-400">Edit Student</h2>
 
@@ -332,7 +332,7 @@ const StudentDetails = () => {
 
       {/* Delete Confirmation Modal */}
       {deleteStudentId && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75">
           <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-1/3">
             <h2 className="text-2xl font-semibold mb-4 text-purple-400">Confirm Delete</h2>
             <p className="mb-4 text-white">Are you sure you want to delete this student?</p>
@@ -352,7 +352,7 @@ const StudentDetails = () => {
             </div>
           </div>
         </div>
-      )}
+      )} 
     </div>
   );
 };

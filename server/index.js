@@ -1,17 +1,28 @@
-// const express = require('express');
-// const app = express();
-// const classRoutes = require('./Class_Management/classRoutes');
-// const branchRoutes = require('./Class_Management/branchRoutes');
+const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
 
-// app.use(express.json());
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000", // Replace with your frontend URL
+    methods: ["GET", "POST"],
+  },
+});
 
-// // Register routes
-// app.use('/api', classRoutes);
-// app.use('/api', branchRoutes);
+io.on("connection", (socket) => {
+  console.log("A user connected");
 
-// const port = 5000;
+  // Example: Send a notification
+  setInterval(() => {
+    socket.emit("notification", { message: "New update available!" });
+  }, 10000);
 
-// // ...existing code...
+  socket.on("disconnect", () => {
+    console.log("A user disconnected");
+  });
+});
 
 // app.get('/api/staff', async (req, res) => {
 //   try {
@@ -36,6 +47,6 @@
 //   }
 // });
 
-// app.listen(port, () => {
-//   console.log(`Server running on port ${port}`);
-// });
+server.listen(5000, () => {
+  console.log("Server is running on port 5000");
+});

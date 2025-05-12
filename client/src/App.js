@@ -39,6 +39,10 @@ import StaffRegistrationForm from "./components/StaffManagement/staffRegistratio
 import ClassManagement from "./components/Class_Management/ClassManagement";
 // import attendance from "./components/Attendance/AttendanceDashboard";
 import AttendanceDashboard from "./components/Attendance/AttendanceDashboard";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import Admissions from "./pages/Admissions";
+import Careers from "./pages/Careers";
 
 // import StudentRegistration from './pages/StudentRegistration';
 
@@ -69,7 +73,10 @@ function MainApp() {
     '/attendancedashboard',
     '/classmanagement',
     '/examsscedule',
-
+    '/privacy-policy',
+    '/terms-of-service',
+    '/admissions',
+    '/careers',
   ];
 
   return (
@@ -136,6 +143,10 @@ function MainApp() {
           element={<StaffRegistrationForm />}
         />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-of-service" element={<TermsOfService />} />
+        <Route path="/admissions" element={<Admissions />} />
+        <Route path="/careers" element={<Careers />} />
         {/* <Route path="/student-registration" element={<StudentRegistration />} /> */}
       </Routes>
     </div>

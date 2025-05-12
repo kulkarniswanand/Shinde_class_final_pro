@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import useBranches from "../../hooks/useBranches"; // Import the custom hook
 
 const StaffRegistrationForm = () => {
   const [formData, setFormData] = useState({
@@ -17,8 +16,6 @@ const StaffRegistrationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverMessage, setServerMessage] = useState("");
 
-  const { branches, loading: branchesLoading } = useBranches(); // Use the custom hook to fetch branches
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -34,7 +31,12 @@ const StaffRegistrationForm = () => {
     if (!formData.designation.trim()) newErrors.designation = "Designation is required.";
     if (!formData.email.match(/^\S+@\S+\.\S+$/)) newErrors.email = "Invalid email address.";
     if (!formData.address.trim()) newErrors.address = "Address is required.";
-    if (!formData.branch.trim()) newErrors.branch = "Branch is required.";
+
+    // Case-insensitive branch validation
+    const validBranches = ["pune", "chinchani", "palus"];
+    if (!validBranches.includes(formData.branch.trim().toLowerCase())) {
+      newErrors.branch = "Branch must be Pune, Chinchani, or Palus (case-insensitive).";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -60,11 +62,6 @@ const StaffRegistrationForm = () => {
       }
 
       setServerMessage("Staff registered successfully!");
-
-      // WhatsApp logic: Open chat with the specific number
-      const whatsappMessage = `New staff registered successfully:\nName: ${formData.name}\nDesignation: ${formData.designation}\nBranch: ${formData.branch}\nContact: ${formData.contact}\nEmail: ${formData.email}\nJoin Date: ${formData.join_date}\nAddress: ${formData.address}`;
-      window.open(`https://wa.me/${formData.contact}?text=${encodeURIComponent(whatsappMessage)}`, "_blank");
-
       setFormData({
         name: "",
         contact: "",
@@ -109,6 +106,7 @@ const StaffRegistrationForm = () => {
             { name: "join_date", type: "date", label: "Join Date" },
             { name: "email", type: "email", label: "Email" },
             { name: "address", type: "text", label: "Address" },
+            { name: "branch", type: "text", label: "Branch" },
           ].map((field, index) => (
             <motion.div
               key={field.name}
@@ -132,39 +130,6 @@ const StaffRegistrationForm = () => {
             </motion.div>
           ))}
 
-          {/* Branch Dropdown */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: 0.6 }}
-            className="flex flex-col"
-          >
-            <label className="block text-sm font-medium capitalize text-yellow-300 mb-2">
-              Branch
-            </label>
-            <select
-              name="branch"
-              value={formData.branch}
-              onChange={handleInputChange}
-              className="w-full px-4 py-3 bg-gray-600 border border-gray-500 rounded-lg focus:ring-2 focus:ring-yellow-400"
-              required
-            >
-              <option value="">Select Branch</option>
-              {branchesLoading ? (
-                <option disabled>Loading branches...</option>
-              ) : branches.length > 0 ? (
-                branches.map((branch) => (
-                  <option key={branch.id} value={branch.name}>
-                    {branch.name}
-                  </option>
-                ))
-              ) : (
-                <option disabled>No branches available</option>
-              )}
-            </select>
-            {errors.branch && <p className="text-red-400 text-sm mt-1">{errors.branch}</p>}
-          </motion.div>
-
           <button
             type="submit"
             className="col-span-2 w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-3 px-4 rounded-lg font-semibold transition-all duration-300"
@@ -173,7 +138,7 @@ const StaffRegistrationForm = () => {
             Submit
           </button>
         </form>
-      </motion.div>
+      </motion.div> 
     </div>
   );
 };
