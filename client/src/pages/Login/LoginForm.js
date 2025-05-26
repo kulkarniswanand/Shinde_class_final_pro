@@ -5,16 +5,53 @@ const LoginForm = () => {
   const [role, setRole] = useState("user");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate(); // React Router navigation hook 
+  const [studentName, setStudentName] = useState(""); // Added state for student name
+  const [errors, setErrors] = useState({}); // State for validation errors
+  const navigate = useNavigate(); // React Router navigation hook  
+
+  const validateForm = () => {
+    const newErrors = {};
+    // Student Name validation (only if role is student)
+    if (role === "student") {
+      if (!studentName.trim()) {
+        newErrors.studentName = "Student Name is required.";
+      } else {
+        const nameParts = studentName.trim().split(/\s+/);
+        const isCapitalized = nameParts.every(
+          (part) => part.length > 0 && part[0] === part[0].toUpperCase()
+        );
+        if (!isCapitalized) {
+          newErrors.studentName = "First letter of name and surname must be capital.";
+        }
+      }
+    }
+    // Username validation
+    if (!username.trim()) {
+      newErrors.username = "Username is required.";
+    }
+
+
+    // Password validation
+    if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters long.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0; // Return true if no errors
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
+    if (!validateForm()) return; // Stop submission if validation fails
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role, username, password }),
+        body: JSON.stringify(
+          role === "student"
+            ? { role, username, password, studentName }
+            : { role, username, password }
+        ),
       });
 
       const data = await response.json();
@@ -23,7 +60,10 @@ const LoginForm = () => {
         console.log(`Login successful as ${data.role}`);
 
         // Store username in localStorage
-        localStorage.setItem("loggedInUser", JSON.stringify({ username }));
+        localStorage.setItem(
+          "loggedInUser",
+          JSON.stringify(role === "student" ? { username, studentName } : { username })
+        );
 
         switch (data.role) {
           case "superadmin":
@@ -71,6 +111,26 @@ const LoginForm = () => {
               <option value="student">Student</option>
             </select>
           </div>
+          {role === "student" && (
+            <div className="mb-5">
+              <label htmlFor="studentName" className="block text-gray-600 font-medium">
+                Student Name:
+              </label>
+              <input
+                type="text"
+                id="studentName"
+                value={studentName}
+                onChange={(e) => {
+                  setStudentName(e.target.value);
+                  if (errors.studentName) setErrors(prev => ({ ...prev, studentName: null }));
+                }}
+                className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                placeholder="Enter your full name"
+                // 'required' attribute is good for browser-level, but JS validation is more robust
+              />
+              {errors.studentName && <p className="text-red-500 text-xs mt-1">{errors.studentName}</p>}
+            </div>
+          )}
           <div className="mb-5">
             <label htmlFor="username" className="block text-gray-600 font-medium">
               Username:
@@ -79,13 +139,18 @@ const LoginForm = () => {
               type="text"
               id="username"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => {
+                setUsername(e.target.value);
+                if (errors.username) setErrors(prev => ({ ...prev, username: null }));
+              }}
               className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder="Enter your username"
               required
             />
+            {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username}</p>}
           </div>
-          <div className="mb-6">
+          {/* Changed mb-6 to mb-5 for consistency */}
+          <div className="mb-5">
             <label htmlFor="password" className="block text-gray-600 font-medium">
               Password:
             </label>
@@ -93,11 +158,15 @@ const LoginForm = () => {
               type="password"
               id="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (errors.password) setErrors(prev => ({ ...prev, password: null }));
+              }}
               className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder="Enter your password"
               required
             />
+            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
           </div>
           <button
             type="submit"

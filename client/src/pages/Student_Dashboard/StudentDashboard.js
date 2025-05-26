@@ -5,7 +5,7 @@ const dashboardOptions = [
   { id: 1, name: "Student Registration", image: "/images/Dashboard/student_registration.jpeg", route: "/StudentRegistrationForm" },
   { id: 5, name: "Exam Schedule", image: "/images/Dashboard/Exam Schedule.jpg", route: "/ExamStudent" }, // Corrected route
   { id: 7, name: "Certificates", image: "/images/Dashboard/Certificates.jpg", route: "/certificates" },
-  { id: 9, name: "Results", image: "/images/Dashboard/Results.jpg", route: "/results" },
+  // { id: 9, name: "Results", image: "/images/Dashboard/Results.jpg", route: "/results" },
 ];
 
 const StudentDashboard = () => {
@@ -16,7 +16,7 @@ const StudentDashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch student details from localStorage (or API if needed)
+    // Fetch student details from localStorage (or API if needed) 
     const storedUsername = localStorage.getItem("username");
     const storedProfileImage = localStorage.getItem("profileImage");
     
