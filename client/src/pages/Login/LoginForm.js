@@ -32,7 +32,7 @@ const LoginForm = () => {
  
 
     // Password validation
-    if (password.length < 6) {
+    if (password.length < 6) { 
       newErrors.password = "Password must be at least 6 characters long.";
     }
 

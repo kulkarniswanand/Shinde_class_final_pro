@@ -38,6 +38,19 @@ const ExamStudent = () => {
     fetchExams();
   }, []);
 
+  // Effect to check for authentication
+  useEffect(() => {
+    const loggedInUser = localStorage.getItem("loggedInUser");
+    if (!loggedInUser) {
+      // If no user is logged in, redirect to the exam login page
+      alert("You must be logged in to access the exam. Please login first.");
+      navigate("/examstudentlogin");
+    }
+    // Optional: Further checks can be added here, e.g., verify if the user is a student
+    // or if the session is still valid, based on the structure of `loggedInUser`.
+    // For now, checking existence is the primary gate.
+  }, []);
+
   useEffect(() => {
     let timer;
     if (examStarted && timeLeft > 0) {
@@ -309,22 +322,63 @@ const ExamStudent = () => {
                   <ul className="space-y-6">
                     {exams
                       .filter((exam) => exam.status === "completed")
-                      .map((exam) => (
-                        <li key={exam.id} className="p-4 border rounded-lg shadow-sm flex justify-between items-center">
-                          <div>
-                            <h4 className="text-lg font-semibold text-gray-700">{exam.name}</h4>
-                            <p className="text-gray-600">Subject: {exam.subject}</p>
-                            <p className="text-gray-600">Class: {exam.standard}</p>
-                            <p className="text-gray-600">Score: {exam.score}/{exam.totalMarks}</p>
-                          </div>
-                          <button
-                            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
-                            onClick={() => navigate("/results", { state: { exam } })} // Pass exam data to /results
-                          >
-                            View Results
-                          </button>
-                        </li>
-                      ))}
+                      .map((exam) => {
+                        const score = parseFloat(exam.score) || 0;
+                        const totalMarks = parseFloat(exam.totalMarks) || 0;
+                        let percentage = 0;
+                        if (totalMarks > 0) {
+                          percentage = (score / totalMarks) * 100;
+                        }
+                        // Ensure percentage is between 0 and 100
+                        percentage = Math.max(0, Math.min(100, percentage));
+
+                        return (
+                          <li key={exam.id} className="p-4 border rounded-lg shadow-sm flex justify-between items-center">
+                            <div>
+                              <h4 className="text-lg font-semibold text-gray-700">{exam.name}</h4>
+                              <p className="text-gray-600">Subject: {exam.subject}</p>
+                              <p className="text-gray-600">Class: {exam.standard}</p>
+                              {/* <p className="text-gray-600">Score: {exam.score}/{exam.totalMarks}</p> */}
+                              <p className="text-gray-600">Score: {score}/{totalMarks}</p>
+                              {/* Progress Bar */}
+                              <div className="mt-2">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="text-xs font-medium text-gray-700">
+                                    Performance:  
+                                  </span>
+                                  <span className={`text-xs font-medium px-2 py-1 ml-1.5 rounded-full ${
+                                    percentage >= 80
+                                      ? "bg-green-100 text-green-800"
+                                      : percentage >= 60
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : "bg-red-100 text-red-800"
+                                  }`}>
+                                    {percentage.toFixed(0)}%
+                                  </span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                                  <div
+                                    className={`h-1.5 rounded-full ${
+                                      percentage >= 80
+                                        ? "bg-green-500"
+                                        : percentage >= 60
+                                        ? "bg-yellow-500"
+                                        : "bg-red-500"
+                                    }`}
+                                    style={{ width: `${percentage}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                            </div>
+                            <button
+                              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
+                              onClick={() => navigate("/results", { state: { exam } })} // Pass exam data to /results
+                            >
+                              View Results
+                            </button>
+                          </li>
+                        );
+                      })}
                   </ul>
                 ) : (
                   <p className="text-gray-500">No completed exams available.</p>

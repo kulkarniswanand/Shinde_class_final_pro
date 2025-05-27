@@ -8,7 +8,7 @@ const ExamManagement = () => {
   const [newQuestion, setNewQuestion] = useState({
     type: "multiple-choice",
     question: "",
-    options: ["", "", "", ""],
+    options: ["", "", "", ""], 
     correctAnswer: "",
     marks: 5,
   });
@@ -674,7 +674,7 @@ const handleUpdateExamStatus = async (id, status) => {
                     <p className="text-gray-600 mb-6">View your past exam results</p>
                     {exams.filter((exam) => exam.status === "completed").length > 0 ? (
                       <ul className="space-y-6">
-                        {exams
+                        {exams 
                           .filter((exam) => exam.status === "completed")
                           .map((exam) => {
                             const score = exam.score || 0; // Default to 0 if score is missing
