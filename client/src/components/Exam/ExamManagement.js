@@ -699,7 +699,7 @@ const handleUpdateExamStatus = async (id, status) => {
                                               }`}>
                                                   {percentage}%
                                               </span>
-                                          </div>
+                                          </div> 
                                           <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
                                               <div
                                                   className={`h-2.5 rounded-full ${

@@ -19,37 +19,63 @@ const ExamStudent = () => {
   const [timeLeft, setTimeLeft] = useState(0);
   const [examStarted, setExamStarted] = useState(false);
   const [examPortalOpen, setExamPortalOpen] = useState(false); // State to toggle exam portal
+  const [studentStandard, setStudentStandard] = useState(null);
+  const [studentName, setStudentName] = useState('');
 
   // Fetch exams from the database
   const fetchExams = async () => {
+    const loggedInUser = localStorage.getItem("loggedInUser");
+    if (!loggedInUser) {
+      // This case should ideally be caught by the auth check useEffect,
+      // but good to have a safeguard.
+      console.error("No logged in user found for fetching exams.");
+      return;
+    }
+
+    const userData = JSON.parse(loggedInUser);
+    const currentStudentStandard = userData.standard;
+
+    if (!currentStudentStandard) {
+      console.error("Student standard not found in localStorage.");
+      // Potentially alert the user or handle this error appropriately
+      return;
+    }
+
     try {
-      const response = await fetch("/api/exams");
+      // Modify the fetch URL to include the student's standard as a query parameter.
+      // The backend API (/api/exams) will need to be updated to handle this parameter
+      // and filter exams accordingly.
+      const response = await fetch(`/api/exams?standard=${encodeURIComponent(currentStudentStandard)}`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
       console.log("Fetched exams:", data);
       setExams(data); // Update the exams state
     } catch (error) {
       console.error("Error fetching exams:", error);
+      setExams([]); // Set to empty array on error to avoid rendering issues
     }
   };
 
-  // Call fetchExams on component mount
-  useEffect(() => {
-    fetchExams();
-  }, []);
-
-  // Effect to check for authentication
+  // Effect to check for authentication and then fetch exams
   useEffect(() => {
     const loggedInUser = localStorage.getItem("loggedInUser");
     if (!loggedInUser) {
       // If no user is logged in, redirect to the exam login page
       alert("You must be logged in to access the exam. Please login first.");
       navigate("/examstudentlogin");
+    } else {
+      const userData = JSON.parse(loggedInUser);
+      if (userData.standard && userData.studentName) {
+        setStudentStandard(userData.standard); // Set the student's standard
+        setStudentName(userData.studentName); // Set the student's name
+        fetchExams(); // Fetch exams only after confirming user and standard
+      } else {
+        alert("User data is incomplete (name or standard missing). Please login again.");
+        localStorage.removeItem("loggedInUser"); // Clear incomplete data
+        navigate("/examstudentlogin");
+      }
     }
-    // Optional: Further checks can be added here, e.g., verify if the user is a student
-    // or if the session is still valid, based on the structure of `loggedInUser`.
-    // For now, checking existence is the primary gate.
-  }, []);
+  }, [navigate]); // Add navigate to dependency array
 
   useEffect(() => {
     let timer;
@@ -280,7 +306,7 @@ const ExamStudent = () => {
         {/* Student Mode */}
         {!examPortalOpen && (
           <div className="space-y-3">
-            <h1 className="text-2xl font-bold text-gray-800">Welcome</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Welcome, {studentName || 'Student'} {studentStandard ? `(Class ${studentStandard})` : ''}</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               {/* Upcoming Exams */}
               <div className="bg-white p-8 rounded-lg shadow-md">
@@ -574,6 +600,6 @@ const ExamStudent = () => {
       </main>
     </div>
   );
-};
+}; 
 
 export default ExamStudent;

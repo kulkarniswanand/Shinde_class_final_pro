@@ -36,8 +36,8 @@ exports.updateExam = async (id, examData) => {
 };
 
 // Get all exams with their questions
-exports.getAllExams = async () => {
-    const query = `
+exports.getAllExams = async (standard) => {
+    let baseQuery = `
         SELECT e.id, e.name, e.subject, e.standard, e.date, e.duration, e.status, e.total_marks AS totalMarks, e.score,
                JSON_ARRAYAGG(
                    JSON_OBJECT(
@@ -51,12 +51,21 @@ exports.getAllExams = async () => {
                ) AS questions
         FROM exams e
         LEFT JOIN questions q ON e.id = q.exam_id
-        GROUP BY e.id
-        ORDER BY e.date ASC
     `;
-    const [results] = await pool.query(query);
+
+    const queryParams = [];
+
+    if (standard) {
+        baseQuery += ` WHERE e.standard = ?`;
+        queryParams.push(standard);
+    }
+
+    baseQuery += ` GROUP BY e.id ORDER BY e.date ASC`;
+
+    const [results] = await pool.query(baseQuery, queryParams);
     return results;
 };
+
 
 // Get exam by ID
 exports.getExamById = async (id) => {
@@ -162,3 +171,4 @@ exports.updateExamStatusAndScore = async (id, status, score) => {
     const [result] = await pool.query(query, values);
     return result;
 };
+ 

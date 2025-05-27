@@ -97,10 +97,10 @@ const StudentExamLoginForm = () => {
       if (response.ok) {
         console.log(`Login successful as ${data.role}`);
         
-        // Store username and studentName in localStorage for the student
+        // Store username, studentName, and standard in localStorage for the student
         localStorage.setItem(
           "loggedInUser",
-          JSON.stringify({ username, studentName }) // Simplified as role is always student
+          JSON.stringify({ username, studentName, standard: data.standard || standard }) // Use standard from response if available, else from form
         );
 
         // Since this form is for student exam login, navigate directly to ExamStudent
@@ -115,7 +115,7 @@ const StudentExamLoginForm = () => {
       alert("An error occurred while logging in. Please try again.");
     }
   };
-
+ 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
       <div className="bg-white p-8 rounded-lg shadow-lg w-100 h-100 transform transition-all hover:scale-105">

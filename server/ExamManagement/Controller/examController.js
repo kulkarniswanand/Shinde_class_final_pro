@@ -10,7 +10,7 @@ exports.createExam = async (req, res) => {
         res.status(500).json({ error: 'Failed to save exam.' });
     }
 };
-
+ 
 exports.updateExam = async (req, res) => {
     try {
         const examId = req.params.id;
@@ -25,8 +25,10 @@ exports.updateExam = async (req, res) => {
 
 exports.getAllExams = async (req, res) => {
     try {
-        const exams = await Exam.getAllExams();
+        const { standard } = req.query; // Get the standard from query parameters
+        const exams = await Exam.getAllExams(standard); // Pass standard to the model function
         res.json(exams);
+        console.log("Fetching exams for standard:", standard || "all");
     } catch (err) {
         console.error("Error fetching exams:", err);
         res.status(500).json({ error: 'Failed to fetch exams.' });
