@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom"; // Keep useLocation for redirection logic
 
 const StudentExamLoginForm = () => {
@@ -8,9 +8,39 @@ const StudentExamLoginForm = () => {
   const [studentName, setStudentName] = useState(""); // Added state for student name
   const [standard, setStandard] = useState(""); // Added state for standard
   const [branch, setBranch] = useState(""); // Added state for branch
+  const [branchOptions, setBranchOptions] = useState([]);
+  const [standardOptions, setStandardOptions] = useState([]);
   const [errors, setErrors] = useState({}); // State for validation errors  
   const navigate = useNavigate(); // React Router navigation hook  
   const location = useLocation(); // Get current location
+
+  useEffect(() => {
+    // Fetch branches
+    const fetchBranches = async () => {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/student-exam-login/branches`);
+        if (!response.ok) throw new Error('Failed to fetch branches');
+        const data = await response.json();
+        setBranchOptions(data);
+      } catch (error) {
+        console.error("Error fetching branches:", error);
+        // Optionally set an error state to display to the user
+      }
+    };
+    // Fetch standards (classes)
+    const fetchStandards = async () => {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/student-exam-login/classes`);
+        if (!response.ok) throw new Error('Failed to fetch standards');
+        const data = await response.json();
+        setStandardOptions(data);
+      } catch (error) {
+        console.error("Error fetching standards:", error);
+      }
+    };
+    fetchBranches();
+    fetchStandards();
+  }, []);
 
   const validateForm = () => {
     const newErrors = {};
@@ -53,13 +83,12 @@ const StudentExamLoginForm = () => {
     e.preventDefault();
     if (!validateForm()) return; // Stop submission if validation fails
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/login`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/student-exam-login/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
-          role === "student"
-            ? { role, username, password, studentName, standard, branch }
-            : { role, username, password }
+          // Since role is always 'student' for this form, we can simplify the body
+          { role: "student", username, password, studentName, standard, branch }
         ),
       });
 
@@ -67,34 +96,17 @@ const StudentExamLoginForm = () => {
 
       if (response.ok) {
         console.log(`Login successful as ${data.role}`);
-
-        // Store username in localStorage
+        
+        // Store username and studentName in localStorage for the student
         localStorage.setItem(
           "loggedInUser",
-          JSON.stringify(role === "student" ? { username, studentName } : { username })
+          JSON.stringify({ username, studentName }) // Simplified as role is always student
         );
 
-        switch (data.role) {
-          case "superadmin":
-            navigate("/superadmindashboard");
-            break;
-          case "admin":
-            navigate("/admin-dashboard");
-            break;
-          case "user":
-            navigate("/user-dashboard");
-            break;
-          case "student":
-            // If logging in from the exam login path, go to ExamStudent page
-            if (location.pathname === "/examstudentlogin") {
-              navigate("/ExamStudent");
-            } else {
-              navigate("/StudentDashboard"); // Default for other student logins
-            }
-            break;
-          default:
-            alert("Unknown role received.");
-        }
+        // Since this form is for student exam login, navigate directly to ExamStudent
+        // The check for location.pathname is also redundant here as this form's purpose is fixed.
+        navigate("/ExamStudent");
+
       } else {
         alert(data.message || "Login failed. Please check your credentials.");
       }
@@ -107,7 +119,7 @@ const StudentExamLoginForm = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
       <div className="bg-white p-8 rounded-lg shadow-lg w-100 h-100 transform transition-all hover:scale-105">
-        <h2 className="text-3xl font-extrabold mb-6 text-gray-800 text-center">Welcome Back!</h2>
+        <h2 className="text-3xl font-extrabold mb-6 text-gray-800 text-center">Welcome</h2>
 
         <form onSubmit={handleLogin}>
           {/* Use grid for 2-column layout on medium screens and up */}
@@ -151,8 +163,7 @@ const StudentExamLoginForm = () => {
               <label htmlFor="branch" className="block text-gray-600 font-medium">
                 Branch:
               </label>
-              <input
-                type="text"
+              <select
                 id="branch"
                 value={branch}
                 onChange={(e) => {
@@ -160,18 +171,23 @@ const StudentExamLoginForm = () => {
                   if (errors.branch) setErrors(prev => ({ ...prev, branch: null }));
                 }}
                 className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                placeholder="Enter your branch (e.g., Science, Commerce, IT)"
-              />
+              >
+                <option value="">Select Branch</option>
+                {branchOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
               {errors.branch && <p className="text-red-500 text-xs mt-1">{errors.branch}</p>}
             </div>
 
             {/* Standard (Column 1) */}
             <div className="mb-5 md:mb-0"> {/* Adjust margin for grid layout */}
                 <label htmlFor="standard" className="block text-gray-600 font-medium">
-                  Standard:
+                  Class:
                 </label>
-                <input
-                  type="text"
+                <select
                   id="standard"
                   value={standard}
                   onChange={(e) => {
@@ -179,8 +195,14 @@ const StudentExamLoginForm = () => {
                     if (errors.standard) setErrors(prev => ({ ...prev, standard: null }));
                   }}
                   className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  placeholder="Enter your standard (e.g., 10th, 12th, FY)"
-                />
+                >
+                  <option value="">Select Class</option>
+                  {standardOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
                 {errors.standard && <p className="text-red-500 text-xs mt-1">{errors.standard}</p>}
               </div>
 
@@ -211,7 +233,7 @@ const StudentExamLoginForm = () => {
             </label>
             <input
               type="password"
-              id="password"
+              id="password" 
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
