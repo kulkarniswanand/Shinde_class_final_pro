@@ -8,23 +8,50 @@ export default function ClassManagement() {
 
   const { branches, loading: branchesLoading } = useBranches(); // ✅ Use custom hook here
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const classesPerPage = 8;
+
   const fetchClasses = async () => {
-    try {
-      console.log("Fetching classes..."); // Debug log
-      const resClasses = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/getclass`); // Ensure this endpoint fetches all classes
-      if (resClasses.ok) {
-        const dataClasses = await resClasses.json();
-        console.log("Fetched classes:", dataClasses); // Debug log
-        setClasses(Array.isArray(dataClasses.data) ? dataClasses.data : []); // Update the state with fetched classes
-      } else {
-        console.error("Failed to fetch classes. Status:", resClasses.status);
-        setClasses([]); // Clear the state if fetching fails
+  try {
+    console.log("Fetching classes..."); // Debug log
+    const resClasses = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/getclass`);
+    if (resClasses.ok) {
+      const dataClasses = await resClasses.json();
+      console.log("Fetched classes:", dataClasses); // Debug log
+
+      // Ensure the array is set correctly regardless of backend structure
+      let classArray = [];
+      if (Array.isArray(dataClasses)) {
+        classArray = dataClasses;
+      } else if (Array.isArray(dataClasses.data)) {
+        classArray = dataClasses.data;
+      } else if (Array.isArray(dataClasses.classes)) {
+        classArray = dataClasses.classes;
+      } else if (dataClasses && typeof dataClasses === "object") {
+        // Try to find the first array property with objects containing className
+        const arr = Object.values(dataClasses).find(
+          (v) => Array.isArray(v) && v.length > 0 && typeof v[0] === "object" && ("className" in v[0])
+        );
+        if (arr) classArray = arr;
       }
-    } catch (error) {
-      console.error("Error fetching classes:", error); // Log network errors
-      setClasses([]); // Clear the state in case of an error
+      // If still not found, fallback to empty array
+      // Filter out any falsy or non-object entries
+      classArray = (classArray || []).filter(
+        (c) => c && typeof c === "object" && c.className // Check for className directly
+      );
+      setClasses(classArray);
+      console.log("Class array set to:", classArray); // Debug log
+    } else {
+      console.error("Failed to fetch classes. Status:", resClasses.status);
+      setClasses([]); // Clear the state if fetching fails
     }
-  };
+  } catch (error) {
+    console.error("Error fetching classes:", error); // Log network errors
+    setClasses([]); // Clear the state in case of an error
+  }
+};
+
 
   useEffect(() => {
     fetchClasses(); // Fetch classes when the component mounts
@@ -89,6 +116,12 @@ export default function ClassManagement() {
     }
   };
 
+  // Pagination logic
+  const indexOfLastClass = currentPage * classesPerPage;
+  const indexOfFirstClass = indexOfLastClass - classesPerPage;
+  const currentClasses = classes.slice(indexOfFirstClass, indexOfLastClass);
+  const totalPages = Math.ceil(classes.length / classesPerPage);
+
   return (
     <div className="p-6 max-w-5xl mx-auto text-gray-200 dark:bg-gray-900 bg-gray-100 rounded-xl shadow-md">
       <h1 className="text-3xl font-bold mb-6 text-center text-indigo-500 dark:text-indigo-400">Class Management</h1>
@@ -152,12 +185,12 @@ export default function ClassManagement() {
           </tr>
         </thead>
         <tbody>
-          {classes.length > 0 ? (
-            classes.map((cls) => (
+          {currentClasses.length > 0 ? (
+            currentClasses.map((cls) => (
               <tr key={cls.id} className="border-b border-gray-700 hover:bg-gray-900">
                 <td className="p-3">{cls.id}</td>
                 <td className="p-3">{cls.className}</td>
-                <td className="p-3">{cls.branchName || cls.branchId}</td>
+                <td className="p-3">{cls.branchName}</td>
                 <td className="p-3">{cls.year}</td>
                 <td className="p-3 flex gap-2">
                   <button
@@ -184,6 +217,32 @@ export default function ClassManagement() {
           )}
         </tbody>
       </table>
+      {/* Pagination Controls */}
+      <div className="flex justify-center items-center mt-6 gap-2">
+        <button
+          className="px-3 py-1 rounded bg-gray-700 text-white hover:bg-gray-600 disabled:opacity-50"
+          onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Prev
+        </button>
+        {[...Array(totalPages)].map((_, idx) => (
+          <button
+            key={idx + 1}
+            className={`px-3 py-1 rounded ${currentPage === idx + 1 ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}
+            onClick={() => setCurrentPage(idx + 1)}
+          >
+            {idx + 1}
+          </button>
+        ))}
+        <button
+          className="px-3 py-1 rounded bg-gray-700 text-white hover:bg-gray-600 disabled:opacity-50"
+          onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+          disabled={currentPage === totalPages || totalPages === 0}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 }

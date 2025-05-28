@@ -11,18 +11,23 @@ exports.createBranch = async (req, res) => {
 
   try {
     // Save branch to the database
-    const query = `
+    const branchQuery = `
       INSERT INTO branches (name, location, username, password) 
       VALUES (?, ?, ?, ?)
     `;
+    const [branchResult] = await db.execute(branchQuery, [name, location, username, password]);
 
-    // Use db.promise().execute()
-    const [result] = await db.execute(query, [name, location, username, password]);
+    // Also insert into users table with role as 'admin'
+    const userQuery = `
+      INSERT INTO users (username, password, role)
+      VALUES (?, ?, ?)
+    `;
+    await db.execute(userQuery, [username, password, 'admin']);
 
     // Send a successful response
     res.status(201).json({
       message: 'Branch created successfully',
-      branchId: result.insertId,
+      branchId: branchResult.insertId,
     });
   } catch (error) {
     console.error('Error creating branch:', error);

@@ -65,7 +65,7 @@ const LoginForm = () => {
               onChange={(e) => setRole(e.target.value)}
               className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
-              <option value="superadmin">Super Admin</option>
+              <option value="superadmin">SuperAdmin</option>
               <option value="admin">Admin</option>
               {/* <option value="user">User</option> */}
               <option value="student">Student</option>

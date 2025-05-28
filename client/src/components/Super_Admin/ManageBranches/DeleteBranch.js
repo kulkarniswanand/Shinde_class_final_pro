@@ -5,6 +5,10 @@ export default function DeleteBranch() {
   const [selectedBranch, setSelectedBranch] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const branchesPerPage = 5;
+
   useEffect(() => {
     fetchBranches();
   }, []);
@@ -18,6 +22,12 @@ export default function DeleteBranch() {
       console.error("Error fetching branches:", error);
     }
   };
+
+  // Pagination logic
+  const indexOfLastBranch = currentPage * branchesPerPage;
+  const indexOfFirstBranch = indexOfLastBranch - branchesPerPage;
+  const currentBranches = branches.slice(indexOfFirstBranch, indexOfLastBranch);
+  const totalPages = Math.ceil(branches.length / branchesPerPage);
 
   const handleDelete = (branch) => {
     setSelectedBranch(branch);
@@ -67,7 +77,7 @@ export default function DeleteBranch() {
               </tr>
             </thead>
             <tbody>
-              {branches.map((branch) => (
+              {currentBranches.map((branch) => (
                 <tr key={branch.id} className="hover:bg-gray-700">
                   <td className="border border-gray-700 p-3">{branch.id}</td>
                   <td className="border border-gray-700 p-3">{branch.name}</td>
@@ -84,6 +94,32 @@ export default function DeleteBranch() {
               ))}
             </tbody>
           </table>
+          {/* Pagination Controls */}
+          <div className="flex justify-center items-center mt-6 gap-2">
+            <button
+              className="px-3 py-1 rounded bg-gray-700 text-white hover:bg-gray-600 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              Prev
+            </button>
+            {[...Array(totalPages)].map((_, idx) => (
+              <button
+                key={idx + 1}
+                className={`px-3 py-1 rounded ${currentPage === idx + 1 ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}
+                onClick={() => setCurrentPage(idx + 1)}
+              >
+                {idx + 1}
+              </button>
+            ))}
+            <button
+              className="px-3 py-1 rounded bg-gray-700 text-white hover:bg-gray-600 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages || totalPages === 0}
+            >
+              Next
+            </button>
+          </div>
         </div>
       ) : (
         <div className="text-center">
