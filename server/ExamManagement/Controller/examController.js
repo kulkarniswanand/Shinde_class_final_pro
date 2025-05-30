@@ -10,6 +10,20 @@ exports.createExam = async (req, res) => {
         res.status(500).json({ error: 'Failed to save exam.' });
     }
 };
+
+// Controller function to create an exam announcement (scheduled exam without questions)
+exports.createExamAnnouncement = async (req, res) => {
+    try {
+        const examData = req.body; // Expect basic exam details: name, subject, standard, date, duration, totalMarks
+        // Ensure status is 'upcoming' and no questions are processed here
+        const result = await Exam.saveExamAnnouncement(examData);
+        res.status(201).json({ message: 'Exam announcement scheduled successfully', id: result.insertId });
+    } catch (err) {
+        console.error("Error creating exam announcement:", err);
+        res.status(500).json({ error: 'Failed to schedule exam announcement.' });
+    }
+};
+
  
 exports.updateExam = async (req, res) => {
     try {

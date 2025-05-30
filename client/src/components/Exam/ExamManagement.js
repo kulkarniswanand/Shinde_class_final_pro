@@ -1,19 +1,23 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
 
 const ExamManagement = () => {
   const [exams, setExams] = useState([]);
-  const [formData, setFormData] = useState({ name: "", date: "", duration: "", standard: "" });
+  const initialFormData = { name: "", subject: "", standard: "", date: "", duration: "", totalMarks: "" };
+  const [formData, setFormData] = useState(initialFormData);
   const [activeTab, setActiveTab] = useState("student"); // Tab state
-  const [newQuestion, setNewQuestion] = useState({
+  const initialNewQuestionState = {
     type: "multiple-choice",
     question: "",
     options: ["", "", "", ""], 
     correctAnswer: "",
-    marks: 5,
-  });
+    marks: 5, 
+  };
+  const [newQuestion, setNewQuestion] = useState(initialNewQuestionState);
   const [newExamQuestions, setNewExamQuestions] = useState([]);
-  const [showCreateExam, setShowCreateExam] = useState(false); // Toggle for create exam module
+  // const [showCreateExam, setShowCreateExam] = useState(false); // Old state for form visibility
+  const [activeForm, setActiveForm] = useState(null); // 'create', 'schedule', or null
+
   const navigate = useNavigate(); // Initialize useNavigate
   const [currentExam, setCurrentExam] = useState(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -22,6 +26,14 @@ const ExamManagement = () => {
   const [examStarted, setExamStarted] = useState(false);
   const [examPortalOpen, setExamPortalOpen] = useState(false); // State to toggle exam portal
   const [editExamData, setEditExamData] = useState(null); // State to hold the exam being edited
+  const editExamFormRef = useRef(null); // Ref for the edit exam form
+
+  const openExamForm = (formType) => {
+    setFormData(initialFormData);
+    setNewExamQuestions([]);
+    setNewQuestion(initialNewQuestionState);
+    setActiveForm(formType); // 'create' or 'schedule'
+  };
 
   // Fetch exams from the database
   const fetchExams = async () => {
@@ -62,7 +74,7 @@ useEffect(() => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleAddExam = async (e) => {
+  const handleCreateFullExam = async (e) => {
     e.preventDefault();
 
     if (newExamQuestions.length === 0) {
@@ -103,17 +115,58 @@ useEffect(() => {
         window.open(`https://wa.me/?text=${encodeURIComponent(whatsappMessage)}`, "_blank");
 
         // Reset form and questions
-        setFormData({ name: "", date: "", duration: "", standard: "", subject: "" });
+        setFormData(initialFormData);
         setNewExamQuestions([]);
+        setNewQuestion(initialNewQuestionState);
 
         // Fetch updated exams and switch to student mode
         fetchExams(); // Refresh exams data
-        setActiveTab("student"); // Switch to student mode
-        setShowCreateExam(false); // Close create exam module
+        setActiveForm(null); // Close create/schedule exam module and return to dashboard
         alert("Exam created successfully!");
     } catch (error) {
-        console.error("Error creating exam:", error);
+        console.error(`Error creating exam:`, error);
+        alert(`Failed to create exam. Please try again.`);
     }
+};
+
+const handleScheduleExamSubmit = async (e) => {
+  e.preventDefault();
+
+  // Basic validation for schedule form
+  if (!formData.name || !formData.subject || !formData.standard || !formData.date || !formData.duration || !formData.totalMarks) {
+    alert("Please fill all fields in Exam Details to schedule the exam announcement.");
+    return;
+  }
+
+  const scheduleData = {
+    name: formData.name,
+    subject: formData.subject,
+    standard: formData.standard,
+    date: formData.date,
+    duration: formData.duration,
+    totalMarks: formData.totalMarks,
+    // No questions for a scheduled announcement
+  };
+
+  try {
+    const response = await fetch("/api/exams/schedule-announcement", { // New endpoint
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(scheduleData),
+    });
+
+    if (!response.ok) throw new Error("Failed to schedule exam announcement");
+    await response.json(); // Consume response body
+    const whatsappMessage = `Exam Scheduled:\nName: ${scheduleData.name}\nSubject: ${scheduleData.subject}\nClass: ${scheduleData.standard}\nDate & Time: ${new Date(scheduleData.date).toLocaleString()}\nDuration: ${scheduleData.duration} minutes\nTotal Marks: ${scheduleData.totalMarks}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(whatsappMessage)}`, "_blank");
+    setFormData(initialFormData);
+    fetchExams();
+    setActiveForm(null);
+    alert("Exam announcement scheduled successfully!");
+  } catch (error) {
+    console.error("Error scheduling exam announcement:", error);
+    alert("Failed to schedule exam announcement. Please try again.");
+  }
 };
 
 const handleDeleteExam = async (id) => {
@@ -158,13 +211,7 @@ const handleAddQuestion = () => {
 
     setNewExamQuestions([...newExamQuestions, questionToAdd]);
 
-    setNewQuestion({
-        type: "multiple-choice",
-        question: "",
-        options: ["", "", "", ""],
-        correctAnswer: "",
-        marks: 5,
-    });
+    setNewQuestion(initialNewQuestionState); // Reset new question form
 };
 
   const handleEditExam = (id, updatedExam) => {
@@ -256,6 +303,13 @@ const answerQuestion = (value) => {
     setEditExamData(exam); // Set the exam to be edited
   };
 
+  // Scroll to edit form when it becomes visible
+  useEffect(() => {
+    if (editExamData && editExamFormRef.current) {
+      editExamFormRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [editExamData]); // Dependency: run when editExamData changes
+
   const handleEditExamChange = (e) => {
     const { name, value } = e.target;
     setEditExamData({ ...editExamData, [name]: value }); // Update the exam data
@@ -309,7 +363,7 @@ const handleUpdateExamStatus = async (id, status) => {
             <button
               onClick={() => {
                 setActiveTab("student");
-                setShowCreateExam(false);
+                setActiveForm(null); // Close any open forms when switching tabs
               }}
               className={`px-4 py-2 rounded-l-lg ${activeTab === "student" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-800"
                 }`}
@@ -319,7 +373,7 @@ const handleUpdateExamStatus = async (id, status) => {
             <button
               onClick={() => {
                 setActiveTab("teacher");
-                setShowCreateExam(false);
+                setActiveForm(null); // Close any open forms when switching tabs
               }}
               className={`px-4 py-2 rounded-r-lg ${activeTab === "teacher" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-800"
                 }`}
@@ -609,23 +663,23 @@ const handleUpdateExamStatus = async (id, status) => {
         {/* Teacher Mode */}
         {activeTab === "teacher" && (
           <div className="space-y-3">
-            <h1 className="text-2xl font-bold text-gray-800">Welcome</h1>
-            {!showCreateExam ? (
+            <h1 className="text-2xl font-bold text-gray-800">Teacher Dashboard</h1>
+            {!activeForm ? (
               <div>
                 {/* Buttons Row */}
-                <div className="flex justify-between items-center mb-8">
+                <div className="flex justify-end items-center mb-8"> {/* Changed to justify-end for right alignment */}
                   <button
-                    onClick={() => setShowCreateExam(true)}
-                    className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-all" style={{ marginLeft: "auto" }}
+                    onClick={() => openExamForm('create')}
+                    className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-all mr-4"
                   >
                     Create New Exam
                   </button>
-                  {/* <button
-                    onClick={() => navigate("/admin-dashboard")}
-                    className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-all"
+                  <button
+                    onClick={() => openExamForm('schedule')}
+                    className="bg-yellow-500 text-white px-6 py-3 rounded-lg hover:bg-yellow-600 transition-all"
                   >
-                    Go to Dashboard
-                  </button> */}
+                    Schedule Exam
+                  </button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                   {/* Upcoming Exams */}
@@ -734,17 +788,19 @@ const handleUpdateExamStatus = async (id, status) => {
               </div>
             ) : (
               <div>
-                <h2 className="text-2xl font-bold text-gray-800">Create New Exam</h2>
-                {/* Create Exam Module */}
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                  {activeForm === 'create' ? "Create New Exam" : "Schedule Exam Announcement"}
+                </h2>
+                {/* Create/Schedule Exam Module */}
                 <div className="flex justify-between items-center mb-8">
                   <button
-                    onClick={() => setShowCreateExam(false)}
+                    onClick={() => setActiveForm(null)}
                     className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-all" style={{ marginLeft: "auto" }}
                   >
                     Back to Dashboard
                   </button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div className={`grid grid-cols-1 ${activeForm === 'create' ? 'md:grid-cols-2' : 'md:grid-cols-1'} gap-10`}>
                   {/* Exam Details Section */}
                   <div className="bg-white p-8 rounded-lg shadow-md">
                     <h3 className="text-xl font-semibold text-gray-800 mb-4">Exam Details</h3>
@@ -826,186 +882,190 @@ const handleUpdateExamStatus = async (id, status) => {
                       </div>
                     </form>
                   </div>
-                  {/* Add Questions Section */}
-                  <div className="bg-white p-8 rounded-lg shadow-md">
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">Add Questions</h3>
-                    <form>
-                      <div className="mb-4">
-                        <label className="block text-gray-700 font-medium mb-2">Question Type</label>
-                        <select
-                          value={newQuestion.type}
-                          onChange={(e) => {
-                            setNewQuestion({
-                              ...newQuestion,
-                              type: e.target.value,
-                              options: e.target.value === "multiple-choice" ? ["", "", "", ""] : [],
-                              correctAnswer: "",
-                            });
-                          }}
-                          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="multiple-choice">Multiple Choice</option>
-                          <option value="true-false">True/False</option>
-                          <option value="short-answer">Short Answer</option>
-                        </select>
-                      </div>
-                      <div className="mb-4">
-                        <label className="block text-gray-700 font-medium mb-2">Question</label>
-                        <textarea
-                          value={newQuestion.question}
-                          onChange={(e) => setNewQuestion({ ...newQuestion, question: e.target.value })}
-                          placeholder="Enter your question here"
-                          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      {newQuestion.type === "multiple-choice" && (
+                  {/* Add Questions Section - Only for 'create' mode */}
+                  {activeForm === 'create' && (
+                    <div className="bg-white p-8 rounded-lg shadow-md">
+                      <h3 className="text-xl font-semibold text-gray-800 mb-4">Add Questions</h3>
+                      <form>
                         <div className="mb-4">
-                          <label className="block text-gray-700 font-medium mb-2">Options</label>
-                          {newQuestion.options.map((option, index) => (
-                            <div key={index} className="flex items-center gap-2 mb-2">
-                              <input
-                                type="text"
-                                value={option}
-                                onChange={(e) => {
-                                  const updatedOptions = [...newQuestion.options];
-                                  updatedOptions[index] = e.target.value;
-                                  setNewQuestion({ ...newQuestion, options: updatedOptions });
-                                }}
-                                placeholder={`Option ${index + 1}`}
-                                className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              />
-                              <input
-                                type="radio"
-                                name="correctAnswer"
-                                checked={newQuestion.correctAnswer === option}
-                                onChange={() => setNewQuestion({ ...newQuestion, correctAnswer: option })}
-                              />
-                            </div>
-                          ))}
+                          <label className="block text-gray-700 font-medium mb-2">Question Type</label>
+                          <select
+                            value={newQuestion.type}
+                            onChange={(e) => {
+                              setNewQuestion({
+                                ...newQuestion,
+                                type: e.target.value,
+                                options: e.target.value === "multiple-choice" ? ["", "", "", ""] : [],
+                                correctAnswer: "",
+                              });
+                            }}
+                            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="multiple-choice">Multiple Choice</option>
+                            <option value="true-false">True/False</option>
+                            <option value="short-answer">Short Answer</option>
+                          </select>
                         </div>
-                      )}
-                      {newQuestion.type === "true-false" && (
                         <div className="mb-4">
-                          <label className="block text-gray-700 font-medium mb-2">Correct Answer</label>
-                          <div className="flex items-center gap-4">
-                            <label>
-                              <input
-                                type="radio"
-                                name="true-false"
-                                value="true"
-                                checked={newQuestion.correctAnswer === "true"}
-                                onChange={() => setNewQuestion({ ...newQuestion, correctAnswer: "true" })}
-                              />
-                              True
-                            </label>
-                            <label>
-                              <input
-                                type="radio"
-                                name="true-false"
-                                value="false"
-                                checked={newQuestion.correctAnswer === "false"}
-                                onChange={() => setNewQuestion({ ...newQuestion, correctAnswer: "false" })}
-                              />
-                              False
-                            </label>
-                          </div>
-                        </div>
-                      )}
-                      {newQuestion.type === "short-answer" && (
-                        <div className="mb-4">
-                          <label className="block text-gray-700 font-medium mb-2">Correct Answer</label>
-                          <input
-                            type="text"
-                            value={newQuestion.correctAnswer}
-                            onChange={(e) => setNewQuestion({ ...newQuestion, correctAnswer: e.target.value })}
-                            placeholder="Enter the correct answer"
+                          <label className="block text-gray-700 font-medium mb-2">Question</label>
+                          <textarea
+                            value={newQuestion.question}
+                            onChange={(e) => setNewQuestion({ ...newQuestion, question: e.target.value })}
+                            placeholder="Enter your question here"
                             className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
-                      )}
-                      <div className="mb-4">
-                        <label className="block text-gray-700 font-medium mb-2">Marks</label>
-                        <input
-                          type="number"
-                          value={newQuestion.marks}
-                          onChange={(e) => setNewQuestion({ ...newQuestion, marks: parseInt(e.target.value) || 1 })}
-                          placeholder="Marks"
-                          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleAddQuestion}
-                        className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-all"
-                      >
-                        Add Question
-                      </button>
-                    </form>
-                  </div>
+                        {newQuestion.type === "multiple-choice" && (
+                          <div className="mb-4">
+                            <label className="block text-gray-700 font-medium mb-2">Options</label>
+                            {newQuestion.options.map((option, index) => (
+                              <div key={index} className="flex items-center gap-2 mb-2">
+                                <input
+                                  type="text"
+                                  value={option}
+                                  onChange={(e) => {
+                                    const updatedOptions = [...newQuestion.options];
+                                    updatedOptions[index] = e.target.value;
+                                    setNewQuestion({ ...newQuestion, options: updatedOptions });
+                                  }}
+                                  placeholder={`Option ${index + 1}`}
+                                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                                <input
+                                  type="radio"
+                                  name="correctAnswer"
+                                  checked={newQuestion.correctAnswer === option}
+                                  onChange={() => setNewQuestion({ ...newQuestion, correctAnswer: option })}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {newQuestion.type === "true-false" && (
+                          <div className="mb-4">
+                            <label className="block text-gray-700 font-medium mb-2">Correct Answer</label>
+                            <div className="flex items-center gap-4">
+                              <label>
+                                <input
+                                  type="radio"
+                                  name="true-false"
+                                  value="true"
+                                  checked={newQuestion.correctAnswer === "true"}
+                                  onChange={() => setNewQuestion({ ...newQuestion, correctAnswer: "true" })}
+                                />
+                                True
+                              </label>
+                              <label>
+                                <input
+                                  type="radio"
+                                  name="true-false"
+                                  value="false"
+                                  checked={newQuestion.correctAnswer === "false"}
+                                  onChange={() => setNewQuestion({ ...newQuestion, correctAnswer: "false" })}
+                                />
+                                False
+                              </label>
+                            </div>
+                          </div>
+                        )}
+                        {newQuestion.type === "short-answer" && (
+                          <div className="mb-4">
+                            <label className="block text-gray-700 font-medium mb-2">Correct Answer</label>
+                            <input
+                              type="text"
+                              value={newQuestion.correctAnswer}
+                              onChange={(e) => setNewQuestion({ ...newQuestion, correctAnswer: e.target.value })}
+                              placeholder="Enter the correct answer"
+                              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                        )}
+                        <div className="mb-4">
+                          <label className="block text-gray-700 font-medium mb-2">Marks</label>
+                          <input
+                            type="number"
+                            value={newQuestion.marks}
+                            onChange={(e) => setNewQuestion({ ...newQuestion, marks: parseInt(e.target.value) || 1 })}
+                            placeholder="Marks"
+                            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleAddQuestion}
+                          className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-all"
+                        >
+                          Add Question
+                        </button>
+                      </form>
+                    </div>
+                  )}
                 </div>
                 {/* Questions Added Section */}
-                <div className="bg-white p-8 rounded-lg shadow-md mt-8">
-                  <h3 className="text-xl font-semibold text-gray-800 mb-4">Questions Added ({newExamQuestions.length})</h3>
-                  <p className="text-gray-600 mb-6">
-                    Total Marks: {newExamQuestions.reduce((total, q) => total + q.marks, 0)} <br />
-                    Due Date & Time: {formData.date ? new Date(formData.date).toLocaleString() : "Not Set"}<br />
-                    Duration (minutes): {formData.duration || "Not Set"}
-                  </p>
-                  {newExamQuestions.length > 0 ? (
-                    <ul className="space-y-6 divide-y">
-                      {newExamQuestions.map((q, idx) => (
-                        <li key={idx} className="pt-4 first:pt-0">
-                          <div className="flex justify-between items-start">
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-2">
-                                <span className="bg-gray-100 px-2 py-1 rounded text-xs font-medium">Q{idx + 1}</span>
-                                <span className="text-sm text-gray-500">{q.type} · {q.marks} marks</span>
+                {activeForm === 'create' && (
+                  <div className="bg-white p-8 rounded-lg shadow-md mt-8">
+                    <h3 className="text-xl font-semibold text-gray-800 mb-4">Questions Added ({newExamQuestions.length})</h3>
+                    <p className="text-gray-600 mb-6">
+                      Total Marks: {newExamQuestions.reduce((total, q) => total + q.marks, 0)} <br />
+                      Due Date & Time: {formData.date ? new Date(formData.date).toLocaleString() : "Not Set"}<br />
+                      Duration (minutes): {formData.duration || "Not Set"}
+                    </p>
+                    {newExamQuestions.length > 0 ? (
+                      <ul className="space-y-6 divide-y">
+                        {newExamQuestions.map((q, idx) => (
+                          <li key={idx} className="pt-4 first:pt-0">
+                            <div className="flex justify-between items-start">
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="bg-gray-100 px-2 py-1 rounded text-xs font-medium">Q{idx + 1}</span>
+                                  <span className="text-sm text-gray-500">{q.type} · {q.marks} marks</span>
+                                </div>
+                                <p className="font-medium">{q.question}</p>
+                                {q.type === "multiple-choice" && (
+                                  <ul className="ml-5 list-disc space-y-1 text-sm">
+                                    {q.options.map((opt, i) => (
+                                      <li
+                                        key={i}
+                                        className={opt === q.correctAnswer ? "text-green-600 font-medium" : ""}
+                                      >
+                                        {opt} {opt === q.correctAnswer && "(Correct)"}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                                {q.type === "true-false" && (
+                                  <p className="text-sm text-green-600">Correct answer: {q.correctAnswer}</p>
+                                )}
+                                {q.type === "short-answer" && (
+                                  <p className="text-sm text-green-600">Correct answer: {q.correctAnswer}</p>
+                                )}
                               </div>
-                              <p className="font-medium">{q.question}</p>
-                              {q.type === "multiple-choice" && (
-                                <ul className="ml-5 list-disc space-y-1 text-sm">
-                                  {q.options.map((opt, i) => (
-                                    <li
-                                      key={i}
-                                      className={opt === q.correctAnswer ? "text-green-600 font-medium" : ""}
-                                    >
-                                      {opt} {opt === q.correctAnswer && "(Correct)"}
-                                    </li>
-                                  ))}
-                                </ul>
-                              )}
-                              {q.type === "true-false" && (
-                                <p className="text-sm text-green-600">Correct answer: {q.correctAnswer}</p>
-                              )}
-                              {q.type === "short-answer" && (
-                                <p className="text-sm text-green-600">Correct answer: {q.correctAnswer}</p>
-                              )}
+                              <button
+                                onClick={() => {
+                                  const updatedQuestions = newExamQuestions.filter((_, i) => i !== idx);
+                                  setNewExamQuestions(updatedQuestions);
+                                }}
+                                className="text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1 rounded-lg transition-all"
+                              >
+                                Remove
+                              </button>
                             </div>
-                            <button
-                              onClick={() => {
-                                const updatedQuestions = newExamQuestions.filter((_, i) => i !== idx);
-                                setNewExamQuestions(updatedQuestions);
-                              }}
-                              className="text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1 rounded-lg transition-all"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-center text-gray-500 py-8">No questions added yet</p>
-                  )}
-                  {/* Create Exam Button */}
-                  <div className="flex justify-end mt-6">
-                    <button
-                      onClick={handleAddExam}
-                      className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-all"
-                    >
-                      Create Exam
-                    </button>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-center text-gray-500 py-8">No questions added yet</p>
+                    )}
                   </div>
+                )}
+                {/* Submit Button for Create or Schedule */}
+                <div className="flex justify-end mt-6">
+                  <button
+                    onClick={activeForm === 'create' ? handleCreateFullExam : handleScheduleExamSubmit}
+                    className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-all"
+                  >
+                    {activeForm === 'create' ? "Create Exam" : "Schedule Exam Announcement"}
+                  </button>
                 </div>
               </div>
             )}
@@ -1013,7 +1073,7 @@ const handleUpdateExamStatus = async (id, status) => {
         )}
         {/* Edit Exam Form */}
         {editExamData && activeTab === "teacher" && ( // Restrict form to teacher mode
-            <div className="bg-white p-8 rounded-lg shadow-md mt-8">
+            <div ref={editExamFormRef} className="bg-white p-8 rounded-lg shadow-md mt-8">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">Edit Exam</h3>
                 <form>
                     <div className="mb-4">

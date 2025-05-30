@@ -17,7 +17,7 @@ exports.loginStudent = async (req, res) => {
       standard: student.class,
       branch: student.branch,
     });
-  } catch (error) {
+  } catch (error) { 
     console.error("Login error:", error);
     res.status(500).json({ message: "Internal server error" });
   }

@@ -14,7 +14,7 @@ exports.saveExam = async (examData) => {
         const questionValues = examData.questions.map((q) => [
             examId, // Use the correct exam_id
             q.type,
-            q.question,
+            q.question, 
             JSON.stringify(q.options || []), // Ensure options are stored as JSON
             q.correctAnswer || null, // Handle null values for correctAnswer
             q.marks || 0, // Default marks to 0 if not provided
@@ -22,6 +22,18 @@ exports.saveExam = async (examData) => {
 
         await pool.query(questionQuery, [questionValues]);
     }
+
+    return result;
+};
+
+// Save new exam announcement (scheduled exam without questions)
+exports.saveExamAnnouncement = async (examData) => {
+    const query = `INSERT INTO exams (name, subject, standard, date, duration, status, total_marks) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+    // Ensure 'upcoming' status. totalMarks can be null if not provided or handled by frontend.
+    const values = [examData.name, examData.subject, examData.standard, examData.date, examData.duration, 'upcoming', examData.totalMarks || null];
+
+    const [result] = await pool.query(query, values);
+    // No questions are inserted for an announcement
 
     return result;
 };

@@ -10,7 +10,7 @@ const ExamStudent = () => {
     options: ["", "", "", ""],
     correctAnswer: "",
     marks: 5,
-  });
+  }); 
   const [newExamQuestions, setNewExamQuestions] = useState([]);
   const navigate = useNavigate(); // Initialize useNavigate
   const [currentExam, setCurrentExam] = useState(null);

@@ -12,7 +12,7 @@ const StudentExamLoginForm = () => {
   const [standardOptions, setStandardOptions] = useState([]);
   const [errors, setErrors] = useState({}); // State for validation errors  
   const navigate = useNavigate(); // React Router navigation hook  
-  const location = useLocation(); // Get current location
+  const location = useLocation(); // Get current location 
 
   useEffect(() => {
     // Fetch branches

@@ -10,3 +10,4 @@ router.get("/classes", studentExamLoginController.getAllClasses);
 
 
 module.exports = router;
+ 
