@@ -30,18 +30,15 @@ export default function UpdateBranch() {
 
   const validate = () => {
     if (!selectedBranch) return false;
-    const newErrors = {};
-    if (!selectedBranch.name?.trim()) newErrors.name = "Branch name is required.";
-    if (!selectedBranch.location?.trim()) newErrors.location = "Location is required.";
-    if (!selectedBranch.username?.trim()) newErrors.username = "Username is required.";
-    if (!selectedBranch.password?.trim()) newErrors.password = "Password is required.";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    if (!selectedBranch.name?.trim()) return false;
+    if (!selectedBranch.location?.trim()) return false;
+    if (!selectedBranch.username?.trim()) return false;
+    if (!selectedBranch.password?.trim()) return false;
+    return true;
   };
 
   const handleEdit = (branch) => {
     setSelectedBranch({ ...branch });
-    setErrors({});
   };
 
   const handleUpdate = async (e) => {
