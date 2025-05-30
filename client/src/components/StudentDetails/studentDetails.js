@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Table, Input, Select, Button, DatePicker } from "antd"; // Import DatePicker
 import moment from "moment"; // Import moment for date formatting
+import CircularNav from "../CircularNav/CircularNav"; // Import CircularNav
 
 const StudentDetails = () => {
   const [students, setStudents] = useState([]);
@@ -16,7 +17,7 @@ const StudentDetails = () => {
   useEffect(() => {
     fetchStudents();
   }, []);
-
+ 
   const fetchStudents = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/studentsDetails");
@@ -207,11 +208,10 @@ const StudentDetails = () => {
 
   return (
     <div className="p-5 bg-black text-white min-h-screen">
+      <CircularNav /> {/* Add CircularNav component */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-3xl font-semibold text-violet-600">Student Details</h2>
-        <Button onClick={() => navigate("/admin-dashboard")} className="bg-purple-600 hover:bg-blue-600 text-white">
-          Go to Dashboard
-        </Button>
+        {/* "Go to Dashboard" button removed, CircularNav will be in top-right */}
       </div>
 
       <div className="flex items-center gap-4 my-4">

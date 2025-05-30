@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import CircularNav from "../CircularNav/CircularNav"; // Import CircularNav
 
 const StaffManagement = () => {
   const [staff, setStaff] = useState([]);
@@ -11,7 +12,7 @@ const StaffManagement = () => {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
-  useEffect(() => {
+  useEffect(() => { 
     console.log("useEffect called");
     if (searchCriteria === "branch" && searchValue) {
       fetchStaffByBranch(searchValue);
@@ -157,12 +158,8 @@ const StaffManagement = () => {
 
   return (
     <div className="container mx-auto p-6 bg-gradient-to-r from-blue-900 via-purple-900 to-black min-h-screen text-white relative">
-      <button
-        onClick={handleDashboard}
-        className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-purple-500 hover:to-pink-500 text-white px-4 py-2 rounded-lg shadow-lg border border-white absolute top-4 right-4 transition duration-300"
-      >
-        Go to Dashboard
-      </button>
+      <CircularNav /> {/* Add CircularNav component */}
+      {/* "Go to Dashboard" button removed, CircularNav will be in top-right (handled by its own fixed positioning) */}
       <h1 className="text-4xl font-extrabold text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-red-500">
         Staff Management
       </h1>

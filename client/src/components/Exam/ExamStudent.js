@@ -205,21 +205,24 @@ const ExamStudent = () => {
 
   const startExam = (exam) => {
     // Ensure questions are parsed correctly
-    const questions = Array.isArray(exam.questions) ? exam.questions : JSON.parse(exam.questions || "[]");
+    // The backend returns questions as an array, which might be [{id: null, ...}] if no questions.
+    const parsedQuestions = Array.isArray(exam.questions) ? exam.questions : JSON.parse(exam.questions || "[]");
 
-    if (!questions || questions.length === 0) {
-      alert("This exam has no questions. Please contact your teacher.");
+    // Filter out placeholder null questions if present
+    const actualQuestions = parsedQuestions.filter(q => q && q.id !== null);
+
+    if (!actualQuestions || actualQuestions.length === 0) {
+      alert("This exam is an announcement only or has no questions. It cannot be started.");
       return;
     }
 
-    setCurrentExam({ ...exam, questions });
+    setCurrentExam({ ...exam, questions: actualQuestions }); // Use actualQuestions
     setCurrentQuestionIndex(0);
     setExamAnswers({});
     setTimeLeft(exam.duration * 60); // Set timeLeft in seconds based on exam duration
     setExamStarted(true); // Ensure the timer starts
     setExamPortalOpen(true);
   };
-
   const answerQuestion = (value) => {
     setExamAnswers({
       ...examAnswers,
@@ -315,27 +318,38 @@ const ExamStudent = () => {
                 {exams.filter((exam) => exam.status === "upcoming").length > 0 ? (
                   exams
                     .filter((exam) => exam.status === "upcoming")
-                    .map((exam) => (
-                      <div key={exam.id} className="mb-6 p-4 border rounded-lg shadow-sm flex justify-between items-center">
-                        {/* Exam Details */}
-                        <div>
-                          <h4 className="text-lg font-semibold text-gray-700">{exam.name}</h4>
-                          <p className="text-gray-600">Subject: {exam.subject}</p>
-                          <p className="text-gray-600">Standard: {exam.standard}</p>
-                          <p className="text-gray-600">
-                            Due: {exam.date ? new Date(exam.date).toLocaleString() : "Not Set"}
-                          </p>
-                          <p className="text-gray-600">Duration: {exam.duration} minutes</p>
+                    .map((exam) => {
+                      // Check if the exam is an announcement (has no actual questions)
+                      const isAnnouncement = !exam.questions || exam.questions.length === 0 || (exam.questions.length === 1 && exam.questions[0].id === null);
+                      return (
+                        <div key={exam.id} className="mb-6 p-4 border rounded-lg shadow-sm flex justify-between items-center">
+                          {/* Exam Details */}
+                          <div>
+                            <h4 className="text-lg font-semibold text-gray-700">{exam.name}</h4>
+                            <p className="text-gray-600">Subject: {exam.subject}</p>
+                            <p className="text-gray-600">Standard: {exam.standard}</p>
+                            <p className="text-gray-600">
+                              Due: {exam.date ? new Date(exam.date).toLocaleString() : "Not Set"}
+                            </p>
+                            <p className="text-gray-600">Duration: {exam.duration} minutes</p>
+                            {isAnnouncement && <p className="text-sm text-orange-500 italic mt-1">This is an exam announcement only.</p>}
+                          </div>
+                          {/* Buttons */}
+                          <button
+                            className={`px-4 py-2 rounded-lg transition-all ${
+                              isAnnouncement
+                                ? "bg-gray-400 text-gray-700 cursor-not-allowed"
+                                : "bg-green-500 text-white hover:bg-green-600"
+                            }`}
+                            onClick={() => !isAnnouncement && startExam(exam)}
+                            disabled={isAnnouncement}
+                            title={isAnnouncement ? "This is an announcement. Exam cannot be started." : "Start Exam"}
+                          >
+                            {isAnnouncement ? "Announcement" : "Start Exam"}
+                          </button>
                         </div>
-                        {/* Buttons */}
-                        <button
-                          className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-all"
-                          onClick={() => startExam(exam)} // Open exam portal
-                        >
-                          Start Exam
-                        </button>
-                      </div>
-                    ))
+                      );
+                    })
                 ) : (
                   <p className="text-gray-500">No upcoming exams available.</p>
                 )}

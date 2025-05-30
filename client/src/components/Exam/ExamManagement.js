@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
+import CircularNav from "../CircularNav/CircularNav"; // Import CircularNav
 
 const ExamManagement = () => {
   const [exams, setExams] = useState([]);
@@ -12,7 +13,7 @@ const ExamManagement = () => {
     options: ["", "", "", ""], 
     correctAnswer: "",
     marks: 5, 
-  };
+  }; 
   const [newQuestion, setNewQuestion] = useState(initialNewQuestionState);
   const [newExamQuestions, setNewExamQuestions] = useState([]);
   // const [showCreateExam, setShowCreateExam] = useState(false); // Old state for form visibility
@@ -220,14 +221,18 @@ const handleAddQuestion = () => {
 
   const startExam = (exam) => {
     // Ensure questions are parsed correctly
-    const questions = Array.isArray(exam.questions) ? exam.questions : JSON.parse(exam.questions || "[]");
+    // The backend returns questions as an array, which might be [{id: null, ...}] if no questions.
+    const parsedQuestions = Array.isArray(exam.questions) ? exam.questions : JSON.parse(exam.questions || "[]");
 
-    if (!questions || questions.length === 0) {
-        alert("This exam has no questions. Please contact your teacher.");
+    // Filter out placeholder null questions if present (e.g., from JSON_ARRAYAGG of a LEFT JOIN with no matches)
+    const actualQuestions = parsedQuestions.filter(q => q && q.id !== null);
+
+    if (!actualQuestions || actualQuestions.length === 0) {
+        alert("This exam is an announcement only or has no questions. It cannot be started.");
         return;
     }
 
-    setCurrentExam({ ...exam, questions });
+    setCurrentExam({ ...exam, questions: actualQuestions }); // Use actualQuestions
     setCurrentQuestionIndex(0);
     setExamAnswers({});
     setTimeLeft(exam.duration * 60); // Set timeLeft in seconds based on exam duration
@@ -352,6 +357,7 @@ const handleUpdateExamStatus = async (id, status) => {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      {!examPortalOpen && <CircularNav />} {/* Conditionally render CircularNav */}
       {/* Navbar */}
       <header className="bg-white border-b shadow-sm sticky top-0 z-10">
         <div className="max-w-[90%] mx-auto px-6 py-4 flex justify-between items-center"> {/* Changed max-w-6xl to max-w-[90%] and added mx-auto */}
@@ -380,12 +386,6 @@ const handleUpdateExamStatus = async (id, status) => {
             >
               Teacher Mode
             </button>
-            <button
-              onClick={() => navigate("/admin-dashboard")}
-              className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-all"
-            >
-              Go to Dashboard
-            </button>
           </div>
         </div>
       </header>
@@ -412,32 +412,43 @@ const handleUpdateExamStatus = async (id, status) => {
                 <p className="text-gray-600 mb-6">Exams scheduled in the near future</p>
                 {exams.filter((exam) => exam.status === "upcoming").length > 0 ? (
                   exams
-                    .filter((exam) => exam.status === "upcoming")
-                    .map((exam) => (
-                      <div key={exam.id} className="mb-6 p-4 border rounded-lg shadow-sm flex justify-between items-center">
-                        {/* Exam Details */}
-                        <div>
-                          <h4 className="text-lg font-semibold text-gray-700">{exam.name}</h4>
-                          <p className="text-gray-600">Subject: {exam.subject}</p>
-                          <p className="text-gray-600">Standard: {exam.standard}</p>
-                          <p className="text-gray-600">
-                            Due: {exam.date ? new Date(exam.date).toLocaleString() : "Not Set"}
-                          </p>
-                          <p className="text-gray-600">Duration: {exam.duration} minutes</p>
+                    .filter((exam) => exam.status === "upcoming") 
+                    .map((exam) => {
+                      // Check if the exam is an announcement (has no actual questions)
+                      const isAnnouncement = !exam.questions || exam.questions.length === 0 || (exam.questions.length === 1 && exam.questions[0].id === null);
+                      return (
+                        <div key={exam.id} className="mb-6 p-4 border rounded-lg shadow-sm flex justify-between items-center">
+                          {/* Exam Details */}
+                          <div>
+                            <h4 className="text-lg font-semibold text-gray-700">{exam.name}</h4>
+                            <p className="text-gray-600">Subject: {exam.subject}</p>
+                            <p className="text-gray-600">Standard: {exam.standard}</p>
+                            <p className="text-gray-600">
+                              Due: {exam.date ? new Date(exam.date).toLocaleString() : "Not Set"}
+                            </p>
+                            <p className="text-gray-600">Duration: {exam.duration} minutes</p>
+                            {isAnnouncement && <p className="text-sm text-orange-500 italic mt-1">This is an exam announcement only.</p>}
+                          </div>
+                          {/* Buttons */}
+                          <div className="flex gap-4">
+                            {activeTab === "student" && (
+                              <button
+                                className={`px-4 py-2 rounded-lg transition-all ${
+                                  isAnnouncement
+                                    ? "bg-gray-400 text-gray-700 cursor-not-allowed"
+                                    : "bg-green-500 text-white hover:bg-green-600"
+                                }`}
+                                onClick={() => !isAnnouncement && startExam(exam)}
+                                disabled={isAnnouncement}
+                                title={isAnnouncement ? "This is an announcement. Exam cannot be started." : "Start Exam"}
+                              >
+                                {isAnnouncement ? "Announcement" : "Start Exam"}
+                              </button>
+                            )}
+                          </div>
                         </div>
-                        {/* Buttons */}
-                        <div className="flex gap-4">
-                          {activeTab === "student" && (
-                            <button
-                              className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-all"
-                              onClick={() => startExam(exam)} // Open exam portal
-                            >
-                              Start Exam
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    ))
+                      );
+                    })
                 ) : (
                   <p className="text-gray-500">No upcoming exams available.</p>
                 )}

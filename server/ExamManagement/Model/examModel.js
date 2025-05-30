@@ -183,4 +183,15 @@ exports.updateExamStatusAndScore = async (id, status, score) => {
     const [result] = await pool.query(query, values);
     return result;
 };
+
+// Mark multiple exams as completed by their IDs
+exports.markExamsAsCompleted = async (examIds) => {
+    if (!examIds || examIds.length === 0) {
+        return { affectedRows: 0 }; // No IDs to update
+    }
+    // Ensure we only update exams that are currently 'upcoming'
+    const query = `UPDATE exams SET status = 'completed' WHERE id IN (?) AND status = 'upcoming'`;
+    const [result] = await pool.query(query, [examIds]);
+    return result;
+};
  

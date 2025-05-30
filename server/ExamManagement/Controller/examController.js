@@ -40,8 +40,35 @@ exports.updateExam = async (req, res) => {
 exports.getAllExams = async (req, res) => {
     try {
         const { standard } = req.query; // Get the standard from query parameters
-        const exams = await Exam.getAllExams(standard); // Pass standard to the model function
-        res.json(exams);
+        let exams = await Exam.getAllExams(standard); // Fetch initial list of exams
+
+        const now = new Date();
+        const announcementsToUpdateIds = [];
+
+        exams.forEach(exam => {
+            // Check if it's an upcoming announcement and its due date has passed
+            const isAnnouncement = !exam.questions || exam.questions.length === 0 || (exam.questions.length === 1 && exam.questions[0] && exam.questions[0].id === null);
+            if (exam.status === 'upcoming' && exam.date && new Date(exam.date) < now && isAnnouncement) {
+                announcementsToUpdateIds.push(exam.id);
+            }
+        });
+
+        if (announcementsToUpdateIds.length > 0) {
+            try {
+                await Exam.markExamsAsCompleted(announcementsToUpdateIds);
+                // Update the status in the 'exams' array for the current response
+                exams = exams.map(exam => {
+                    if (announcementsToUpdateIds.includes(exam.id)) {
+                        return { ...exam, status: 'completed' };
+                    }
+                    return exam;
+                });
+            } catch (updateError) {
+                console.error("Error updating status for past due announcements:", updateError);
+                // Decide if you want to send potentially stale data or an error
+            }
+        }
+        res.json(exams); 
         console.log("Fetching exams for standard:", standard || "all");
     } catch (err) {
         console.error("Error fetching exams:", err);
