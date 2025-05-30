@@ -2,7 +2,6 @@ import React from "react";
 import ImageSlider from "../../components/Home/ImageSlider";
 import DirectorMessage from "../../components/Home/DirectorMessage";
 import VisionMission from "../../components/Home/VisionMission";
-import Footer from "../../components/Home/Footer";
 
 const HomePage = () => {
   return (
@@ -27,9 +26,6 @@ const HomePage = () => {
       <section>
         <VisionMission />
       </section>
-
-      {/* Footer Section (if needed) */}
-      {/* <Footer /> */}
     </div>
   );
 };

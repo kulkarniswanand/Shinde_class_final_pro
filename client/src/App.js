@@ -8,7 +8,6 @@ import {
 import { Element } from "react-scroll";
 
 import Home from "./pages/Main/Home";
-import VisionMission from "./components/Home/VisionMission";
 import About from "./pages/Main/About";
 import Features from "./pages/Main/Features";
 import Achievements from "./pages/Main/Achievements";
@@ -119,7 +118,7 @@ function MainApp() {
             </>
           }
         />
-        //swanand
+        {/* swanand */}
         <Route path="/login" element={<LoginForm />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/superadmindashboard" element={<SuperAdminDashboard />} />

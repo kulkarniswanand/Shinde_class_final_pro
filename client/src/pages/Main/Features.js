@@ -1,5 +1,4 @@
-import React, { Suspense, useEffect } from "react";
-import Footer from "../../components/Home/Footer";
+import React, { useEffect } from "react";
 
 // Features data
 const classFeatures = [
@@ -68,7 +67,8 @@ const Features = () => {
       <section className="py-16 bg-gradient-to-r from-blue-500 via-teal-400 to-indigo-600 text-white">
         <div className="container mx-auto px-6 md:px-12">
           <h2 className="text-4xl font-bold text-center mb-12">
-            Why Choose <span className="text-yellow-300">Shinde Classes?</span>
+            Why Choose{" "}
+            <span className="text-yellow-300">Shinde Classes?</span>
           </h2>
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {classFeatures.map((feature) => (
@@ -91,22 +91,15 @@ const Features = () => {
           </div>
           {/* CTA Button */}
           <div className="text-center mt-10">
-            <a
-              href="#"
+            <button
+              type="button"
               className="px-6 py-3 bg-yellow-500 text-white rounded-lg shadow-lg hover:bg-yellow-600 transition-all transform hover:scale-105"
             >
               Start Your Journey Today!
-            </a>
+            </button>
           </div>
         </div>
       </section>
-
-      {/* Footer Section */}
-      {/* <section className="mt-16">
-        <Suspense fallback={<div>Loading footer...</div>}>
-          <Footer />
-        </Suspense>
-      </section> */}
     </>
   );
 };

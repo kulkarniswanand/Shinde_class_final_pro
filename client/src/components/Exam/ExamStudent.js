@@ -3,15 +3,6 @@ import { useNavigate } from "react-router-dom"; // Import useNavigate for naviga
 
 const ExamStudent = () => {
   const [exams, setExams] = useState([]);
-  const [formData, setFormData] = useState({ name: "", date: "", duration: "", standard: "" });
-  const [newQuestion, setNewQuestion] = useState({
-    type: "multiple-choice",
-    question: "",
-    options: ["", "", "", ""],
-    correctAnswer: "",
-    marks: 5,
-  });
-  const [newExamQuestions, setNewExamQuestions] = useState([]);
   const navigate = useNavigate(); // Initialize useNavigate
   const [currentExam, setCurrentExam] = useState(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -52,116 +43,6 @@ const ExamStudent = () => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleAddExam = async (e) => {
-    e.preventDefault();
-
-    if (newExamQuestions.length === 0) {
-      alert("Please add at least one question to the exam.");
-      return;
-    }
-
-    const examData = {
-      name: formData.name,
-      subject: formData.subject,
-      standard: formData.standard,
-      date: formData.date,
-      duration: formData.duration,
-      totalMarks: newExamQuestions.reduce((total, q) => total + q.marks, 0),
-      questions: newExamQuestions.map((q) => ({
-        type: q.type,
-        question: q.question,
-        options: q.options.filter((opt) => opt.trim() !== ""), // Remove empty options
-        correctAnswer: q.correctAnswer,
-        marks: q.marks,
-      })),
-    };
-
-    try {
-      const response = await fetch("/api/exams", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(examData),
-      });
-
-      if (!response.ok) throw new Error("Failed to create exam");
-
-      const data = await response.json();
-      console.log("Exam created successfully:", data);
-
-      // WhatsApp logic for exam details
-      const whatsappMessage = `Exam Details:\nName: ${examData.name}\nSubject: ${examData.subject}\nClass: ${examData.standard}\nDate & Time: ${new Date(
-        examData.date
-      ).toLocaleString()}\nDuration: ${examData.duration} minutes\nTotal Marks: ${examData.totalMarks}`;
-      window.open(`https://wa.me/?text=${encodeURIComponent(whatsappMessage)}`, "_blank");
-
-      // Reset form and questions
-      setFormData({ name: "", date: "", duration: "", standard: "", subject: "" });
-      setNewExamQuestions([]);
-
-      // Fetch updated exams
-      fetchExams(); // Refresh exams data
-      alert("Exam created successfully!");
-    } catch (error) {
-      console.error("Error creating exam:", error);
-    }
-  };
-
-  const handleDeleteExam = async (id) => {
-    try {
-      const response = await fetch(`/api/exams/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) throw new Error("Failed to delete exam");
-
-      setExams(exams.filter((exam) => exam.id !== id));
-      alert("Exam deleted successfully!");
-    } catch (error) {
-      console.error("Error deleting exam:", error);
-    }
-  };
-
-  const handleAddQuestion = () => {
-    console.log("Current formData:", formData); // Debugging log to verify formData values
-
-    if (
-      !newQuestion.question ||
-      (newQuestion.type === "multiple-choice" && newQuestion.options.some((opt) => !opt)) ||
-      !newQuestion.correctAnswer
-    ) {
-      alert("Please fill all required fields for the question.");
-      return;
-    }
-
-    // Validate "Due Date & Time" and "Duration (minutes)"
-    if (!formData.date || !formData.duration) {
-      alert("Please fill in 'Due Date & Time' and 'Duration (minutes)' in the 'Exam Details' section.");
-      return;
-    }
-
-    const questionToAdd = {
-      ...newQuestion,
-      id: newExamQuestions.length + 1,
-      duration: formData.duration, // Include duration
-      dueDate: formData.date, // Include due date
-    };
-
-    setNewExamQuestions([...newExamQuestions, questionToAdd]);
-
-    setNewQuestion({
-      type: "multiple-choice",
-      question: "",
-      options: ["", "", "", ""],
-      correctAnswer: "",
-      marks: 5,
-    });
   };
 
   const startExam = (exam) => {

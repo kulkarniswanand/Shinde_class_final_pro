@@ -153,4 +153,4 @@ export function useAttendance() {
         throw new Error('useAttendance must be used within an AttendanceProvider');
     }
     return context;
-} 
+}

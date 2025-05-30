@@ -167,10 +167,6 @@ const handleAddQuestion = () => {
     });
 };
 
-  const handleEditExam = (id, updatedExam) => {
-    setExams(exams.map((exam) => (exam.id === id ? { ...exam, ...updatedExam } : exam)));
-  };
-
   const startExam = (exam) => {
     // Ensure questions are parsed correctly
     const questions = Array.isArray(exam.questions) ? exam.questions : JSON.parse(exam.questions || "[]");
@@ -276,23 +272,6 @@ const answerQuestion = (value) => {
         alert("Exam updated successfully!");
     } catch (error) {
         console.error("Error updating exam:", error);
-    }
-};
-
-const handleUpdateExamStatus = async (id, status) => {
-    try {
-        const response = await fetch(`/api/exams/${id}/status`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status }),
-        });
-
-        if (!response.ok) throw new Error("Failed to update exam status");
-
-        fetchExams(); // Refresh exams data
-        alert("Exam status updated successfully!");
-    } catch (error) {
-        console.error("Error updating exam status:", error);
     }
 };
 

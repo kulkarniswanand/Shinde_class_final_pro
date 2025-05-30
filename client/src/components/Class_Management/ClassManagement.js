@@ -13,45 +13,48 @@ export default function ClassManagement() {
   const classesPerPage = 8;
 
   const fetchClasses = async () => {
-  try {
-    console.log("Fetching classes..."); // Debug log
-    const resClasses = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/getclass`);
-    if (resClasses.ok) {
-      const dataClasses = await resClasses.json();
-      console.log("Fetched classes:", dataClasses); // Debug log
+    try {
+      console.log("Fetching classes..."); // Debug log
+      const resClasses = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/getclass`);
+      if (resClasses.ok) {
+        const dataClasses = await resClasses.json();
+        console.log("Fetched classes:", dataClasses); // Debug log
 
-      // Ensure the array is set correctly regardless of backend structure
-      let classArray = [];
-      if (Array.isArray(dataClasses)) {
-        classArray = dataClasses;
-      } else if (Array.isArray(dataClasses.data)) {
-        classArray = dataClasses.data;
-      } else if (Array.isArray(dataClasses.classes)) {
-        classArray = dataClasses.classes;
-      } else if (dataClasses && typeof dataClasses === "object") {
-        // Try to find the first array property with objects containing className
-        const arr = Object.values(dataClasses).find(
-          (v) => Array.isArray(v) && v.length > 0 && typeof v[0] === "object" && ("className" in v[0])
+        // Ensure the array is set correctly regardless of backend structure
+        let classArray = [];
+        if (Array.isArray(dataClasses)) {
+          classArray = dataClasses;
+        } else if (Array.isArray(dataClasses.data)) {
+          classArray = dataClasses.data;
+        } else if (Array.isArray(dataClasses.classes)) {
+          classArray = dataClasses.classes;
+        } else if (dataClasses && typeof dataClasses === "object") {
+          // Try to find the first array property with objects containing className or branchName
+          const arr = Object.values(dataClasses).find(
+            (v) =>
+              Array.isArray(v) &&
+              v.length > 0 &&
+              typeof v[0] === "object" &&
+              ("className" in v[0] || "branchName" in v[0])
+          );
+          if (arr) classArray = arr;
+        }
+        // If still not found, fallback to empty array
+        // Filter out any falsy or non-object entries
+        classArray = (classArray || []).filter(
+          (c) => c && typeof c === "object" && (c.className || c.branchName)
         );
-        if (arr) classArray = arr;
+        setClasses(classArray);
+        console.log("Class array set to:", classArray); // Debug log
+      } else {
+        console.error("Failed to fetch classes. Status:", resClasses.status);
+        setClasses([]); // Clear the state if fetching fails
       }
-      // If still not found, fallback to empty array
-      // Filter out any falsy or non-object entries
-      classArray = (classArray || []).filter(
-        (c) => c && typeof c === "object" && c.className // Check for className directly
-      );
-      setClasses(classArray);
-      console.log("Class array set to:", classArray); // Debug log
-    } else {
-      console.error("Failed to fetch classes. Status:", resClasses.status);
-      setClasses([]); // Clear the state if fetching fails
+    } catch (error) {
+      console.error("Error fetching classes:", error); // Log network errors
+      setClasses([]); // Clear the state in case of an error
     }
-  } catch (error) {
-    console.error("Error fetching classes:", error); // Log network errors
-    setClasses([]); // Clear the state in case of an error
-  }
-};
-
+  };
 
   useEffect(() => {
     fetchClasses(); // Fetch classes when the component mounts

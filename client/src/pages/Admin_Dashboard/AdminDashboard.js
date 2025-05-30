@@ -1,7 +1,5 @@
 import React, { useState } from "react"; // Removed useEffect and io imports
 import { useNavigate } from "react-router-dom";
-import { AttendanceProvider } from "../../context/AttendanceContext"; // Import AttendanceProvider
-import StudentRegistrationForm from "../../components/student_registration/studentRegistration";
 
 const dashboardOptions = [
   { id: 1, name: "Student Registration", image: "/images/Dashboard/student_registration.jpeg", route: "/StudentRegistrationForm" },

@@ -5,16 +5,9 @@ import { FaHome, FaInfoCircle, FaCogs, FaTrophy, FaImages, FaPhone, FaSignInAlt 
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isDarkMode] = useState(true); // Add isDarkMode state
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false); // Add profile menu state
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
-  };
-
-  const handleLogout = () => {
-    // Add logout logic here
-    console.log("User logged out");
   };
 
   return (

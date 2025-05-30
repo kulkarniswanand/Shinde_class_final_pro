@@ -108,9 +108,9 @@ const LoginForm = () => {
         </form>
         <p className="mt-6 text-gray-600 text-sm text-center">
           Forgot your password?{" "}
-          <a href="#" className="text-blue-500 hover:underline">
+          <button type="button" className="text-blue-500 hover:underline">
             Reset it here.
-          </a>
+          </button>
         </p>
       </div>
     </div>

@@ -6,7 +6,6 @@ import "react-toastify/dist/ReactToastify.css";
 export default function UpdateBranch() {
   const [branches, setBranches] = useState([]);
   const [selectedBranch, setSelectedBranch] = useState(null);
-  const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 

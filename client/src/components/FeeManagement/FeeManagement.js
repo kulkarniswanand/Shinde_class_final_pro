@@ -109,7 +109,6 @@ const FeesManagement = () => {
     };
 
     const updatedInstallments = [...(selectedStudent.installments || []), newInstallment];
-    const amountGivenSum = updatedInstallments.reduce((sum, inst) => sum + parseFloat(inst.amount), 0);
     const remainingFees = parseFloat(selectedStudent.totalFees) - discount - (selectedStudent.installments?.reduce((sum, inst) => sum + parseFloat(inst.amount), 0) || 0);
 
     // Validation: Ensure the amount given does not exceed the remaining fees

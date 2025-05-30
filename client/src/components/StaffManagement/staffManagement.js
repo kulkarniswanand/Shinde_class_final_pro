@@ -7,7 +7,6 @@ const StaffManagement = () => {
   const [deleteStaffId, setDeleteStaffId] = useState(null);
   const [searchCriteria, setSearchCriteria] = useState("name");
   const [searchValue, setSearchValue] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
@@ -194,13 +193,6 @@ const StaffManagement = () => {
           New Staff
         </button>
       </div>
-
-      {/* Success Message */}
-      {successMessage && (
-        <div className="bg-green-500 text-white p-3 rounded-lg mb-6 text-center shadow-md">
-          {successMessage}
-        </div>
-      )}
 
       {/* Staff Table */}
       <div className="overflow-x-auto shadow-lg rounded-lg">

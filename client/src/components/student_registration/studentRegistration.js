@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const SimpleRegistrationForm = () => {
@@ -20,7 +19,6 @@ const SimpleRegistrationForm = () => {
   const [errors, setErrors] = useState({});
   const [admissionDate] = useState(new Date().toISOString().split("T")[0]);
   const [branches, setBranches] = useState([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverMessage, setServerMessage] = useState({ type: "", text: "" });
 
   useEffect(() => {
@@ -32,7 +30,7 @@ const SimpleRegistrationForm = () => {
     if (formData.dob && formData.class) {
       validateField("dob", formData.dob);
     }
-  }, [formData.dob, formData.class]);
+  }, [formData.dob, formData.class, validateField]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -134,7 +132,6 @@ const SimpleRegistrationForm = () => {
 
     if (!window.confirm("Are you sure you want to submit this form?")) return;
 
-    setIsSubmitting(true);
     setServerMessage({ type: "", text: "" });
 
     try {
@@ -171,8 +168,6 @@ const SimpleRegistrationForm = () => {
         type: "error",
         text: "Failed to register student. Please try again.",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 

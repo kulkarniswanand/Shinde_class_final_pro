@@ -9,7 +9,6 @@ const StudentDetails = () => {
   const [deleteStudentId, setDeleteStudentId] = useState(null);
   const [searchCriteria, setSearchCriteria] = useState("studentname");
   const [searchValue, setSearchValue] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
