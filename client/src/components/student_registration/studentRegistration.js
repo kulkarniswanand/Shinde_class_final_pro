@@ -21,23 +21,7 @@ const SimpleRegistrationForm = () => {
   const [branches, setBranches] = useState([]);
   const [serverMessage, setServerMessage] = useState({ type: "", text: "" });
 
-  useEffect(() => {
-    fetchBranches();
-  }, []);
-
-  // Validate DOB dynamically when class or dob changes
-  useEffect(() => {
-    if (formData.dob && formData.class) {
-      validateField("dob", formData.dob);
-    }
-  }, [formData.dob, formData.class, validateField]);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-    validateField(name, value);
-  };
-
+  // --- Move validateField above all its usages ---
   const validateField = (name, value) => {
     let message = "";
 
@@ -108,6 +92,25 @@ const SimpleRegistrationForm = () => {
     }
 
     setErrors((prev) => ({ ...prev, [name]: message }));
+  };
+  // --- End move ---
+
+  useEffect(() => {
+    fetchBranches();
+  }, []);
+
+  // Validate DOB dynamically when class or dob changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (formData.dob && formData.class) {
+      validateField("dob", formData.dob);
+    }
+  }, [formData.dob, formData.class]); // Remove validateField from dependency array
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    validateField(name, value);
   };
 
   const validateForm = () => {
