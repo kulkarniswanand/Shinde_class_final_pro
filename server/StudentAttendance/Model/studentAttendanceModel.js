@@ -28,22 +28,26 @@ exports.saveAttendance = async (studentId, name, studentClass, branch, date, sta
       // Pad single digits with leading zero
       const pad = (num) => num.toString().padStart(2, '0');
 
-      // Extract components from dateObjIST using its local methods,
-      // as its internal time value now represents the IST wall clock time.
-      const year = dateObjIST.getFullYear();
-      const month = pad(dateObjIST.getMonth() + 1); // getMonth() is 0-indexed
-      const day = pad(dateObjIST.getDate());
-      const hours = pad(dateObjIST.getHours());
-      const minutes = pad(dateObjIST.getMinutes());
-      const seconds = pad(dateObjIST.getSeconds());
+      // Extract components from dateObjIST using getUTC... methods.
+      // dateObjIST's internal value is a UTC timestamp that represents the desired IST wall-clock time.
+      // Using getUTC... methods will extract the components of this specific UTC timestamp.
+      const year = dateObjIST.getUTCFullYear();
+      const month = pad(dateObjIST.getUTCMonth() + 1); // getUTCMonth() is 0-indexed
+      const day = pad(dateObjIST.getUTCDate());
+      const hours = pad(dateObjIST.getUTCHours());
+      const minutes = pad(dateObjIST.getUTCMinutes());
+      const seconds = pad(dateObjIST.getUTCSeconds());
 
       formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     } catch (parseError) {
         console.error("Error parsing/formatting date for IST:", parseError);
-        // Fallback to current server time if parsing failed unexpectedly
-        const now = new Date();
+        // Fallback to current server time, converted to IST, if parsing failed unexpectedly
+        const serverNowUTC = new Date(); // Server's current time, internal representation is UTC
+        const istOffsetMilliseconds = (5 * 60 + 30) * 60 * 1000;
+        const serverNowAsIST = new Date(serverNowUTC.getTime() + istOffsetMilliseconds); // UTC timestamp representing IST wall clock
+
         const pad = (num) => num.toString().padStart(2, '0');
-        formattedDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+        formattedDate = `${serverNowAsIST.getUTCFullYear()}-${pad(serverNowAsIST.getUTCMonth() + 1)}-${pad(serverNowAsIST.getUTCDate())} ${pad(serverNowAsIST.getUTCHours())}:${pad(serverNowAsIST.getUTCMinutes())}:${pad(serverNowAsIST.getUTCSeconds())}`;
     }
 
     // Use promise-based query
