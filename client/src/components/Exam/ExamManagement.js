@@ -350,7 +350,7 @@ const handleUpdateExamStatus = async (id, status) => {
 
         fetchExams(); // Refresh exams data
         alert("Exam status updated successfully!");
-    } catch (error) {
+    } catch (error) { 
         console.error("Error updating exam status:", error);
     }
 };

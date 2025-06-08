@@ -1,7 +1,7 @@
 .circular-nav-container {
   position: fixed;
-  top: 25px;
-  right: 25px; /* Position to top-right */
+  top: 15px;
+  right: 20px; /* Position to top-right */
   left: auto; /* Ensure left doesn't interfere */
   transform: none; /* Reset transform for closed state */
   z-index: 1050;
@@ -16,10 +16,10 @@
   background-color: #6366f1; /* Indigo-500 */
   color: white;
   border: none;
-  width: 56px; /* Slightly smaller */
-  height: 56px;
+  width: 48px; /* Reduced from 56px */
+  height: 48px; /* Reduced from 56px */
   border-radius: 50%;
-  font-size: 26px;
+  font-size: 22px; /* Reduced from 26px */
   cursor: pointer;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
   display: flex;
@@ -44,15 +44,15 @@
 
 .nav-wheel {
   position: fixed; /* Fixed positioning for viewport-relative animation */
-  width: calc(110px * 2 + 70px); /* approx 290px */
-  height: calc(110px * 2 + 70px); /* approx 290px */
+  width: calc(110px * 2 + 62px); /* Adjusted for smaller button (was 70px) */
+  height: calc(110px * 2 + 62px); /* Adjusted for smaller button */
 
   /* Initial (closed) state: Aligned with the toggle button, small, and transparent */
   /* Button is 56x56. Container at top: 25px, right: 25px. */
   /* Button center V: 25px + 28px = 53px from top */
   /* Button center H: 25px + 28px = 53px from right */
-  top: calc(25px + (56px / 2)); /* Vertically align with toggle button's center (from viewport top) */
-  left: calc(100% - 25px - (56px / 2)); /* Horizontally align with toggle button's center (from viewport left) */
+  top: calc(25px + (48px / 2)); /* Adjusted for smaller button */
+  left: calc(100% - 25px - (48px / 2)); /* Adjusted for smaller button */
   /* transform: translate(-50%, -50%) centers the wheel on the (top, left) point */
   transform: translate(-50%, -50%) scale(0.1) rotate(-180deg);
 
@@ -63,7 +63,7 @@
   opacity: 0;
   transform-origin: center center; /* Crucial for scale and rotate animations */
   pointer-events: none; /* Not interactive when closed */
-  transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55), 
+  transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55),  
               opacity 0.5s ease-out, 
               top 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55), 
               left 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);

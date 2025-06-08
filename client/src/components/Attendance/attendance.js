@@ -19,6 +19,8 @@ import * as attendanceService from "../../services/attendanceService";
 // Import required libraries for exports
 import jsPDF from "jspdf";
 import { CSVLink } from "react-csv";
+import CircularNav from "../CircularNav/CircularNav"; // Import CircularNav
+
 
 // Icons component
 const Icons = {
@@ -176,52 +178,27 @@ const AttendanceDashboard = () => {
   useEffect(() => {
     const fetchClasses = async () => {
       setIsClassesLoading(true);
-      // Define a base configuration for classes, especially if IDs need to be consistent
-      // or if course_codes are tied to specific class names.
-      const defaultClassesConfig = [
-        { id: 1, name: "10th", course_code: "10" },
-        { id: 2, name: "11th Science", course_code: "11S" },
-        { id: 3, name: "12th Science", course_code: "12S" },
-        { id: 4, name: "11th Commerce", course_code: "11C" },
-        { id: 5, name: "12th Commerce", course_code: "12C" },
-        { id: 6, name: "8th", course_code: "8" },
-        { id: 7, name: "9th", course_code: "9" },
-      ];
-
       try {
-        const apiClassData = await attendanceService.getClasses(); // This will now hit GET /api/attendance/classes
+        // Add default classes immediately
+        const defaultClasses = [
+          { id: 1, name: "10th", course_code: "10" },
+          { id: 2, name: "11th Science", course_code: "11S" },
+          { id: 3, name: "12th Science", course_code: "12S" },
+          { id: 4, name: "11th Commerce", course_code: "11C" },
+          { id: 5, name: "12th Commerce", course_code: "12C" },
+          { id: 6, name: "8th", course_code: "8" },
+          { id: 7, name: "9th", course_code: "9" },
+        ];
+        setClasses(defaultClasses);
 
-        if (apiClassData && Array.isArray(apiClassData) && apiClassData.length > 0) {
-          if (typeof apiClassData[0] === 'string') {
-            // If API returns an array of strings (class names)
-            const formattedClasses = apiClassData.map((name, index) => {
-              // Try to find a match in default config to reuse id/course_code
-              const defaultConfigMatch = defaultClassesConfig.find(
-                (dc) => dc.name.toLowerCase() === name.toLowerCase()
-              );
-              return {
-                id: defaultConfigMatch ? defaultConfigMatch.id : index + 100, // Ensure unique IDs, start from 100 if not in default
-                name: name,
-                course_code: defaultConfigMatch ? defaultConfigMatch.course_code : name.toUpperCase().substring(0,3), // Fallback for course_code
-              };
-            });
-            setClasses(formattedClasses);
-          } else if (typeof apiClassData[0] === 'object' && 'id' in apiClassData[0] && 'name' in apiClassData[0]) {
-            // If API returns correctly formatted objects [{id, name, ...}]
-            setClasses(apiClassData);
-          } else {
-            // Fallback if API data is in an unexpected format
-            console.warn("API for classes returned unexpected data, using default classes.");
-            setClasses(defaultClassesConfig);
-          }
-        } else {
-          // Fallback to default classes if API returns no data
-          console.warn("API for classes returned no data, using default classes.");
-          setClasses(defaultClassesConfig);
+        // Try fetching real classes from API
+        const data = await attendanceService.getClasses();
+        if (data && data.length > 0) {
+          setClasses(data); // Replace defaults if API successful
         }
       } catch (error) {
         console.error("Error fetching classes:", error);
-        setClasses(defaultClassesConfig); // Fallback to default classes on error
+        // Keep default classes if API fails
       } finally {
         setIsClassesLoading(false);
       }
@@ -397,15 +374,9 @@ const AttendanceDashboard = () => {
         (c) => c.id === selectedClass
       )?.name;
       if (selectedClassName) {
-        // Ensure robust comparison, e.g., case-insensitive and trim whitespace
-        result = result.filter(student => {
-          const studentClassVal = student.class;
-          if (typeof studentClassVal === 'string' && typeof selectedClassName === 'string') {
-            return studentClassVal.trim().toLowerCase() === selectedClassName.trim().toLowerCase();
-          }
-          // Fallback to exact match if types are not strings or one is null/undefined
-          return studentClassVal === selectedClassName;
-        });
+        result = result.filter(
+          (student) => student.class === selectedClassName
+        );
       } else {
         result = []; // No students if class not found
       }
@@ -1585,10 +1556,12 @@ const AttendanceDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Header */}
+      {/* CircularNav - match ExamManagement.js usage */}
+      <CircularNav />
       <header className="w-full bg-white border-b border-gray-200 shadow-sm py-3 sticky top-0 z-10">
-        <div className="container mx-auto px-6 flex justify-between items-center">
+        <div className="container mx-auto px-20 py-1.5 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-blue-600">Shinde Classes</h1>
-          <nav className="flex space-x-6">
+          <nav className="flex space-x-5">
             {["dashboard", "roster", "history"].map((view) => {
               const isActive = activeView === view;
               let Icon;

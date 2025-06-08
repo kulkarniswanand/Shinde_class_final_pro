@@ -10,7 +10,8 @@ const navLinks = [
   { path: "/ExamsScedule", label: "Exams", icon: "📝" },
   { path: "/staff-management", label: "Staff Mgt", icon: "👨‍🏫" },
   { path: "/FeeStructure", label: "Fee Struct", icon: "📊" },
-  { path: "/classmanagement", label: "Class Mgt", icon: "🏫" },
+  { path: "/classmanagement", label: "Class Mgt", icon: "🏫" }, 
+  { path: "/attendancedashboard", label: "Attendance", icon: "🗓️"}, 
 ];
  
 const CircularNav = () => {
