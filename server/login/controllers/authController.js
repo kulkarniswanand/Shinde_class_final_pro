@@ -1,10 +1,10 @@
-const { findUserByCredentials, findStudentByCredentials } = require('../models/user');
+const { findUserByCredentials, findStudentByCredentials, updateUserPassword, updateStudentPassword } = require('../models/user');
 
 async function login(req, res) {
   const { role, username, password, studentName } = req.body;
 
   try {
-    if (role === "student") {
+    if (role === "student") { 
       if (!studentName) {
         return res.status(400).json({ message: "Student name is required for student login" });
       }
@@ -32,4 +32,27 @@ async function login(req, res) {
   }
 }
 
-module.exports = { login };
+async function resetPassword(req, res) {
+  const { username, newPassword, role } = req.body;
+  if (!username || !newPassword) {
+    return res.status(400).json({ message: "Username and new password are required." });
+  }
+  try {
+    let result;
+    if (role === "student") {
+      result = await updateStudentPassword(username, newPassword);
+    } else {
+      result = await updateUserPassword(username, newPassword);
+    }
+    if (result.affectedRows > 0) {
+      return res.json({ message: "Password reset successful." });
+    } else {
+      return res.status(404).json({ message: "User not found." });
+    }
+  } catch (error) {
+    console.error("Error during password reset:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+module.exports = { login, resetPassword };

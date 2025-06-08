@@ -24,5 +24,10 @@ exports.getDistinctClasses = async () => {
   return rows.map(row => row.class); // Return an array of class names
 };
 
-// Helper to get student details for the login response (already implicitly handled by getStudentByCredentials)
-// No new function needed here for login response as getStudentByCredentials already returns the necessary student details.
+exports.updateStudentPassword = async (username, newPassword) => {
+  const [result] = await db.query(
+    "UPDATE students SET password = ? WHERE username = ?",
+    [newPassword, username]
+  );
+  return result;
+};

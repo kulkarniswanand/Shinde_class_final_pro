@@ -12,9 +12,13 @@ router.post('/mark', studentAttendanceController.markAttendance);
 router.get('/records', studentAttendanceController.getAllAttendance); 
 
 // Get attendance by student ID
-router.get('/student/:id', studentAttendanceController.getAttendanceByStudent);
+router.get('/student/:id', studentAttendanceController.getAttendanceByStudent); 
 
 // Get attendance by date (and optionally by class)
-router.get('/byDate', studentAttendanceController.getAttendanceByDate);
+// Changed from '/byDateRange' to '/history' to match frontend call
+router.get('/history', studentAttendanceController.getAttendanceByDateRange); 
+
+// Get distinct classes for attendance dropdowns
+router.get('/classes', studentAttendanceController.getDistinctClasses);
 
 module.exports = router;

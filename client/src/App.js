@@ -37,9 +37,8 @@ import StudentDetails from "./components/StudentDetails/studentDetails";
 import StaffManagement from "./components/StaffManagement/staffManagement";
 import StaffRegistrationForm from "./components/StaffManagement/staffRegistration";
 import ClassManagement from "./components/Class_Management/ClassManagement";
-// import attendance from "./components/Attendance/AttendanceDashboard";
-import AttendanceDashboard from "./components/Attendance/AttendanceDashboard";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
+import AttendanceDashboard from "./components/Attendance/attendance";
+import PrivacyPolicy from "./pages/PrivacyPolicy"; 
 import TermsOfService from "./pages/TermsOfService";
 import Admissions from "./pages/Admissions";
 import Careers from "./pages/Careers";
@@ -143,7 +142,7 @@ function MainApp() {
         <Route path="/student-details" element={<StudentDetails />} />
         <Route path="/staff-management" element={<StaffManagement />} />
         <Route path="/classmanagement" element={<ClassManagement />} />
-        <Route path="/AttendanceDashboard" element={<AttendanceDashboard />} />
+        <Route path="/attendancedashboard" element={<AttendanceDashboard />} />
         <Route
           path="/staffRegistrationForm"
           element={<StaffRegistrationForm />}

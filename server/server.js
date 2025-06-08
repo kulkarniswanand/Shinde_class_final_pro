@@ -15,7 +15,7 @@ const classRoutes = require("./Class_Management/Routes/ClassmanagementRoutes");
 const attendanceRoutes = require("./StudentAttendance/Routes/studentAttendanceRoutes");
 const examRoutes = require("./ExamManagement/Routes/examRoutes");
 const studentDashboardRoutes = require("./Student_Dashboard/Routes/studentDashboardRoutes");
-const studentExamLoginRoutes = require("./StudentExamLoginForm/Routes/studentExamLoginRoutes")
+const studentExamLoginRoutes = require("./StudentExamLoginForm/Routes/studentExamLoginRoutes") 
 
 const app = express(); 
 const PORT = process.env.PORT || 5000; 
@@ -32,12 +32,12 @@ app.use("/api/deletebranch", deleteBranchRoute);
 app.use("/api/feesStructure",feesStructure);
 app.use("/api/feesManagement",feesManagement);
 app.use("/api/studentsDetails", studentsDetails);
+app.use("/api/students", studentRoutes);
 // app.use("/api/students", studentsRoutes);
 app.use("/api/staff", staffRoutes);
 app.use("/api", superAdminRoutes);
 app.use("/api", classRoutes);
-// app.use("/api/attendance", attendanceRoutes);
-app.use("/api/studentAttendance", attendanceRoutes); // Ensure this matches the expected route
+app.use("/api/attendance", attendanceRoutes);
 app.use("/api/exams", examRoutes); // Use exam routes
 app.use('/api/student-dashboard', studentDashboardRoutes);
 app.use('/api/student-exam-login', studentExamLoginRoutes);

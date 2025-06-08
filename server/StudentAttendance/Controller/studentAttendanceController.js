@@ -10,7 +10,7 @@ exports.getAllStudents = async (req, res) => {
     res.status(500).json({ message: 'Error fetching students', error: error.message });
   }
 };
-
+ 
 // Save attendance
 exports.markAttendance = async (req, res) => {
   try {
@@ -39,20 +39,21 @@ exports.getAllAttendance = async (req, res) => {
   }
 };
 
-// Get attendance by date
-exports.getAttendanceByDate = async (req, res) => {
+// Get attendance by date range (and optionally class name)
+exports.getAttendanceByDateRange = async (req, res) => {
   try {
-    const { date } = req.query;
+    const { startDate, endDate, className } = req.query; // className is optional
 
-    if (!date) {
-      return res.status(400).json({ message: 'Date parameter is required' });
+    if (!startDate || !endDate) {
+      return res.status(400).json({ message: 'startDate and endDate parameters are required' });
     }
 
-    const data = await attendanceModel.getAttendanceByDate(date);
+    // Pass className (which can be undefined) to the model function
+    const data = await attendanceModel.getAttendanceByDateRange(startDate, endDate, className);
     res.status(200).json(data);
   } catch (error) {
-    console.error('Error fetching attendance by date:', error);
-    res.status(500).json({ message: 'Error fetching attendance by date', error: error.message });
+    console.error('Error fetching attendance by date range:', error);
+    res.status(500).json({ message: 'Error fetching attendance by date range', error: error.message });
   }
 };
 
@@ -65,6 +66,17 @@ exports.getAttendanceByStudent = async (req, res) => {
   } catch (error) {
     console.error('Error fetching student attendance:', error);
     res.status(500).json({ message: 'Error fetching student attendance', error: error.message });
+  }
+};
+
+// Get distinct classes for attendance module
+exports.getDistinctClasses = async (req, res) => {
+  try {
+    const classes = await attendanceModel.getDistinctClasses();
+    res.status(200).json(classes); // Send as an array of strings
+  } catch (error) {
+    console.error('Error fetching distinct classes:', error);
+    res.status(500).json({ message: 'Error fetching distinct classes', error: error.message });
   }
 };
  

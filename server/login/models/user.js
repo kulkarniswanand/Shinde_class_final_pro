@@ -7,7 +7,7 @@ async function findUserByCredentials(role, username, password) {
     [role, username, password]
   );
   return rows;
-}
+} 
 
 async function findStudentByCredentials(studentName, username, password) {
   // Using pool.execute for prepared statements
@@ -18,7 +18,25 @@ async function findStudentByCredentials(studentName, username, password) {
   return rows;
 }
 
+async function updateUserPassword(username, newPassword) {
+  const [result] = await pool.execute(
+    'UPDATE users SET password = ? WHERE username = ?',
+    [newPassword, username]
+  );
+  return result;
+}
+
+async function updateStudentPassword(username, newPassword) {
+  const [result] = await pool.execute(
+    'UPDATE students SET password = ? WHERE username = ?',
+    [newPassword, username]
+  );
+  return result;
+}
+
 module.exports = {
   findUserByCredentials,
   findStudentByCredentials,
+  updateUserPassword,
+  updateStudentPassword,
 };

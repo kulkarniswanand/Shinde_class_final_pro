@@ -10,36 +10,36 @@ exports.getAllStudents = async () => {
     console.error('Error fetching students:', error);
     return []; // Return empty array on error
   }
-};
+}; 
 
 // Save attendance in the "attendance" table with correct date format
 exports.saveAttendance = async (studentId, name, studentClass, branch, date, status) => {
   try {
-    // Convert the incoming ISO date string (UTC) into YYYY-MM-DD HH:MM:SS format in IST (UTC+5:30)
+    // Input 'date' is an ISO date string from the client (UTC)
+    // Convert to IST (UTC+5:30) and format as YYYY-MM-DD HH:MM:SS
     let formattedDate;
     try {
-      const dateObjUTC = new Date(date); // Create Date object from ISO string (represents UTC time)
+      const dateObj = new Date(date); // Parsed as UTC
 
       // Calculate IST by adding 5 hours and 30 minutes (in milliseconds)
       const istOffsetMilliseconds = (5 * 60 + 30) * 60 * 1000;
-      const dateObjIST = new Date(dateObjUTC.getTime() + istOffsetMilliseconds);
+      const dateObjIST = new Date(dateObj.getTime() + istOffsetMilliseconds);
 
       // Pad single digits with leading zero
       const pad = (num) => num.toString().padStart(2, '0');
 
-      // Extract components from the *IST* date object using UTC methods
-      // because the object's internal time value is adjusted, but we want the raw values
-      // corresponding to the adjusted time.
-      const year = dateObjIST.getUTCFullYear();
-      const month = pad(dateObjIST.getUTCMonth() + 1); // Months are 0-indexed
-      const day = pad(dateObjIST.getUTCDate());
-      const hours = pad(dateObjIST.getUTCHours());
-      const minutes = pad(dateObjIST.getUTCMinutes());
-      const seconds = pad(dateObjIST.getUTCSeconds());
+      // Extract components from dateObjIST using its local methods,
+      // as its internal time value now represents the IST wall clock time.
+      const year = dateObjIST.getFullYear();
+      const month = pad(dateObjIST.getMonth() + 1); // getMonth() is 0-indexed
+      const day = pad(dateObjIST.getDate());
+      const hours = pad(dateObjIST.getHours());
+      const minutes = pad(dateObjIST.getMinutes());
+      const seconds = pad(dateObjIST.getSeconds());
 
       formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     } catch (parseError) {
-        console.error("Error parsing date for formatting:", parseError);
+        console.error("Error parsing/formatting date for IST:", parseError);
         // Fallback to current server time if parsing failed unexpectedly
         const now = new Date();
         const pad = (num) => num.toString().padStart(2, '0');
@@ -48,7 +48,7 @@ exports.saveAttendance = async (studentId, name, studentClass, branch, date, sta
 
     // Use promise-based query
     const sql = 'INSERT INTO teachtrack.attendance (id, name, class, branch, date, status) VALUES (?, ?, ?, ?, ?, ?)';
-    console.log('Executing SQL with formatted date:', sql, [studentId, name, studentClass, branch, formattedDate, status]); // Log the formatted date
+    console.log('Executing SQL with IST formatted date:', sql, [studentId, name, studentClass, branch, formattedDate, status]);
 
     const [result] = await pool.query(sql, [studentId, name, studentClass, branch, formattedDate, status]);
     return result;
@@ -61,7 +61,13 @@ exports.saveAttendance = async (studentId, name, studentClass, branch, date, sta
 // Get all attendance
 exports.getAllAttendance = async () => {
   try {
-    const sql = 'SELECT id, name, class, branch, date, status FROM teachtrack.attendance ORDER BY date DESC';
+    // Dates are stored as IST. Send them as strings.
+    const sql = `
+      SELECT id, name, class, branch, 
+             DATE_FORMAT(date, '%Y-%m-%d %H:%i:%s') as date, 
+             status 
+      FROM teachtrack.attendance 
+      ORDER BY date DESC`;
     const [rows] = await pool.query(sql);
     return rows || [];
   } catch (error) {
@@ -73,11 +79,58 @@ exports.getAllAttendance = async () => {
 // Get attendance for a specific student
 exports.getAttendanceByStudent = async (studentId) => {
   try {
-    const sql = 'SELECT * FROM teachtrack.attendance WHERE id = ? ORDER BY date DESC';
+    const sql = `
+      SELECT id, name, class, branch, 
+             DATE_FORMAT(date, '%Y-%m-%d %H:%i:%s') as date, 
+             status 
+      FROM teachtrack.attendance 
+      WHERE id = ? 
+      ORDER BY date DESC`;
     const [rows] = await pool.query(sql, [studentId]);
     return rows || [];
   } catch (error) {
     console.error('Error fetching student attendance:', error);
     return []; // Return empty array on error
+  }
+};
+
+// Get attendance by date range (and optionally by class name)
+exports.getAttendanceByDateRange = async (startDate, endDate, className) => {
+  try {
+    let sql = `
+      SELECT id, name, class, branch, 
+             DATE_FORMAT(date, '%Y-%m-%d %H:%i:%s') as date, 
+             status 
+      FROM teachtrack.attendance 
+      WHERE DATE(date) >= ? AND DATE(date) <= ?`;
+    
+    const queryParams = [startDate, endDate];
+
+    if (className) {
+      sql += ' AND class = ?';
+      queryParams.push(className);
+    }
+
+    sql += ' ORDER BY date DESC';
+
+    const [rows] = await pool.query(sql, queryParams);
+    return rows || [];
+  } catch (error) {
+    console.error('Error fetching attendance by date range:', error);
+    return []; // Return empty array on error
+  }
+};
+
+// Get distinct class names from the students table
+exports.getDistinctClasses = async () => {
+  try {
+    // Assuming 'class' column stores the standard/class name
+    // Order them, perhaps numerically if they contain numbers, then alphabetically
+    const sql = "SELECT DISTINCT class FROM teachtrack.students ORDER BY CAST(REGEXP_SUBSTR(class, '^[0-9]+') AS UNSIGNED), class";
+    const [rows] = await pool.query(sql);
+    return rows.map(row => row.class) || []; // Return an array of class name strings
+  } catch (error) {
+    console.error('Error fetching distinct classes:', error);
+    return [];
   }
 };
