@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
+import CircularNav from "../CircularNav/CircularNav"; // Import CircularNav
 import "react-toastify/dist/ReactToastify.css";
 
 const SimpleRegistrationForm = () => {
@@ -8,7 +10,7 @@ const SimpleRegistrationForm = () => {
     name: "",
     address: "",
     gender: "",
-    dob: "",
+    dob: "", 
     parentMobile: "",
     studentMobile: "",
     email: "",
@@ -188,6 +190,7 @@ const SimpleRegistrationForm = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white px-6 py-10">
+      <CircularNav /> {/* Add CircularNav component */}
       <motion.div className="bg-gray-800 p-10 rounded-xl shadow-lg w-full max-w-4xl">
         <h1 className="text-3xl font-bold text-center mb-6 text-blue-400">
           Student Admission Form

@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; 
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom"; // Keep useLocation for redirection logic
 
 // Password reset form component
-function PasswordResetForm({ onBack }) {
-  const [username, setUsername] = useState("");
+function PasswordResetForm({ onBack, initialUsername }) {
+  const [username, setUsername] = useState(initialUsername || "");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -27,13 +27,12 @@ function PasswordResetForm({ onBack }) {
     setLoading(true);
     setMessage("");
     try {
-      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/reset-password`, {
+      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/student-exam-login/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username,
           newPassword,
-          role: "user", // or "student" if you want to support student reset here
         }),
       });
       const data = await res.json();
@@ -136,15 +135,48 @@ function PasswordResetForm({ onBack }) {
   );
 }
 
-const LoginForm = () => {
-  const [role, setRole] = useState("user");
+const StudentExamLoginForm = () => {
+  const [role, setRole] = useState("student"); // Default role set to student
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [studentName, setStudentName] = useState(""); // Added state for student name
-  const [errors, setErrors] = useState({}); // State for validation errors
+  const [standard, setStandard] = useState(""); // Added state for standard
+  const [branch, setBranch] = useState(""); // Added state for branch
+  const [branchOptions, setBranchOptions] = useState([]);
+  const [standardOptions, setStandardOptions] = useState([]);
+  const [errors, setErrors] = useState({}); // State for validation errors  
   const [showPassword, setShowPassword] = useState(false); // State for password visibility
   const [showReset, setShowReset] = useState(false);
   const navigate = useNavigate(); // React Router navigation hook  
+  const location = useLocation(); // Get current location  
+
+  useEffect(() => {
+    // Fetch branches
+    const fetchBranches = async () => {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/student-exam-login/branches`);
+        if (!response.ok) throw new Error('Failed to fetch branches');
+        const data = await response.json();
+        setBranchOptions(data);
+      } catch (error) {
+        console.error("Error fetching branches:", error);
+        // Optionally set an error state to display to the user
+      }
+    };
+    // Fetch standards (classes)
+    const fetchStandards = async () => {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/student-exam-login/classes`);
+        if (!response.ok) throw new Error('Failed to fetch standards');
+        const data = await response.json();
+        setStandardOptions(data);
+      } catch (error) {
+        console.error("Error fetching standards:", error);
+      }
+    };
+    fetchBranches();
+    fetchStandards();
+  }, []);
 
   const validateForm = () => {
     const newErrors = {};
@@ -161,6 +193,12 @@ const LoginForm = () => {
           newErrors.studentName = "First letter of name and surname must be capital.";
         }
       }
+      if (!standard.trim()) {
+        newErrors.standard = "Standard is required.";
+      }
+      if (!branch.trim()) {
+        newErrors.branch = "Branch is required.";
+      }
     }
     // Username validation
     if (!username.trim()) {
@@ -169,7 +207,7 @@ const LoginForm = () => {
  
 
     // Password validation
-    if (password.length < 6) { 
+    if (password.length < 6) {
       newErrors.password = "Password must be at least 6 characters long.";
     }
 
@@ -181,13 +219,12 @@ const LoginForm = () => {
     e.preventDefault();
     if (!validateForm()) return; // Stop submission if validation fails
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/login`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/student-exam-login/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
-          role === "student"
-            ? { role, username, password, studentName }
-            : { role, username, password }
+          // Since role is always 'student' for this form, we can simplify the body
+          { role: "student", username, password, studentName, standard, branch }
         ),
       });
 
@@ -195,29 +232,17 @@ const LoginForm = () => {
 
       if (response.ok) {
         console.log(`Login successful as ${data.role}`);
-
-        // Store username in localStorage
+        
+        // Store username, studentName, and standard in localStorage for the student
         localStorage.setItem(
           "loggedInUser",
-          JSON.stringify(role === "student" ? { username, studentName } : { username })
+          JSON.stringify({ username, studentName, standard: data.standard || standard }) // Use standard from response if available, else from form
         );
 
-        switch (data.role) {
-          case "superadmin":
-            navigate("/superadmindashboard");
-            break;
-          case "admin":
-            navigate("/admin-dashboard");
-            break;
-          case "user":
-            navigate("/user-dashboard");
-            break;
-          case "student":
-            navigate("/StudentDashboard");
-            break;
-          default:
-            alert("Unknown role received.");
-        }
+        // Since this form is for student exam login, navigate directly to ExamStudent
+        // The check for location.pathname is also redundant here as this form's purpose is fixed.
+        navigate("/ExamStudent");
+
       } else {
         alert(data.message || "Login failed. Please check your credentials.");
       }
@@ -226,33 +251,37 @@ const LoginForm = () => {
       alert("An error occurred while logging in. Please try again.");
     }
   };
-
+ 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
       {showReset ? (
-        <PasswordResetForm onBack={() => setShowReset(false)} />
+        <PasswordResetForm
+          onBack={() => setShowReset(false)}
+          initialUsername={username}
+        />
       ) : (
-        <div className="bg-white p-8 rounded-lg shadow-lg w-96 transform transition-all hover:scale-105">
-          <h2 className="text-3xl font-extrabold mb-6 text-gray-800 text-center">Welcome Back!</h2>
+        <div className="bg-white p-8 rounded-lg shadow-lg w-100 h-100 transform transition-all hover:scale-105">
+          <h2 className="text-3xl font-extrabold mb-6 text-gray-800 text-center">Welcome</h2>
+
           <form onSubmit={handleLogin}>
-            <div className="mb-5">
-              <label htmlFor="role" className="block text-gray-600 font-medium">
-                Login As:
-              </label>
-              <select
-                id="role"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              >
-                <option value="superadmin">Super Admin</option>
-                <option value="admin">Admin</option>
-                {/* <option value="user">User</option> */}
-                <option value="student">Student</option>
-              </select>
-            </div>
-            {role === "student" && (
-              <div className="mb-5">
+            {/* Use grid for 2-column layout on medium screens and up */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Login As (Column 1) - Display Only Input */}
+              <div className="mb-5 md:mb-0">
+                <label htmlFor="loginAs" className="block text-gray-600 font-medium">
+                  Login As:
+                </label>
+                <input
+                  type="text"
+                  id="loginAs"
+                  value="Student"
+                  readOnly
+                  className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-100 cursor-not-allowed"
+                />
+              </div>
+
+              {/* Student Name (Column 1) */}
+              <div className="mb-5 md:mb-0"> {/* Adjust margin for grid layout */}
                 <label htmlFor="studentName" className="block text-gray-600 font-medium">
                   Student Name:
                 </label>
@@ -270,58 +299,110 @@ const LoginForm = () => {
                 />
                 {errors.studentName && <p className="text-red-500 text-xs mt-1">{errors.studentName}</p>}
               </div>
-            )}
-            <div className="mb-5">
-              <label htmlFor="username" className="block text-gray-600 font-medium">
-                Username:
-              </label>
-              <input
-                type="text"
-                id="username"
-                value={username}
-                onChange={(e) => {
-                  setUsername(e.target.value);
-                  if (errors.username) setErrors(prev => ({ ...prev, username: null }));
-                }}
-                className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                placeholder="Enter your username"
-                required
-              />
-              {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username}</p>}
-            </div>
-            {/* Changed mb-6 to mb-5 for consistency */}
-            <div className="mb-5">
-              <label htmlFor="password" className="block text-gray-600 font-medium">
-                Password:
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  value={password}
+
+              {/* Branch (Column 2) - Moved here */}
+              <div className="mb-5 md:mb-0"> {/* Adjust margin for grid layout */}
+                <label htmlFor="branch" className="block text-gray-600 font-medium">
+                  Branch:
+                </label>
+                <select
+                  id="branch"
+                  value={branch}
                   onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (errors.password) setErrors(prev => ({ ...prev, password: null }));
+                    setBranch(e.target.value);
+                    if (errors.branch) setErrors(prev => ({ ...prev, branch: null }));
                   }}
-                  className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 pr-10"
-                  placeholder="Enter your password"
-                  required
-                />
-                <span
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  tabIndex={0}
-                  role="button"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                 >
-                  {showPassword ? "🙈" : "👁️"}
-                </span>
+                  <option value="">Select Branch</option>
+                  {branchOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+                {errors.branch && <p className="text-red-500 text-xs mt-1">{errors.branch}</p>}
               </div>
-              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
-            </div>
+
+              {/* Standard (Column 1) */}
+              <div className="mb-5 md:mb-0"> {/* Adjust margin for grid layout */}
+                  <label htmlFor="standard" className="block text-gray-600 font-medium">
+                    Class:
+                  </label>
+                  <select
+                    id="standard"
+                    value={standard}
+                    onChange={(e) => {
+                      setStandard(e.target.value);
+                      if (errors.standard) setErrors(prev => ({ ...prev, standard: null }));
+                    }}
+                    className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  >
+                    <option value="">Select Class</option>
+                    {standardOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.standard && <p className="text-red-500 text-xs mt-1">{errors.standard}</p>}
+                </div>
+
+              {/* Username (Column 2) - Moved here */}
+              <div className="mb-5 md:mb-0"> {/* Adjust margin for grid layout */}
+                  <label htmlFor="username" className="block text-gray-600 font-medium">
+                    Username:
+                  </label>
+                  <input
+                    type="text"
+                    id="username"
+                    value={username}
+                    onChange={(e) => {
+                      setUsername(e.target.value);
+                      if (errors.username) setErrors(prev => ({ ...prev, username: null }));
+                    }}
+                    className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    placeholder="Enter your username"
+                    required
+                  />
+                  {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username}</p>}
+                </div>
+
+              {/* Password (Column 2, spans if needed, but fits here) */}
+              <div className="mb-5 md:mb-0">
+                <label htmlFor="password" className="block text-gray-600 font-medium">
+                  Password:
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password" 
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (errors.password) setErrors(prev => ({ ...prev, password: null }));
+                    }}
+                    className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 pr-10"
+                    placeholder="Enter your password"
+                    required
+                  />
+                  <span
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? "🙈" : "👁️"}
+                  </span>
+                </div>
+                {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+              </div>
+            </div> {/* End of grid container */}
             <button
               type="submit"
-              className="w-full px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold rounded-md shadow-md hover:from-purple-500 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              // Added mt-6 for spacing above the button after the grid
+              className="w-full px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold rounded-md shadow-md hover:from-purple-500 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-purple-400 mt-6"
             >
               Login
             </button>
@@ -342,4 +423,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default StudentExamLoginForm;

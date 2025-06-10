@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Table, Button, Modal, Input, Select } from "antd"; // Import Select
-import { Link } from "react-router-dom";
 import "tailwindcss/tailwind.css";
+import CircularNav from "../CircularNav/CircularNav"; // Import CircularNav
 
 const FeesManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -13,7 +13,7 @@ const FeesManagement = () => {
   const [filterValue, setFilterValue] = useState(""); // State for filter value
   const [validationMessage, setValidationMessage] = useState(""); // Add state for validation message
 
-  useEffect(() => {
+  useEffect(() => { 
     const fetchStudents = async () => {
       try {
         const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/feesManagement`);
@@ -218,11 +218,10 @@ const FeesManagement = () => {
 
   return (
     <div className="p-5 bg-black text-white min-h-screen">
+      <CircularNav /> {/* Add CircularNav component */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-3xl font-semibold text-purple-400">Fees Management</h2>
-        <Link to="/admin-dashboard">
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white">Go to Dashboard</Button>
-        </Link>
+        {/* "Go to Dashboard" button removed, CircularNav will be in top-right */}
       </div>
 
       <div className="flex items-center gap-4 my-4">

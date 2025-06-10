@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import useBranches from "../../hooks/useBranches"; // adjust path as needed
+import CircularNav from "../CircularNav/CircularNav"; // Import CircularNav
 
 export default function ClassManagement() {
   const [classes, setClasses] = useState([]);
@@ -12,7 +13,7 @@ export default function ClassManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const classesPerPage = 8;
 
-  const fetchClasses = async () => {
+  const fetchClasses = async () => { 
     try {
       console.log("Fetching classes..."); // Debug log
       const resClasses = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/getclass`);
@@ -127,6 +128,7 @@ export default function ClassManagement() {
 
   return (
     <div className="p-6 max-w-5xl mx-auto text-gray-200 dark:bg-gray-900 bg-gray-100 rounded-xl shadow-md">
+      <CircularNav /> {/* Add CircularNav component */}
       <h1 className="text-3xl font-bold mb-6 text-center text-indigo-500 dark:text-indigo-400">Class Management</h1>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">

@@ -36,14 +36,14 @@ import StudentDetails from "./components/StudentDetails/studentDetails";
 import StaffManagement from "./components/StaffManagement/staffManagement";
 import StaffRegistrationForm from "./components/StaffManagement/staffRegistration";
 import ClassManagement from "./components/Class_Management/ClassManagement";
-// import attendance from "./components/Attendance/AttendanceDashboard";
-import AttendanceDashboard from "./components/Attendance/AttendanceDashboard";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
+import AttendanceDashboard from "./components/Attendance/attendance";
+import PrivacyPolicy from "./pages/PrivacyPolicy"; 
 import TermsOfService from "./pages/TermsOfService";
 import Admissions from "./pages/Admissions";
 import Careers from "./pages/Careers";
 import Results from "./components/Exam/Result";
 import ExamStudent from "./components/Exam/ExamStudent";
+import StudentExamLoginForm from "./components/Exam/StudentExamLoginForm";
 
 // import StudentRegistration from './pages/StudentRegistration';
 
@@ -80,6 +80,7 @@ function MainApp() {
     '/careers',
     '/results',
     '/examstudent',
+    '/examstudentlogin'
   ];
 
   return (
@@ -140,7 +141,7 @@ function MainApp() {
         <Route path="/student-details" element={<StudentDetails />} />
         <Route path="/staff-management" element={<StaffManagement />} />
         <Route path="/classmanagement" element={<ClassManagement />} />
-        <Route path="/AttendanceDashboard" element={<AttendanceDashboard />} />
+        <Route path="/attendancedashboard" element={<AttendanceDashboard />} />
         <Route
           path="/staffRegistrationForm"
           element={<StaffRegistrationForm />}
@@ -152,6 +153,7 @@ function MainApp() {
         <Route path="/careers" element={<Careers />} />
         <Route path="/results" element={<Results />} />
         <Route path="/examstudent" element={<ExamStudent />} />
+        <Route path="/examstudentlogin" element={<StudentExamLoginForm />} />
         
         {/* <Route path="/student-registration" element={<StudentRegistration />} /> */}
       </Routes>

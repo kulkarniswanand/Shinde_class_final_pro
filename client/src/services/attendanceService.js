@@ -3,7 +3,7 @@ import config from '../config';
 
 // Create a configured Axios instance with defaults
 const api = axios.create({
-  baseURL: `${config.API_BASE_URL}/api`,
+  baseURL: `${config.API_BASE_URL}/api`, 
   timeout: 15000, // 15 seconds
   headers: {
     'Content-Type': 'application/json'
@@ -60,7 +60,8 @@ const handleApiError = (error, fallback, logMessage = 'API Error') => {
 // Get all students
 export const getStudents = async () => {
   try {
-    const response = await api.get('/students');
+    // Corrected to use the attendance-specific student endpoint
+    const response = await api.get('/attendance/students');
     return response.data || [];
   } catch (error) {
     return handleApiError(error, [], 'Error fetching students');
@@ -106,8 +107,8 @@ export const markAttendance = async (attendanceData) => {
     console.log(`Marking attendance with data:`, attendanceData);
 
     // Send the validated data object directly
-    // Corrected endpoint URL:
-    const response = await api.post('/studentAttendance/mark', attendanceData);
+    // Corrected endpoint URL to align with server.js changes:
+    const response = await api.post('/attendance/mark', attendanceData);
 
     console.log("Attendance API responded:", response.status, response.data);
     return response.data; // Should return { message: '...' } on success

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import CircularNav from "../CircularNav/CircularNav"; // Import CircularNav
 
 const FeesStructure = () => {
   const [feesData, setFeesData] = useState([]);
@@ -11,7 +12,7 @@ const FeesStructure = () => {
     fetchFeesData(); 
     fetchBranches();
   }, []);
-
+ 
   const fetchFeesData = async () => {
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/feesStructure`);
@@ -52,6 +53,7 @@ const FeesStructure = () => {
 
   return (
     <div className="p-6 bg-black min-h-screen text-white">
+      <CircularNav /> {/* Add CircularNav component */}
       <h1 className="text-3xl font-bold text-violet-400 mb-6">Fees Structure</h1>
       <button 
         onClick={() => setShowAddForm(true)}

@@ -14,7 +14,7 @@ exports.saveExam = async (examData) => {
         const questionValues = examData.questions.map((q) => [
             examId, // Use the correct exam_id
             q.type,
-            q.question,
+            q.question, 
             JSON.stringify(q.options || []), // Ensure options are stored as JSON
             q.correctAnswer || null, // Handle null values for correctAnswer
             q.marks || 0, // Default marks to 0 if not provided
@@ -22,6 +22,18 @@ exports.saveExam = async (examData) => {
 
         await pool.query(questionQuery, [questionValues]);
     }
+
+    return result;
+};
+
+// Save new exam announcement (scheduled exam without questions)
+exports.saveExamAnnouncement = async (examData) => {
+    const query = `INSERT INTO exams (name, subject, standard, date, duration, status, total_marks) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+    // Ensure 'upcoming' status. totalMarks can be null if not provided or handled by frontend.
+    const values = [examData.name, examData.subject, examData.standard, examData.date, examData.duration, 'upcoming', examData.totalMarks || null];
+
+    const [result] = await pool.query(query, values);
+    // No questions are inserted for an announcement
 
     return result;
 };
@@ -36,8 +48,8 @@ exports.updateExam = async (id, examData) => {
 };
 
 // Get all exams with their questions
-exports.getAllExams = async () => {
-    const query = `
+exports.getAllExams = async (standard) => {
+    let baseQuery = `
         SELECT e.id, e.name, e.subject, e.standard, e.date, e.duration, e.status, e.total_marks AS totalMarks, e.score,
                JSON_ARRAYAGG(
                    JSON_OBJECT(
@@ -51,12 +63,21 @@ exports.getAllExams = async () => {
                ) AS questions
         FROM exams e
         LEFT JOIN questions q ON e.id = q.exam_id
-        GROUP BY e.id
-        ORDER BY e.date ASC
     `;
-    const [results] = await pool.query(query);
+
+    const queryParams = [];
+
+    if (standard) {
+        baseQuery += ` WHERE e.standard = ?`;
+        queryParams.push(standard);
+    }
+
+    baseQuery += ` GROUP BY e.id ORDER BY e.date ASC`;
+
+    const [results] = await pool.query(baseQuery, queryParams);
     return results;
 };
+
 
 // Get exam by ID
 exports.getExamById = async (id) => {
@@ -162,3 +183,15 @@ exports.updateExamStatusAndScore = async (id, status, score) => {
     const [result] = await pool.query(query, values);
     return result;
 };
+
+// Mark multiple exams as completed by their IDs
+exports.markExamsAsCompleted = async (examIds) => {
+    if (!examIds || examIds.length === 0) {
+        return { affectedRows: 0 }; // No IDs to update
+    }
+    // Ensure we only update exams that are currently 'upcoming'
+    const query = `UPDATE exams SET status = 'completed' WHERE id IN (?) AND status = 'upcoming'`;
+    const [result] = await pool.query(query, [examIds]);
+    return result;
+};
+ 

@@ -1,0 +1,141 @@
+.circular-nav-container {
+  position: fixed;
+  top: 15px;
+  right: 20px; /* Position to top-right */
+  left: auto; /* Ensure left doesn't interfere */
+  transform: none; /* Reset transform for closed state */
+  z-index: 1050;
+  transition: top 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55),
+              left 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55),
+              right 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55),
+              transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  /* This container primarily positions the toggle button */
+}
+
+.nav-toggle-button {
+  background-color: #6366f1; /* Indigo-500 */
+  color: white;
+  border: none;
+  width: 48px; /* Reduced from 56px */
+  height: 48px; /* Reduced from 56px */
+  border-radius: 50%;
+  font-size: 22px; /* Reduced from 26px */
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.nav-toggle-button:hover {
+  background-color: #4f46e5; /* Indigo-600 */
+  transform: scale(1.1) rotate(45deg); /* Add a little rotation on hover */
+}
+
+.circular-nav-container.open .nav-toggle-button {
+    /* transform: rotate(135deg); Rotate close icon - This will be handled by the container's open state */
+    /* The button itself will move with the container. We just need to ensure its visual state (X) is correct */
+    /* The rotation for the 'X' icon should still apply */
+    transform: rotate(135deg); 
+
+}
+
+
+.nav-wheel {
+  position: fixed; /* Fixed positioning for viewport-relative animation */
+  width: calc(110px * 2 + 62px); /* Adjusted for smaller button (was 70px) */
+  height: calc(110px * 2 + 62px); /* Adjusted for smaller button */
+
+  /* Initial (closed) state: Aligned with the toggle button, small, and transparent */
+  /* Button is 56x56. Container at top: 25px, right: 25px. */
+  /* Button center V: 25px + 28px = 53px from top */
+  /* Button center H: 25px + 28px = 53px from right */
+  top: calc(25px + (48px / 2)); /* Adjusted for smaller button */
+  left: calc(100% - 25px - (48px / 2)); /* Adjusted for smaller button */
+  /* transform: translate(-50%, -50%) centers the wheel on the (top, left) point */
+  transform: translate(-50%, -50%) scale(0.1) rotate(-180deg);
+
+  border-radius: 50%;
+  display: flex; 
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform-origin: center center; /* Crucial for scale and rotate animations */
+  pointer-events: none; /* Not interactive when closed */
+  transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55),  
+              opacity 0.5s ease-out, 
+              top 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55), 
+              left 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.circular-nav-container.open .nav-wheel {
+  opacity: 1;
+  top: 50%; /* Wheel's center moves to viewport vertical center */
+  left: 50%; /* Move to viewport horizontal center */
+  transform: translate(-50%, -50%) scale(1) rotate(0deg); /* Center on its (top,left) point, full size */
+  pointer-events: auto;
+}
+
+.circular-nav-container.open { /* When container is open, move it down */
+  /* Position container so button's center aligns with viewport center */
+  top: calc(50% - (56px / 2)); /* Button's top edge so its center is at 50% V */
+  left: 50%;
+  right: auto; /* Override the initial 'right' */
+  transform: translateX(-50%); /* Center the container horizontally */
+}
+
+.nav-item {
+  position: absolute; /* Positioned relative to .nav-wheel center */
+  width: 64px; 
+  height: 64px;
+  border-radius: 50%;
+  text-decoration: none;
+  color: white;
+  /* The transform for positioning is applied inline by React */
+  transition: filter 0.2s ease-out; /* For brightness on hover */
+}
+
+.nav-item-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #4b5563; /* Tailwind gray-600 */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease-out, background-color 0.2s;
+}
+
+.nav-item:hover .nav-item-content {
+  transform: scale(1.12);
+  background-color: #374151; /* Tailwind gray-700 */
+}
+
+.nav-item.active .nav-item-content {
+  background-color: #805ad5; /* Purple-500 */
+  font-weight: bold;
+  transform: scale(1.05); /* Slightly larger if active */
+}
+.nav-item.active:hover .nav-item-content {
+  background-color: #6b46c1; /* Darker Purple */
+  transform: scale(1.15);
+}
+
+.nav-item-icon {
+  font-size: 18px;
+  margin-bottom: 1px;
+}
+
+.nav-item-label {
+  font-size: 9px;
+  line-height: 1.1; 
+  padding: 0 3px;
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

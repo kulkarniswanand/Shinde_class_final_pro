@@ -3,6 +3,15 @@ import { useNavigate } from "react-router-dom"; // Import useNavigate for naviga
 
 const ExamStudent = () => {
   const [exams, setExams] = useState([]);
+  const [formData, setFormData] = useState({ name: "", date: "", duration: "", standard: "" });
+  const [newQuestion, setNewQuestion] = useState({
+    type: "multiple-choice",
+    question: "",
+    options: ["", "", "", ""],
+    correctAnswer: "",
+    marks: 5,
+  }); 
+  const [newExamQuestions, setNewExamQuestions] = useState([]);
   const navigate = useNavigate(); // Initialize useNavigate
   const [currentExam, setCurrentExam] = useState(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -10,24 +19,63 @@ const ExamStudent = () => {
   const [timeLeft, setTimeLeft] = useState(0);
   const [examStarted, setExamStarted] = useState(false);
   const [examPortalOpen, setExamPortalOpen] = useState(false); // State to toggle exam portal
+  const [studentStandard, setStudentStandard] = useState(null);
+  const [studentName, setStudentName] = useState('');
 
   // Fetch exams from the database
   const fetchExams = async () => {
+    const loggedInUser = localStorage.getItem("loggedInUser");
+    if (!loggedInUser) {
+      // This case should ideally be caught by the auth check useEffect,
+      // but good to have a safeguard.
+      console.error("No logged in user found for fetching exams.");
+      return;
+    }
+
+    const userData = JSON.parse(loggedInUser);
+    const currentStudentStandard = userData.standard;
+
+    if (!currentStudentStandard) {
+      console.error("Student standard not found in localStorage.");
+      // Potentially alert the user or handle this error appropriately
+      return;
+    }
+
     try {
-      const response = await fetch("/api/exams");
+      // Modify the fetch URL to include the student's standard as a query parameter.
+      // The backend API (/api/exams) will need to be updated to handle this parameter
+      // and filter exams accordingly.
+      const response = await fetch(`/api/exams?standard=${encodeURIComponent(currentStudentStandard)}`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
       console.log("Fetched exams:", data);
       setExams(data); // Update the exams state
     } catch (error) {
       console.error("Error fetching exams:", error);
+      setExams([]); // Set to empty array on error to avoid rendering issues
     }
   };
 
-  // Call fetchExams on component mount
+  // Effect to check for authentication and then fetch exams
   useEffect(() => {
-    fetchExams();
-  }, []);
+    const loggedInUser = localStorage.getItem("loggedInUser");
+    if (!loggedInUser) {
+      // If no user is logged in, redirect to the exam login page
+      alert("You must be logged in to access the exam. Please login first.");
+      navigate("/examstudentlogin");
+    } else {
+      const userData = JSON.parse(loggedInUser);
+      if (userData.standard && userData.studentName) {
+        setStudentStandard(userData.standard); // Set the student's standard
+        setStudentName(userData.studentName); // Set the student's name
+        fetchExams(); // Fetch exams only after confirming user and standard
+      } else {
+        alert("User data is incomplete (name or standard missing). Please login again.");
+        localStorage.removeItem("loggedInUser"); // Clear incomplete data
+        navigate("/examstudentlogin");
+      }
+    }
+  }, [navigate]); // Add navigate to dependency array
 
   useEffect(() => {
     let timer;
@@ -47,21 +95,24 @@ const ExamStudent = () => {
 
   const startExam = (exam) => {
     // Ensure questions are parsed correctly
-    const questions = Array.isArray(exam.questions) ? exam.questions : JSON.parse(exam.questions || "[]");
+    // The backend returns questions as an array, which might be [{id: null, ...}] if no questions.
+    const parsedQuestions = Array.isArray(exam.questions) ? exam.questions : JSON.parse(exam.questions || "[]");
 
-    if (!questions || questions.length === 0) {
-      alert("This exam has no questions. Please contact your teacher.");
+    // Filter out placeholder null questions if present
+    const actualQuestions = parsedQuestions.filter(q => q && q.id !== null);
+
+    if (!actualQuestions || actualQuestions.length === 0) {
+      alert("This exam is an announcement only or has no questions. It cannot be started.");
       return;
     }
 
-    setCurrentExam({ ...exam, questions });
+    setCurrentExam({ ...exam, questions: actualQuestions }); // Use actualQuestions
     setCurrentQuestionIndex(0);
     setExamAnswers({});
     setTimeLeft(exam.duration * 60); // Set timeLeft in seconds based on exam duration
     setExamStarted(true); // Ensure the timer starts
     setExamPortalOpen(true);
   };
-
   const answerQuestion = (value) => {
     setExamAnswers({
       ...examAnswers,
@@ -148,7 +199,7 @@ const ExamStudent = () => {
         {/* Student Mode */}
         {!examPortalOpen && (
           <div className="space-y-3">
-            <h1 className="text-2xl font-bold text-gray-800">Welcome</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Welcome, {studentName || 'Student'} {studentStandard ? `(Class ${studentStandard})` : ''}</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               {/* Upcoming Exams */}
               <div className="bg-white p-8 rounded-lg shadow-md">
@@ -157,27 +208,38 @@ const ExamStudent = () => {
                 {exams.filter((exam) => exam.status === "upcoming").length > 0 ? (
                   exams
                     .filter((exam) => exam.status === "upcoming")
-                    .map((exam) => (
-                      <div key={exam.id} className="mb-6 p-4 border rounded-lg shadow-sm flex justify-between items-center">
-                        {/* Exam Details */}
-                        <div>
-                          <h4 className="text-lg font-semibold text-gray-700">{exam.name}</h4>
-                          <p className="text-gray-600">Subject: {exam.subject}</p>
-                          <p className="text-gray-600">Standard: {exam.standard}</p>
-                          <p className="text-gray-600">
-                            Due: {exam.date ? new Date(exam.date).toLocaleString() : "Not Set"}
-                          </p>
-                          <p className="text-gray-600">Duration: {exam.duration} minutes</p>
+                    .map((exam) => {
+                      // Check if the exam is an announcement (has no actual questions)
+                      const isAnnouncement = !exam.questions || exam.questions.length === 0 || (exam.questions.length === 1 && exam.questions[0].id === null);
+                      return (
+                        <div key={exam.id} className="mb-6 p-4 border rounded-lg shadow-sm flex justify-between items-center">
+                          {/* Exam Details */}
+                          <div>
+                            <h4 className="text-lg font-semibold text-gray-700">{exam.name}</h4>
+                            <p className="text-gray-600">Subject: {exam.subject}</p>
+                            <p className="text-gray-600">Standard: {exam.standard}</p>
+                            <p className="text-gray-600">
+                              Due: {exam.date ? new Date(exam.date).toLocaleString() : "Not Set"}
+                            </p>
+                            <p className="text-gray-600">Duration: {exam.duration} minutes</p>
+                            {isAnnouncement && <p className="text-sm text-orange-500 italic mt-1">This is an exam announcement only.</p>}
+                          </div>
+                          {/* Buttons */}
+                          <button
+                            className={`px-4 py-2 rounded-lg transition-all ${
+                              isAnnouncement
+                                ? "bg-gray-400 text-gray-700 cursor-not-allowed"
+                                : "bg-green-500 text-white hover:bg-green-600"
+                            }`}
+                            onClick={() => !isAnnouncement && startExam(exam)}
+                            disabled={isAnnouncement}
+                            title={isAnnouncement ? "This is an announcement. Exam cannot be started." : "Start Exam"}
+                          >
+                            {isAnnouncement ? "Announcement" : "Start Exam"}
+                          </button>
                         </div>
-                        {/* Buttons */}
-                        <button
-                          className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-all"
-                          onClick={() => startExam(exam)} // Open exam portal
-                        >
-                          Start Exam
-                        </button>
-                      </div>
-                    ))
+                      );
+                    })
                 ) : (
                   <p className="text-gray-500">No upcoming exams available.</p>
                 )}
@@ -190,22 +252,63 @@ const ExamStudent = () => {
                   <ul className="space-y-6">
                     {exams
                       .filter((exam) => exam.status === "completed")
-                      .map((exam) => (
-                        <li key={exam.id} className="p-4 border rounded-lg shadow-sm flex justify-between items-center">
-                          <div>
-                            <h4 className="text-lg font-semibold text-gray-700">{exam.name}</h4>
-                            <p className="text-gray-600">Subject: {exam.subject}</p>
-                            <p className="text-gray-600">Class: {exam.standard}</p>
-                            <p className="text-gray-600">Score: {exam.score}/{exam.totalMarks}</p>
-                          </div>
-                          <button
-                            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
-                            onClick={() => navigate("/results", { state: { exam } })} // Pass exam data to /results
-                          >
-                            View Results
-                          </button>
-                        </li>
-                      ))}
+                      .map((exam) => {
+                        const score = parseFloat(exam.score) || 0;
+                        const totalMarks = parseFloat(exam.totalMarks) || 0;
+                        let percentage = 0;
+                        if (totalMarks > 0) {
+                          percentage = (score / totalMarks) * 100;
+                        }
+                        // Ensure percentage is between 0 and 100
+                        percentage = Math.max(0, Math.min(100, percentage));
+
+                        return (
+                          <li key={exam.id} className="p-4 border rounded-lg shadow-sm flex justify-between items-center">
+                            <div>
+                              <h4 className="text-lg font-semibold text-gray-700">{exam.name}</h4>
+                              <p className="text-gray-600">Subject: {exam.subject}</p>
+                              <p className="text-gray-600">Class: {exam.standard}</p>
+                              {/* <p className="text-gray-600">Score: {exam.score}/{exam.totalMarks}</p> */}
+                              <p className="text-gray-600">Score: {score}/{totalMarks}</p>
+                              {/* Progress Bar */}
+                              <div className="mt-2">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="text-xs font-medium text-gray-700">
+                                    Performance:  
+                                  </span>
+                                  <span className={`text-xs font-medium px-2 py-1 ml-1.5 rounded-full ${
+                                    percentage >= 80
+                                      ? "bg-green-100 text-green-800"
+                                      : percentage >= 60
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : "bg-red-100 text-red-800"
+                                  }`}>
+                                    {percentage.toFixed(0)}%
+                                  </span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                                  <div
+                                    className={`h-1.5 rounded-full ${
+                                      percentage >= 80
+                                        ? "bg-green-500"
+                                        : percentage >= 60
+                                        ? "bg-yellow-500"
+                                        : "bg-red-500"
+                                    }`}
+                                    style={{ width: `${percentage}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                            </div>
+                            <button
+                              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
+                              onClick={() => navigate("/results", { state: { exam } })} // Pass exam data to /results
+                            >
+                              View Results
+                            </button>
+                          </li>
+                        );
+                      })}
                   </ul>
                 ) : (
                   <p className="text-gray-500">No completed exams available.</p>
@@ -401,6 +504,6 @@ const ExamStudent = () => {
       </main>
     </div>
   );
-};
+}; 
 
 export default ExamStudent;

@@ -11,6 +11,20 @@ exports.createExam = async (req, res) => {
     }
 };
 
+// Controller function to create an exam announcement (scheduled exam without questions)
+exports.createExamAnnouncement = async (req, res) => {
+    try {
+        const examData = req.body; // Expect basic exam details: name, subject, standard, date, duration, totalMarks
+        // Ensure status is 'upcoming' and no questions are processed here
+        const result = await Exam.saveExamAnnouncement(examData);
+        res.status(201).json({ message: 'Exam announcement scheduled successfully', id: result.insertId });
+    } catch (err) {
+        console.error("Error creating exam announcement:", err);
+        res.status(500).json({ error: 'Failed to schedule exam announcement.' });
+    }
+};
+
+ 
 exports.updateExam = async (req, res) => {
     try {
         const examId = req.params.id;
@@ -25,8 +39,37 @@ exports.updateExam = async (req, res) => {
 
 exports.getAllExams = async (req, res) => {
     try {
-        const exams = await Exam.getAllExams();
-        res.json(exams);
+        const { standard } = req.query; // Get the standard from query parameters
+        let exams = await Exam.getAllExams(standard); // Fetch initial list of exams
+
+        const now = new Date();
+        const announcementsToUpdateIds = [];
+
+        exams.forEach(exam => {
+            // Check if it's an upcoming announcement and its due date has passed
+            const isAnnouncement = !exam.questions || exam.questions.length === 0 || (exam.questions.length === 1 && exam.questions[0] && exam.questions[0].id === null);
+            if (exam.status === 'upcoming' && exam.date && new Date(exam.date) < now && isAnnouncement) {
+                announcementsToUpdateIds.push(exam.id);
+            }
+        });
+
+        if (announcementsToUpdateIds.length > 0) {
+            try {
+                await Exam.markExamsAsCompleted(announcementsToUpdateIds);
+                // Update the status in the 'exams' array for the current response
+                exams = exams.map(exam => {
+                    if (announcementsToUpdateIds.includes(exam.id)) {
+                        return { ...exam, status: 'completed' };
+                    }
+                    return exam;
+                });
+            } catch (updateError) {
+                console.error("Error updating status for past due announcements:", updateError);
+                // Decide if you want to send potentially stale data or an error
+            }
+        }
+        res.json(exams); 
+        console.log("Fetching exams for standard:", standard || "all");
     } catch (err) {
         console.error("Error fetching exams:", err);
         res.status(500).json({ error: 'Failed to fetch exams.' });
