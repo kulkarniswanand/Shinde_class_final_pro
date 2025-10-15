@@ -59,7 +59,7 @@ const About = () => {
         {/* Right Side Image */}
         <div className="flex-1 relative">
           <img
-            src="./images/About/students.jpg"
+            src="./images/About_students.jpg"
             alt="About Us"
             className="w-full h-full object-cover rounded-tl-3xl transition-all duration-500"
           />

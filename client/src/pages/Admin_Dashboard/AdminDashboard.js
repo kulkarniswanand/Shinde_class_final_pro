@@ -2,17 +2,17 @@ import React, { useState } from "react"; // Removed useEffect and io imports
 import { useNavigate } from "react-router-dom";
 
 const dashboardOptions = [
-  { id: 1, name: "Student Registration", image: "/images/Dashboard/student_registration.jpeg", route: "/StudentRegistrationForm" },
-  { id: 2, name: "Fees Management", image: "/images/Dashboard/Fees_Management.jpg", route: "/FeeManagement" },
-  { id: 3, name: "Fees Structure", image: "/images/Dashboard/Fees_Management.jpg", route: "/FeeStructure" },
-  { id: 4, name: "Student Details", image: "/images/Dashboard/Student_Details.jpg", route: "/student-details" },
-  { id: 5, name: "Attendance", image: "/images/Dashboard/Attendance.jpg", route: "/attendancedashboard" },
-  { id: 6, name: "Exam Schedule", image: "/images/Dashboard/Exam_Schedule.jpg", route: "/ExamsScedule" },
-  { id: 7, name: "Staff Management", image: "/images/Dashboard/Staff_Management.jpg", route: "/staff-management" },
+  { id: 1, name: "Student Registration", image: "/images/Dash_student_registration.jpeg", route: "/StudentRegistrationForm" },
+  { id: 2, name: "Fees Management", image: "/images/Dash_Fees_Management.jpg", route: "/FeeManagement" },
+  { id: 3, name: "Fees Structure", image: "/images/Dash_Fees_Management.jpg", route: "/FeeStructure" },
+  { id: 4, name: "Student Details", image: "/images/Dash_Student_Details.jpg", route: "/student-details" },
+  { id: 5, name: "Attendance", image: "/images/Dash_Attendance.jpg", route: "/attendancedashboard" },
+  { id: 6, name: "Exam Schedule", image: "/images/Dash_Exam_Schedule.jpg", route: "/ExamsScedule" },
+  { id: 7, name: "Staff Management", image: "/images/Dash_Staff_Management.jpg", route: "/staff-management" },
   // { id: 7, name: "Certificates", image: "/images/Dashboard/Certificates.jpg", route: "/certificates" },
   // { id: 8, name: "Exam Marks", image: "/images/Dashboard/Exam_Marks.jpg", route: "/exam-marks" },
   // { id: 9, name: "Results", image: "/images/Dashboard/Results.jpg", route: "/results" },
-  { id: 10, name: "Class Management", image: "/images/Dashboard/classmanage.png", route: "/classmanagement" },  
+  { id: 10, name: "Class Management", image: "/images/Dash_classmanage.png", route: "/classmanagement" },  
 
 ];
 

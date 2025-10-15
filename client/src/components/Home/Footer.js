@@ -77,7 +77,7 @@ const Footer = () => {
               Shinde Classes
             </h3>
             <img
-              src="/images/footer/logo.png"
+              src="/images/Footer_logo.png"
               alt="Shinde Classes Logo"
               className="mb-4 w-32 transform hover:scale-105 transition-all duration-300"
             />

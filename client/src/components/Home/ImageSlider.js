@@ -54,7 +54,7 @@ const ImageSlider = () => {
           {/* Slide 1 */}
           <div className="relative">
             <img
-              src="/images/slider/sh.jpg"
+              src="/Images/Slider_sh.jpg"
               alt="Slide 1"
               className="w-full h-80 md:h-96 object-cover"
             />
@@ -67,7 +67,7 @@ const ImageSlider = () => {
           {/* Slide 2 */}
           <div className="relative">
             <img
-              src="/images/slider/shh.png"
+              src="/Images/Slider_shh.png"
               alt="Slide 2"
               className="w-full h-80 md:h-96 object-cover"
             />
@@ -80,7 +80,7 @@ const ImageSlider = () => {
           {/* Slide 3 */}
           <div className="relative">
             <img
-              src="/images/slider/shhh.jpg"
+              src="/Images/Slider_shhh.jpg"
               alt="Slide 2"
               className="w-full h-80 md:h-96 object-cover"
             />
@@ -93,7 +93,7 @@ const ImageSlider = () => {
           {/* Slide 4 */}
           <div className="relative">
             <img
-              src="/images/slider/shhhh.png"
+              src="/Images/Slider_shhhh.png"
               alt="Slide 3"
               className="w-full h-80 md:h-96 object-cover"
             />
